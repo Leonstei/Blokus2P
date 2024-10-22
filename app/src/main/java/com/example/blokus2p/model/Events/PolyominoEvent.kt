@@ -4,4 +4,5 @@ interface PolyominoEvent : AppEvent {
     data class PolyominoSelected(val polyomino: Polyomino) : PolyominoEvent
     object PolyominoRotate: PolyominoEvent
     object PolyominoRotateClockwise: PolyominoEvent
+    object PolyominoRotateCounterClockwise: PolyominoEvent
 }

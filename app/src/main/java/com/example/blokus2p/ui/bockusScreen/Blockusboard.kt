@@ -60,7 +60,7 @@ fun BlockusScreen(viewModel: AppViewModel = viewModel()) {
             IconButton(onClick = {onEvent(PolyominoEvent.PolyominoRotateClockwise)}) {
                 Icon(imageVector = ImageVector.vectorResource(R.drawable.rotate_right), contentDescription = "")
             }
-            IconButton(onClick = {onEvent(PolyominoEvent.PolyominoRotateClockwise)}) {
+            IconButton(onClick = {onEvent(PolyominoEvent.PolyominoRotateCounterClockwise)}) {
                 Icon(imageVector = ImageVector.vectorResource(R.drawable.rotate_left), contentDescription = "RotateLeft")
             }
         }
@@ -188,7 +188,7 @@ fun Polyomino(
                     .offset(
                         x = (x - minX) * cellSize,
                         y = (y - minY) * cellSize
-                    )
+                    ).border(1.dp, borderColor)
                     .size(cellSize)
                     .background(if(player == 1) gameState.playerOneColor else gameState.playerTwoColor)
                     .clickable { if(player == gameState.activPlayer.id) onEvent(PolyominoEvent.PolyominoSelected(polyomino)) }

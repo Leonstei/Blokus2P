@@ -21,45 +21,6 @@ data class Player(
     val color: Color = Color.Black,
     val points: Int = 0,
     val polyominos: List<Polyomino> =listOf(
-        Polyomino("Eins", 1, false, listOf(Pair(0, 0))),
-        Polyomino("Zwei", 2, false, listOf(Pair(0, 0), Pair(0, 1))),
-        Polyomino(
-            "Drei gerade",
-            3,
-            false,
-            listOf(Pair(0, 0), Pair(0, 1), Pair(0, 2))
-        ),
-        Polyomino("Drei L", 3, false, listOf(Pair(0, 0), Pair(0, 1), Pair(1, 0))),
-        Polyomino(
-            "Vier",
-            4,
-            false,
-            listOf(Pair(0, 0), Pair(0, 1), Pair(0, 2), Pair(0, 3))
-        ),
-        Polyomino(
-            "Vier L",
-            4,
-            false,
-            listOf(Pair(0, 0), Pair(0, 1), Pair(0, 2), Pair(1, 2))
-        ),
-        Polyomino(
-            "Vier T",
-            4,
-            false,
-            listOf(Pair(0, 0), Pair(0, 1), Pair(0, 2), Pair(1, 1))
-        ),
-        Polyomino(
-            "Vier Z",
-            4,
-            false,
-            listOf(Pair(0, 0), Pair(0, 1), Pair(1, 1), Pair(1, 2))
-        ),
-        Polyomino(
-            "Vier Block",
-            4,
-            false,
-            listOf(Pair(0, 0), Pair(0, 1), Pair(1, 0), Pair(1, 1))
-        ),
         Polyomino(
             "Fünf",
             5,
@@ -108,6 +69,45 @@ data class Player(
             false,
             listOf(Pair(1, 0), Pair(1, 1), Pair(0, 1), Pair(1, 2), Pair(2, 1))
         ),
+        Polyomino(
+            "Vier",
+            4,
+            false,
+            listOf(Pair(0, 0), Pair(0, 1), Pair(0, 2), Pair(0, 3))
+        ),
+        Polyomino(
+            "Vier L",
+            4,
+            false,
+            listOf(Pair(0, 0), Pair(0, 1), Pair(0, 2), Pair(1, 2))
+        ),
+        Polyomino(
+            "Vier T",
+            4,
+            false,
+            listOf(Pair(0, 0), Pair(0, 1), Pair(0, 2), Pair(1, 1))
+        ),
+        Polyomino(
+            "Vier Z",
+            4,
+            false,
+            listOf(Pair(0, 0), Pair(0, 1), Pair(1, 1), Pair(1, 2))
+        ),
+        Polyomino(
+            "Vier Block",
+            4,
+            false,
+            listOf(Pair(0, 0), Pair(0, 1), Pair(1, 0), Pair(1, 1))
+        ),
+        Polyomino(
+            "Drei",
+            3,
+            false,
+            listOf(Pair(0, 0), Pair(0, 1), Pair(0, 2))
+        ),
+        Polyomino("Drei L", 3, false, listOf(Pair(0, 0), Pair(0, 1), Pair(1, 0))),
+        Polyomino("Zwei", 2, false, listOf(Pair(0, 0), Pair(0, 1))),
+        Polyomino("Eins", 1, false, listOf(Pair(0, 0))),
     ),
     val placedPolyomino: Polyomino = Polyomino(),
     val edges: List<Int> = listOf()
