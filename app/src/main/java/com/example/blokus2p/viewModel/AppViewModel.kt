@@ -22,9 +22,9 @@ class AppViewModel() : ViewModel() {
         _gameSate.update {
             it.copy(
                 activPlayer_id = 1,
-                activPlayer = Player(1, "Player 1", androidx.compose.ui.graphics.Color.Yellow, 0),
+                activPlayer = Player(1, "Player 1", androidx.compose.ui.graphics.Color.Blue, 0),
                 playerTwo = Player(2, "Player 2", androidx.compose.ui.graphics.Color.Magenta, 0),
-                playerOneColor = androidx.compose.ui.graphics.Color.Yellow,
+                playerOneColor = androidx.compose.ui.graphics.Color.Blue,
                 playerTwoColor = androidx.compose.ui.graphics.Color.Magenta,
             )
         }
@@ -46,7 +46,9 @@ class AppViewModel() : ViewModel() {
                         activPlayer = _gameSate.value.activPlayer.copy(
                             polyominos = _gameSate.value.activPlayer.polyominos.map {
                                 if (it.name == event.polyomino.name) {
-                                    it.copy(isSelected = true)
+                                    it.copy(isSelected = true,
+                                        selectedCell = event.selectedCell
+                                    )
                                 } else {
                                     it.copy(isSelected = false)
                                 }
