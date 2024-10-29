@@ -18,6 +18,8 @@ class AppViewModel() : ViewModel() {
     private val _polyominoState = MutableStateFlow(PolyominoSate())
     val polyominoState: StateFlow<PolyominoSate> = _polyominoState.asStateFlow()
 
+    private var selectedPosition: Pair<Int, Int>? = null
+
     init {
         _gameSate.update {
             it.copy(
@@ -42,7 +44,9 @@ class AppViewModel() : ViewModel() {
             is PolyominoEvent.PolyominoSelected -> {
                 _gameSate.update { state ->
                     state.copy(
-                        selectedPolyomino = event.polyomino,
+                        selectedPolyomino = event.polyomino.copy(
+                            selectedCell = event.selectedCell
+                        ),
                         activPlayer = _gameSate.value.activPlayer.copy(
                             polyominos = _gameSate.value.activPlayer.polyominos.map {
                                 if (it.name == event.polyomino.name) {
@@ -116,6 +120,7 @@ class AppViewModel() : ViewModel() {
         if (_gameSate.value.selectedPolyomino.name == "") return
         if(_gameSate.value.selectedPolyomino.name == _gameSate.value.activPlayer.placedPolyomino.name) return
         val updatedBoardGrid = _gameSate.value.boardGrid.copyOf()
+        setSelectedCellFirst()
         val positionen = findValidPosition(col, row, 1)
         if (positionen.isEmpty()) {
             Log.d("AppViewModel", "keine gültige combination gefunden")
@@ -154,6 +159,22 @@ class AppViewModel() : ViewModel() {
             }
         }
     }
+    private fun setSelectedCellFirst(){
+        if(_gameSate.value.selectedPolyomino.selectedCell == Pair(0,0)) return
+        _gameSate.update { state->
+            state.copy(
+                selectedPolyomino = state.selectedPolyomino.copy(
+                    cells = state.selectedPolyomino.cells.map {
+                        cell->
+                        Pair(
+                            cell.first - _gameSate.value.selectedPolyomino.selectedCell.first
+                            ,cell.second - _gameSate.value.selectedPolyomino.selectedCell.second
+                        )
+                    }
+                )
+            )
+        }
+    }
 
     private fun findValidPosition(col: Int, row: Int, count: Int): MutableList<Pair<Int, Int>> {
         val positionen: MutableList<Pair<Int, Int>> = mutableListOf()
@@ -162,6 +183,9 @@ class AppViewModel() : ViewModel() {
                 if (cell.first + col in 0 until _gameSate.value.gridSize &&
                     cell.second + row in 0 until _gameSate.value.gridSize
                 ) {
+                    if(cell == Pair(0,0)) {
+                        selectedPosition = Pair(cell.first + col, cell.second + row)
+                    }
                     positionen.add(Pair(cell.first + col, cell.second + row))
                 }
             }
@@ -171,6 +195,9 @@ class AppViewModel() : ViewModel() {
                 if (cell.first + col in 0 until _gameSate.value.gridSize &&
                     cell.second + row in 0 until _gameSate.value.gridSize
                 ) {
+                    if(cell == Pair(0,0)) {
+                        selectedPosition = Pair(cell.first + col, cell.second + row)
+                    }
                     positionen.add(Pair(cell.first + col, cell.second + row))
                 }
             }
@@ -180,6 +207,9 @@ class AppViewModel() : ViewModel() {
                 if (cell.first + col in 0 until _gameSate.value.gridSize &&
                     cell.second + row in 0 until _gameSate.value.gridSize
                 ) {
+                    if(cell == Pair(0,0)) {
+                        selectedPosition = Pair(cell.first + col, cell.second + row)
+                    }
                     positionen.add(Pair(cell.first + col, cell.second + row))
                 }
             }
@@ -214,7 +244,7 @@ class AppViewModel() : ViewModel() {
         }
         if (!_gameSate.value.activPlayer.edges.isEmpty() &&
             _gameSate.value.activPlayer_id == _gameSate.value.activPlayer.id &&
-            !_gameSate.value.activPlayer.edges.contains(positionen[0].second * _gameSate.value.gridSize + positionen[0].first)
+            !_gameSate.value.activPlayer.edges.contains(selectedPosition?.second!! * _gameSate.value.gridSize + selectedPosition?.first!!)
         ) {
             return false
         }
@@ -388,5 +418,4 @@ class AppViewModel() : ViewModel() {
             Pair(cell.first - minX.coerceAtMost(0), cell.second - minY.coerceAtMost(0))
         }
     }
-
 }

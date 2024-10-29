@@ -165,6 +165,7 @@ fun PolyominoRow(
 @Composable
 fun Polyomino(
     polyomino: Polyomino,
+
     cellSize: Dp,
     onEvent: (PolyominoEvent) -> Unit,
     gameState: GameState,
@@ -184,16 +185,18 @@ fun Polyomino(
     ) {
         polyomino.cells.forEach { (x, y) ->
             Box(
+
                 modifier = Modifier
                     .offset(
                         x = (x - minX) * cellSize,
                         y = (y - minY) * cellSize
-                    ).border(1.dp, if(gameState.selectedPolyomino.selectedCell == Pair(x,y) &&
+                    ).clickable { if(player == gameState.activPlayer.id) onEvent(PolyominoEvent.PolyominoSelected(polyomino,Pair(x,y))) }
+                    .border(1.dp, if(polyomino.selectedCell == Pair(x,y) &&
                         polyomino.name == gameState.selectedPolyomino.name &&
                         player == gameState.activPlayer_id) Color.Red else Color.Transparent)
                     .size(cellSize)
                     .background(if(player == 1) gameState.playerOneColor else gameState.playerTwoColor)
-                    .clickable { if(player == gameState.activPlayer.id) onEvent(PolyominoEvent.PolyominoSelected(polyomino,Pair(x,y))) }
+
             )
         }
     }
