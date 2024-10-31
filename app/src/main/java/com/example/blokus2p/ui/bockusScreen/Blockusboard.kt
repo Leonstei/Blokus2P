@@ -28,19 +28,29 @@ import com.example.blokus2p.R
 import com.example.blokus2p.model.Events.GameEvent
 import com.example.blokus2p.model.Events.Polyomino
 import com.example.blokus2p.model.Events.PolyominoEvent
+import com.example.blokus2p.ui.components.SettingsDialog
 import com.example.blokus2p.viewModel.AppViewModel
 import com.example.blokus2p.viewModel.GameState
 
 @Composable
 fun BlockusScreen(viewModel: AppViewModel = viewModel()) {
     val gameState by viewModel.timerState.collectAsStateWithLifecycle()
-    val polyominoSate by viewModel.polyominoState.collectAsStateWithLifecycle()
-    var cellSize = 28.dp
+    val cellSize = 28.dp
     val onEvent = viewModel::onEvent
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
 
     Column() {
         PlayerBar(gameState)
         Row {
+            if (showDialog) {
+                SettingsDialog(
+                    onDismissRequest = { showDialog = false },
+                    onEvent = onEvent,
+                    gameState = gameState
+                )
+            }
             Button (onClick = {onEvent(GameEvent.NextPlayer(gameState.activPlayer_id))}) {
                 Icon(imageVector = ImageVector.vectorResource(R.drawable.person), contentDescription = "")
                 Icon(imageVector = ImageVector.vectorResource(R.drawable.arrow_forward), contentDescription = "RotateLeft")
@@ -48,7 +58,7 @@ fun BlockusScreen(viewModel: AppViewModel = viewModel()) {
             Button (onClick = {onEvent(GameEvent.UndoPlace)}) {
                 Icon(imageVector = ImageVector.vectorResource(R.drawable.undo), contentDescription = "undo")
             }
-            IconButton(onClick = {}) {
+            IconButton(onClick = {showDialog = true}) {
                 Icon(imageVector = ImageVector.vectorResource(R.drawable.more_vert), contentDescription = "redo")
             }
         }
@@ -121,7 +131,7 @@ fun BlockusBoard(cellSize: Dp,onEvent: (GameEvent) -> Unit,gameState: GameState)
                         if(index == 52 || index == 143){
                             Text("X")
                         }else{
-                            Text("$index")
+                            //Text("$index")
                         }
                     }
                 }
@@ -132,7 +142,6 @@ fun BlockusBoard(cellSize: Dp,onEvent: (GameEvent) -> Unit,gameState: GameState)
 
 @Composable
 fun Polyominos( cellSize: Dp, onEvent: (PolyominoEvent) -> Unit,gameState: GameState) {
-    Spacer(modifier = Modifier.height(12.dp))
     if (gameState.activPlayer_id == gameState.activPlayer.id) {
         PolyominoRow(gameState.activPlayer.polyominos, cellSize, onEvent,gameState,gameState.activPlayer.id)
         Spacer(modifier = Modifier.height(12.dp))
@@ -165,7 +174,6 @@ fun PolyominoRow(
 @Composable
 fun Polyomino(
     polyomino: Polyomino,
-
     cellSize: Dp,
     onEvent: (PolyominoEvent) -> Unit,
     gameState: GameState,

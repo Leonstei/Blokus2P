@@ -28,6 +28,12 @@ data class Player(
             cells=listOf(Pair(0, 0), Pair(0, 1), Pair(0, 2), Pair(0, 3), Pair(0, 4))
         ),
         Polyomino(
+            "Fünf ZL",
+            5,
+            false,
+            cells=listOf(Pair(0, 0), Pair(0, 1), Pair(0, 2), Pair(1, 2), Pair(1, 3))
+        ),
+        Polyomino(
             "Fünf 7",
             5,
             false,
@@ -46,10 +52,28 @@ data class Player(
             cells=listOf(Pair(0, 0), Pair(0, 1), Pair(0, 2), Pair(0, 3), Pair(1, 1))
         ),
         Polyomino(
-            "Fünf Z",
+            "Fünf W",
             5,
             false,
             cells=listOf(Pair(0, 0), Pair(0, 1), Pair(1, 1), Pair(1, 2), Pair(2, 2))
+        ),
+        Polyomino(
+            "Fünf Z",
+            5,
+            false,
+            cells=listOf(Pair(0, 0), Pair(0, 1), Pair(1, 1), Pair(2, 1), Pair(2, 2))
+        ),
+        Polyomino(
+            "Fünf LangeL",
+            5,
+            false,
+            cells=listOf(Pair(0, 0), Pair(0, 1), Pair(0, 2), Pair(1, 2), Pair(2, 2))
+        ),
+        Polyomino(
+            "Fünf C",
+            5,
+            false,
+            cells=listOf(Pair(0, 0), Pair(0, 1), Pair(1, 0), Pair(2, 0), Pair(2, 1))
         ),
         Polyomino(
             "Fünf Block",
@@ -110,5 +134,6 @@ data class Player(
         Polyomino("Eins", 1, false, cells=listOf(Pair(0, 0))),
     ),
     val placedPolyomino: Polyomino = Polyomino(),
-    val edges: List<Int> = listOf()
+    val polyominoIsPlaced: Boolean = false,
+    val edges: Set<Int> = setOf()
 )
