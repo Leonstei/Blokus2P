@@ -97,7 +97,6 @@ fun PlayerBar(gameState: GameState){
 @Composable
 fun BlockusBoard(cellSize: Dp,onEvent: (GameEvent) -> Unit,gameState: GameState) {
     val gridSize = 14
-    // Zustand für die Farben des Spielfelds (jede Zelle wird mit einer Farbe belegt)
 
     Column(
         verticalArrangement = Arrangement.Center,

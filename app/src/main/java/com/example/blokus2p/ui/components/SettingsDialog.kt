@@ -50,7 +50,7 @@ fun SettingsDialog(
             modifier = Modifier
                 .padding(24.dp)
                 .fillMaxWidth()
-                .height(420.dp)
+                .height(620.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -102,14 +102,21 @@ fun SettingsDialog(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Bestätigen-Button
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(
                         onClick = {
-                            // Änderungen werden erst hier übernommen
+                            onEvent(GameEvent.GameRestart(playerOneName, playerTwoName, playerOneColor, playerTwoColor))
+                            onDismissRequest()
+                        },
+                        modifier = Modifier.padding(4.dp)
+                    ) {
+                        Text(text = "Reset")
+                    }
+                    TextButton(
+                        onClick = {
                             onEvent(GameEvent.ChangePlayerSettings(playerOneName, playerTwoName, playerOneColor, playerTwoColor))
                             onDismissRequest()
                         },

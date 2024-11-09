@@ -135,5 +135,4 @@ data class Player(
     ),
     val placedPolyomino: Polyomino = Polyomino(),
     val polyominoIsPlaced: Boolean = false,
-    val edges: Set<Int> = setOf()
 )
