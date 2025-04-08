@@ -1,7 +1,9 @@
 package com.example.blokus2p.viewModel
 
+import android.media.MediaPlayer
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.example.blokus2p.R
 import com.example.blokus2p.model.Events.AppEvent
 import com.example.blokus2p.model.Events.GameEvent
 import com.example.blokus2p.model.Events.Polyomino
@@ -36,6 +38,8 @@ class AppViewModel() : ViewModel() {
         when (event) {
             is GameEvent -> handleGameEvent(event)
             is PolyominoEvent -> handlePolyominoEvent(event)
+            is PolyominoEvent -> TODO()
+            is PolyominoEvent -> TODO()
         }
     }
 
@@ -210,8 +214,10 @@ class AppViewModel() : ViewModel() {
                     )
                 )
             }
+            //var mediaPlayer = MediaPlayer.create(context, R.raw.sound_file_1)
+            //mediaPlayer.start()
             return positionen
-        } else if (count < 8) {
+        } else if (count < 1) {
             return findValidPosition(col, row, count + 1)
         } else {
             return mutableListOf()

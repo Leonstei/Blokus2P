@@ -1,9 +1,15 @@
 package com.example.blokus2p.ui.bockusScreen
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
@@ -16,11 +22,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.motionEventSpy
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.times
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,6 +42,9 @@ import com.example.blokus2p.model.Events.PolyominoEvent
 import com.example.blokus2p.ui.components.SettingsDialog
 import com.example.blokus2p.viewModel.AppViewModel
 import com.example.blokus2p.viewModel.GameState
+import kotlinx.coroutines.delay
+import net.engawapg.lib.zoomable.rememberZoomState
+import net.engawapg.lib.zoomable.zoomable
 
 @Composable
 fun BlockusScreen(viewModel: AppViewModel = viewModel()) {
@@ -40,6 +54,7 @@ fun BlockusScreen(viewModel: AppViewModel = viewModel()) {
     var showDialog by remember {
         mutableStateOf(false)
     }
+    var isZooming by remember { mutableStateOf(false) }
 
     Column() {
         PlayerBar(gameState)
@@ -61,8 +76,15 @@ fun BlockusScreen(viewModel: AppViewModel = viewModel()) {
             IconButton(onClick = {showDialog = true}) {
                 Icon(imageVector = ImageVector.vectorResource(R.drawable.more_vert), contentDescription = "redo")
             }
+//            IconButton(onClick = {isZooming = isZooming.not()}) {
+//                Icon(imageVector = ImageVector.vectorResource(R.drawable.more_vert), contentDescription = "redo")
+//            }
         }
-        BlockusBoard(cellSize,onEvent,gameState)
+//        if(isZooming) {
+//            TransformableBoard(cellSize = cellSize, gameState = gameState, onEvent = onEvent)
+//        }else{
+            BlockusBoard(gameState = gameState, cellSize = cellSize, onEvent = onEvent)
+//        }
         Row {
             IconButton (onClick = {onEvent(PolyominoEvent.PolyominoRotate)}) {
                 Icon(imageVector = ImageVector.vectorResource(R.drawable.rotat360), contentDescription = "")
@@ -93,44 +115,73 @@ fun PlayerBar(gameState: GameState){
         Text("Punkte: ${gameState.activPlayer.points}")
     }
 }
-
 @Composable
-fun BlockusBoard(cellSize: Dp,onEvent: (GameEvent) -> Unit,gameState: GameState) {
-    val gridSize = 14
+private fun TransformableBoard(
+    cellSize: Dp = 28.dp,
+    gameState: GameState,
+    gridSize: Int = 14,
+    onEvent: (GameEvent) -> Unit
+) {
+    var scale by remember { mutableStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    val state = rememberTransformableState { zoomChange, offsetChange, _ ->
+        scale = (scale * zoomChange).coerceIn(1f, 3f)
+        offset += offsetChange
+    }
 
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Gitterlayout
-        for (row in 0 until gameState.gridSize) {
-            Row {
-                for (col in 0 until gameState.gridSize) {
-                    val index = row * gridSize + col
-                    Box(
-                        modifier = Modifier
-                            .size(cellSize)
-                            .border(
-                                BorderStroke(2.dp, Brush.linearGradient(
-                                    listOf(Color.Gray, Color.White)
-                                ))
-                            )
-                            .background(
-                                if(gameState.boardGrid[index] == 0) Color.LightGray
-                                else if(gameState.boardGrid[index] == 1) gameState.playerOneColor else gameState.playerTwoColor
-                            )
-                            .clickable {
-                                if(gameState.boardGrid[index] == 0){
-                                    onEvent(GameEvent.PlacePolyomino(col,row))
-                                }
+    Box(
+        Modifier
+            // apply other transformations like rotation and zoom
+            // on the pizza slice emoji
+            .graphicsLayer(
+                scaleX = scale,
+                scaleY = scale,
+                translationX = offset.x,
+                translationY = offset.y
+            )
+            // add transformable to listen to multitouch transformation events
+            // after offset
+            .transformable(state = state)
+            .background(Color.Blue)
+    ){
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            for (row in 0 until gameState.gridSize) {
+                Row {
+                    for (col in 0 until gameState.gridSize) {
+                        val index = row * gridSize + col
+                        Box(
+                            modifier = Modifier
+                                .size(cellSize)
+                                .border(
+                                    BorderStroke(
+                                        2.dp, Brush.linearGradient(
+                                            listOf(Color.Gray, Color.White)
+                                        )
+                                    )
+                                )
+                                .background(
+                                    when (gameState.boardGrid[index]) {
+                                        0 -> Color.LightGray
+                                        1 -> gameState.playerOneColor
+                                        else -> gameState.playerTwoColor
+                                    }
+                                )
+
+//                                .pointerInput(Unit) {
+//                                        detectTapGestures {
+//                                            if (!isZooming && gameState.boardGrid[index] == 0) {
+//                                                onEvent(GameEvent.PlacePolyomino(col, row))
+//                                            }
+//                                        }
+//                                    }
+                                .padding(1.dp)
+                        ) {
+                            if (index == 52 || index == 143) {
+                                Text("X")
                             }
-                            .padding(1.dp),
-
-                    ){
-                        if(index == 52 || index == 143){
-                            Text("X")
-                        }else{
-                            //Text("$index")
                         }
                     }
                 }
@@ -138,6 +189,104 @@ fun BlockusBoard(cellSize: Dp,onEvent: (GameEvent) -> Unit,gameState: GameState)
         }
     }
 }
+
+@Composable
+fun BlockusBoard(
+    cellSize: Dp,
+    onEvent: (GameEvent) -> Unit,
+    gameState: GameState
+) {
+    val gridSize = 14
+    var scale by remember { mutableStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    var isZooming by remember { mutableStateOf(false) }
+
+    // Zustand für die Transformationen
+    val state = rememberTransformableState { zoomChange, offsetChange, _ ->
+        scale = (scale * zoomChange).coerceIn(1f, 3f)
+        offset += offsetChange
+        isZooming = true  // Setzt isZooming auf true, wenn eine Zoom-Geste erkannt wird
+    }
+
+    Box(
+        Modifier
+            .graphicsLayer(
+                scaleX = scale,
+                scaleY = scale,
+                translationX = offset.x,
+                translationY = offset.y
+            )
+//            .pointerInput(Unit) {
+//                // Nutze pointerInput für das Erkennen von Multi-Touch und Klicks
+//                detectTransformGestures(
+//                    onGesture = { _, pan, zoom, _ ->
+//                        if (zoom != 1f) {
+//                            // Wenn eine Zoom-Geste stattfindet, aktualisieren wir den Zoom-Faktor
+//                            scale = (scale * zoom).coerceIn(1f, 3f)
+//                            offset += pan
+//                            isZooming = true
+//                        } else {
+//                            // Kein Zoom -> könnte ein Klick sein, Zoom wird beendet
+//                            isZooming = false
+//                        }
+//                    }
+//                )
+//            }
+            //.transformable(state = state)
+            .background(Color.Blue)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            for (row in 0 until gameState.gridSize) {
+                Row {
+                    for (col in 0 until gameState.gridSize) {
+                        val index = row * gridSize + col
+                        Box(
+                            modifier = Modifier
+                                .size(cellSize)
+                                .border(
+                                    BorderStroke(
+                                        2.dp, Brush.linearGradient(
+                                            listOf(Color.Gray, Color.White)
+                                        )
+                                    )
+                                )
+                                .background(
+                                    when (gameState.boardGrid[index]) {
+                                        0 -> Color.LightGray
+                                        1 -> gameState.playerOneColor
+                                        else -> gameState.playerTwoColor
+                                    }
+                                )
+//                                .pointerInput(isZooming) {
+//                                    // Diese pointerInput blockiert Klicks während des Zoomens
+//                                    detectTapGestures {
+//                                        if (!isZooming && gameState.boardGrid[index] == 0) {
+//                                            onEvent(GameEvent.PlacePolyomino(col, row))
+//                                        }
+//                                    }
+//                                }
+                                .clickable {
+                                    if (gameState.boardGrid[index] == 0) {
+                                        onEvent(GameEvent.PlacePolyomino(col, row))
+                                    }
+                                }
+                                .padding(1.dp)
+                        ) {
+                            if (index == 52 || index == 143) {
+                                Text("X")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 
 @Composable
 fun Polyominos( cellSize: Dp, onEvent: (PolyominoEvent) -> Unit,gameState: GameState) {
