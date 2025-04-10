@@ -329,19 +329,18 @@ fun Polyomino(
 ){
     val borderColor = if (gameState.selectedPolyomino.name == polyomino.name && player == gameState.activPlayer_id) Color.Red else Color.Transparent
 
-    val minX = polyomino.cells.minOf { it.first }
-    val minY = polyomino.cells.minOf { it.second }
-    val maxX = polyomino.cells.maxOf { it.first } +1
-    val maxY = polyomino.cells.maxOf { it.second } +1
+    val minX = polyomino.currentVariant.minOf { it.first }
+    val minY = polyomino.currentVariant.minOf { it.second }
+    val maxX = polyomino.currentVariant.maxOf { it.first } +1
+    val maxY = polyomino.currentVariant.maxOf { it.second } +1
     Box(
         modifier = Modifier
             .width(cellSize * maxX)
             .height(cellSize * maxY)
             .border(2.dp, borderColor)
     ) {
-        polyomino.cells.forEach { (x, y) ->
+        polyomino.currentVariant.forEach { (x, y) ->
             Box(
-
                 modifier = Modifier
                     .offset(
                         x = (x - minX) * cellSize,

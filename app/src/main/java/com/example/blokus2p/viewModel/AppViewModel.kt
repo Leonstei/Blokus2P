@@ -3,7 +3,6 @@ package com.example.blokus2p.viewModel
 import android.media.MediaPlayer
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.example.blokus2p.R
 import com.example.blokus2p.model.Events.AppEvent
 import com.example.blokus2p.model.Events.GameEvent
 import com.example.blokus2p.model.Events.Polyomino
@@ -38,8 +37,6 @@ class AppViewModel() : ViewModel() {
         when (event) {
             is GameEvent -> handleGameEvent(event)
             is PolyominoEvent -> handlePolyominoEvent(event)
-            is PolyominoEvent -> TODO()
-            is PolyominoEvent -> TODO()
         }
     }
 
@@ -68,7 +65,7 @@ class AppViewModel() : ViewModel() {
             }
 
             is PolyominoEvent.PolyominoRotate -> {
-                rotatePolyomino()
+                flippPolyomino()
             }
 
             is PolyominoEvent.PolyominoRotateClockwise -> {
@@ -201,7 +198,7 @@ class AppViewModel() : ViewModel() {
             rotateRight()
             positionen = findPositions(col, row)
         } else {
-            rotatePolyomino()
+            flippPolyomino()
             positionen = findPositions(col, row)
         }
 
@@ -292,89 +289,69 @@ class AppViewModel() : ViewModel() {
         return true
     }
 
-    private fun rotatePolyomino() {
-        if(_gameSate.value.selectedPolyomino.cells.isEmpty()) return
-        val maxX = _gameSate.value.selectedPolyomino.cells.maxOf { it.first }
-        _gameSate.update {
-            it.copy(
-                activPlayer = it.activPlayer.copy(
-                    polyominos = it.activPlayer.polyominos.map { polyomino ->
+
+    private fun flippPolyomino() {
+        val selected = _gameSate.value.selectedPolyomino
+        if (selected.cells.isEmpty()) return
+
+        val updatedPolyomino = selected.flippHorizontal()
+
+        _gameSate.update { state ->
+            state.copy(
+                activPlayer = state.activPlayer.copy(
+                    polyominos = state.activPlayer.polyominos.map { polyomino ->
                         if (polyomino.isSelected) {
-                            polyomino.copy(
-                                cells = adjustCoordinates(
-                                    polyomino.cells.map { cell ->
-                                        Pair(-cell.first + maxX, cell.second)
-                                    }
-                                )
-                            )
+                            updatedPolyomino.copy(isSelected = true)
                         } else {
                             polyomino
                         }
                     }
                 ),
-                selectedPolyomino = it.selectedPolyomino.copy(
-                    cells = adjustCoordinates( it.selectedPolyomino.cells.map { cell ->
-                        Pair(-cell.first, cell.second)
-                    } )
-                )
+                selectedPolyomino = updatedPolyomino.copy(isSelected = true)
             )
         }
     }
+
     private fun rotateLeft() {
-        if(_gameSate.value.selectedPolyomino.cells.isEmpty()) return
-        val maxX = _gameSate.value.selectedPolyomino.cells.maxOf { it.first }
+        val selected = _gameSate.value.selectedPolyomino
+        if (selected.cells.isEmpty()) return
 
-        _gameSate.update {
-            it.copy(
-                activPlayer = it.activPlayer.copy(
-                    polyominos = it.activPlayer.polyominos.map { polyomino ->
+        val updatedPolyomino = selected.rotatedLeft()
+
+        _gameSate.update { state ->
+            state.copy(
+                activPlayer = state.activPlayer.copy(
+                    polyominos = state.activPlayer.polyominos.map { polyomino ->
                         if (polyomino.isSelected) {
-                            polyomino.copy(
-                                cells = adjustCoordinates(
-                                    polyomino.cells.map { cell ->
-                                        Pair(cell.second, -cell.first + maxX)
-                                    }
-                                )
-                            )
+                            updatedPolyomino.copy(isSelected = true)
                         } else {
                             polyomino
                         }
                     }
                 ),
-                selectedPolyomino = it.selectedPolyomino.copy(
-                    cells = adjustCoordinates( it.selectedPolyomino.cells.map { cell ->
-                            Pair(cell.second, -cell.first)
-                    }) ?: listOf()
-                )
+                selectedPolyomino = updatedPolyomino.copy(isSelected = true)
             )
         }
     }
-    private fun rotateRight() {
-        if(_gameSate.value.selectedPolyomino.cells.isEmpty()) return
-        val maxX = _gameSate.value.selectedPolyomino.cells.maxOf { it.first }
 
-        _gameSate.update {
-            it.copy(
-                activPlayer = it.activPlayer.copy(
-                    polyominos = it.activPlayer.polyominos.map { polyomino ->
+    private fun rotateRight() {
+        val selected = _gameSate.value.selectedPolyomino
+        if (selected.cells.isEmpty()) return
+
+        val updatedPolyomino = selected.rotatedRight()
+
+        _gameSate.update { state ->
+            state.copy(
+                activPlayer = state.activPlayer.copy(
+                    polyominos = state.activPlayer.polyominos.map { polyomino ->
                         if (polyomino.isSelected) {
-                            polyomino.copy(
-                                cells = adjustCoordinates(
-                                    polyomino.cells.map { cell ->
-                                        Pair(cell.second, -cell.first + maxX)
-                                    }
-                                )
-                            )
+                            updatedPolyomino.copy(isSelected = true)
                         } else {
                             polyomino
                         }
                     }
                 ),
-                selectedPolyomino = it.selectedPolyomino.copy(
-                    cells =  adjustCoordinates(it.selectedPolyomino.cells.map { cell ->
-                        Pair(cell.second, -cell.first)
-                    }) ?: listOf()
-                )
+                selectedPolyomino = updatedPolyomino.copy(isSelected = true)
             )
         }
     }
@@ -449,17 +426,6 @@ class AppViewModel() : ViewModel() {
         }
     }
 
-    private fun adjustCoordinates(cells: List<Pair<Int, Int>>): List<Pair<Int, Int>> {
-        // Finde die minimalen X- und Y-Werte
-        val minX = cells.minOf { it.first }
-        val minY = cells.minOf { it.second }
-
-        // Verschiebe alle Zellen, wenn minX oder minY negativ sind
-        return cells.map { cell ->
-            Pair(cell.first - minX.coerceAtMost(0), cell.second - minY.coerceAtMost(0))
-        }
-    }
-
     private fun findPositions(col: Int,row: Int): MutableList<Pair<Int, Int>> {
         val positionen: MutableList<Pair<Int, Int>> = mutableListOf()
         _gameSate.value.selectedPolyomino.cells.forEach { cell ->
@@ -474,5 +440,4 @@ class AppViewModel() : ViewModel() {
         }
         return positionen
     }
-
 }
