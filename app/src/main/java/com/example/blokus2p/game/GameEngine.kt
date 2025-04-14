@@ -15,6 +15,7 @@ class GameEngine(
                 newBoard.boardGrid[xPosition + yPosition * board.boardSize] = player.id
                 placedPolyomino.add(Pair(xPosition, yPosition))
             }
+            newBoard.placedPolyominos.put(player.id, placedPolyomino)
             newBoard.putPlacedPolyomino(player.id, placedPolyomino) //placedPolyomino wird nicht richtig abgespeichert
             return newBoard
         }
