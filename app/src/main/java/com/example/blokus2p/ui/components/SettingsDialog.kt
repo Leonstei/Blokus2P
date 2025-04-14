@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.blokus2p.model.Events.GameEvent
-import com.example.blokus2p.viewModel.GameState
+import com.example.blokus2p.game.GameState
 
 @Composable
 fun SettingsDialog(

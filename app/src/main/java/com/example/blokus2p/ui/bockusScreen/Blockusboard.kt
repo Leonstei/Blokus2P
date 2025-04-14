@@ -1,18 +1,13 @@
 package com.example.blokus2p.ui.bockusScreen
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,28 +18,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.motionEventSpy
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.times
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.blokus2p.R
 import com.example.blokus2p.model.Events.GameEvent
-import com.example.blokus2p.model.Events.Polyomino
+import com.example.blokus2p.game.Polyomino
 import com.example.blokus2p.model.Events.PolyominoEvent
 import com.example.blokus2p.ui.components.SettingsDialog
 import com.example.blokus2p.viewModel.AppViewModel
-import com.example.blokus2p.viewModel.GameState
-import kotlinx.coroutines.delay
-import net.engawapg.lib.zoomable.rememberZoomState
-import net.engawapg.lib.zoomable.zoomable
+import com.example.blokus2p.game.GameState
 
 @Composable
 fun BlockusScreen(viewModel: AppViewModel = viewModel()) {
@@ -104,10 +92,13 @@ fun BlockusScreen(viewModel: AppViewModel = viewModel()) {
 }
 @Composable
 fun PlayerBar(gameState: GameState){
-    Spacer(modifier = Modifier.fillMaxWidth()
+    Spacer(modifier = Modifier
+        .fillMaxWidth()
         .height(40.dp)
         .background(gameState.activPlayer.color))
-    Row(modifier = Modifier.fillMaxWidth().height(20.dp)
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .height(20.dp)
         .background(gameState.activPlayer.color),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.Bottom) {
@@ -119,7 +110,7 @@ fun PlayerBar(gameState: GameState){
 private fun TransformableBoard(
     cellSize: Dp = 28.dp,
     gameState: GameState,
-    gridSize: Int = 14,
+    gridSize: Int = gameState.board.boardSize,
     onEvent: (GameEvent) -> Unit
 ) {
     var scale by remember { mutableStateOf(1f) }
@@ -148,9 +139,9 @@ private fun TransformableBoard(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            for (row in 0 until gameState.gridSize) {
+            for (row in 0 until gridSize) {
                 Row {
-                    for (col in 0 until gameState.gridSize) {
+                    for (col in 0 until gridSize) {
                         val index = row * gridSize + col
                         Box(
                             modifier = Modifier
@@ -196,7 +187,7 @@ fun BlockusBoard(
     onEvent: (GameEvent) -> Unit,
     gameState: GameState
 ) {
-    val gridSize = 14
+    val gridSize = gameState.board.boardSize
     var scale by remember { mutableStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     var isZooming by remember { mutableStateOf(false) }
@@ -239,9 +230,9 @@ fun BlockusBoard(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            for (row in 0 until gameState.gridSize) {
+            for (row in 0 until gridSize) {
                 Row {
-                    for (col in 0 until gameState.gridSize) {
+                    for (col in 0 until gridSize) {
                         val index = row * gridSize + col
                         Box(
                             modifier = Modifier
@@ -345,12 +336,23 @@ fun Polyomino(
                     .offset(
                         x = (x - minX) * cellSize,
                         y = (y - minY) * cellSize
-                    ).clickable { if(player == gameState.activPlayer.id) onEvent(PolyominoEvent.PolyominoSelected(polyomino,Pair(x,y))) }
-                    .border(1.dp, if(polyomino.selectedCell == Pair(x,y) &&
-                        polyomino.name == gameState.selectedPolyomino.name &&
-                        player == gameState.activPlayer_id) Color.Red else Color.Transparent)
+                    )
+                    .clickable {
+                        if (player == gameState.activPlayer.id) onEvent(
+                            PolyominoEvent.PolyominoSelected(
+                                polyomino,
+                                Pair(x, y)
+                            )
+                        )
+                    }
+                    .border(
+                        1.dp, if (polyomino.selectedCell == Pair(x, y) &&
+                            polyomino.name == gameState.selectedPolyomino.name &&
+                            player == gameState.activPlayer_id
+                        ) Color.Red else Color.Transparent
+                    )
                     .size(cellSize)
-                    .background(if(player == 1) gameState.playerOneColor else gameState.playerTwoColor)
+                    .background(if (player == 1) gameState.playerOneColor else gameState.playerTwoColor)
 
             )
         }

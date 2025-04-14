@@ -1,5 +1,7 @@
 package com.example.blokus2p.ai
 
-interface AiInterface {
+import com.example.blokus2p.game.GameBoard
 
+interface AiInterface {
+//    fun boardUpdate()
 }

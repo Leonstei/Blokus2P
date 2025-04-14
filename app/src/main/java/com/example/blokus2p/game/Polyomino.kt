@@ -1,4 +1,4 @@
-package com.example.blokus2p.model.Events
+package com.example.blokus2p.game
 
 data class Polyomino(
     val name: String = "",
@@ -52,11 +52,13 @@ data class Polyomino(
                 rotation = rotation
             )
             )
-            polyominoVariants.add(PolyominoVariant(
+            polyominoVariants.add(
+                PolyominoVariant(
                 cells = normalize(flipHorizontal(current)),
                 isFlipped = true,
                 rotation = rotation
-            ))
+            )
+            )
             current = rotate90(current)
             rotation += 90
         }
