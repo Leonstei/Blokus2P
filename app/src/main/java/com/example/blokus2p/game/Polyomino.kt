@@ -84,3 +84,8 @@ data class PolyominoVariant(
     val isFlipped: Boolean,
     val rotation: Int
 )
+
+data class PlacedPolyomino(
+    val playerId: Int,
+    val cells: List<Pair<Int, Int>>
+)

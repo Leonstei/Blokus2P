@@ -6,30 +6,44 @@ class GameEngine(
 ) {
 
     fun place(player: Player, polyomino: Polyomino, col: Int, row: Int):GameBoard? {
-        if(rules.isValidPlacement(player, polyomino, board, Pair(col, row))) {
-            val newBoard = board
-            val placedPolyomino: MutableList<Pair<Int,Int>> = mutableListOf()
-            for (cell in polyomino.cells) {
-                val xPosition = cell.first + col
-                val yPosition = cell.second + row
-                newBoard.boardGrid[xPosition + yPosition * board.boardSize] = player.id
-                placedPolyomino.add(Pair(xPosition, yPosition))
-            }
-            newBoard.placedPolyominos.put(player.id, placedPolyomino)
-            newBoard.putPlacedPolyomino(player.id, placedPolyomino) //placedPolyomino wird nicht richtig abgespeichert
-            return newBoard
+        if (!rules.isValidPlacement(player, polyomino, board, Pair(col, row))) {
+            return null
         }
-        else return null
+        val newGrid = board.boardGrid.copyOf()
+
+        val placedCells = polyomino.cells.map { cell ->
+            Pair(cell.first + col, cell.second + row)
+        }
+
+        placedCells.forEach { (x, y) ->
+            newGrid[y * board.boardSize + x] = player.id
+        }
+        val placedPoly = PlacedPolyomino(
+            playerId = player.id,
+            cells = placedCells
+        )
+        return board.copyWith(
+            boardGrid = newGrid,
+            placedPolyominos = board.placedPolyominos + placedPoly
+        )
     }
 
     fun undoplace():GameBoard?{
-        val lastPlacedPolyomino = board.placedPolyominos.values.lastOrNull()
+        val lastPlacedPolyomino = board.placedPolyominos.lastOrNull()
         if (lastPlacedPolyomino != null) {
+            val newGrid = board.boardGrid.copyOf()
+            lastPlacedPolyomino.cells.forEach{ ( x, y) ->
+                newGrid[y * board.boardSize + x] = 0
+            }
+
             val newBoard = board
-            for (cell in lastPlacedPolyomino) {
+            for (cell in lastPlacedPolyomino.cells) {
                 newBoard.boardGrid[cell.first+ cell.second  * board.boardSize] = 0
             }
-            return newBoard
+            return board.copyWith(
+                boardGrid = newGrid,
+                placedPolyominos = board.placedPolyominos - lastPlacedPolyomino
+            )
         }else return null
     }
 }
