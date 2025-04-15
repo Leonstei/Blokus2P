@@ -136,10 +136,7 @@ class AppViewModel() : ViewModel() {
     }
 
     private fun placePolyomino(col: Int, row: Int) {
-        if(_gameSate.value.activPlayer.polyominoIsPlaced) return
         if (_gameSate.value.selectedPolyomino.name == "") return
-        if(_gameSate.value.selectedPolyomino.name == _gameSate.value.activPlayer.placedPolyomino.name) return
-        val updatedBoardGrid = _gameSate.value.boardGrid.copyOf()
         setSelectedCellFirst()
         val newBoard = GameEngine(_gameSate.value.board, rules).place(
             _gameSate.value.activPlayer,
@@ -161,31 +158,11 @@ class AppViewModel() : ViewModel() {
         } else {
             Log.d("AppViewModel", "Polyomino konnte nicht platziert werden")
         }
-
-//        val positionen = findValidPosition(col, row, 1)
-//        if (positionen.isEmpty()) {
-//            Log.d("AppViewModel", "keine gültige combination gefunden")
-//        } else {
-//            Log.d("AppviewModel", "positonen: $positionen")
-//            _gameSate.update { state ->
-//                positionen.forEach { (x, y) ->
-//                    if (x in 0 until state.board.boardSize && y in 0 until state.board.boardSize) {
-//                        updatedBoardGrid[y * state.board.boardSize + x] =
-//                            _gameSate.value.activPlayer_id
-//                    }
-//                }
-//                state.copy(
-//                    boardGrid = updatedBoardGrid,
-//                    activPlayer = state.activPlayer.copy(
-//                        points = state.activPlayer.points + state.selectedPolyomino.points,
-//                        placedPolyomino = state.selectedPolyomino.copy(cells = positionen)
-//                    )
-//                )
-//            }
-//        }
     }
+
     private fun setSelectedCellFirst(){
-        if(_gameSate.value.selectedPolyomino.selectedCell == Pair(0,0)) return
+        if(_gameSate.value.selectedPolyomino.selectedCell == Pair(0,0))
+            return
         _gameSate.update { state->
             state.copy(
                 selectedPolyomino = state.selectedPolyomino.copy(
@@ -201,97 +178,7 @@ class AppViewModel() : ViewModel() {
         }
     }
 
-    private fun findValidPosition(col: Int, row: Int, count: Int): MutableList<Pair<Int, Int>> {
-        var positionen: MutableList<Pair<Int, Int>> = mutableListOf()
-        if (count == 1 ) {
-            positionen = findPositions(col, row)
-        } else if (count.mod(5) != 0) {
-            rotateRight()
-            positionen = findPositions(col, row)
-        } else {
-            flippPolyomino()
-            positionen = findPositions(col, row)
-        }
 
-
-        if (checkValidPosition(positionen)) {
-            _gameSate.update { state ->
-                state.copy(
-                    activPlayer = state.activPlayer.copy(
-                        polyominoIsPlaced = true
-                    )
-                )
-            }
-            return positionen
-        } else if (count < 1) {
-            return findValidPosition(col, row, count + 1)
-        } else {
-            return mutableListOf()
-        }
-    }
-
-
-    private fun checkValidPosition(positionen: MutableList<Pair<Int, Int>>): Boolean {
-        val updatedBoardGrid = _gameSate.value.boardGrid.copyOf()
-        val points = _gameSate.value.selectedPolyomino.points
-        val indexOfSelectedCell = selectedPosition?.second!! * _gameSate.value.board.boardSize + selectedPosition?.first!!
-        if (positionen.size == 0) {
-            return false
-        }
-        if (positionen.size != points) {
-            return false
-        }
-
-
-        if(
-            _gameSate.value.activPlayer.points != 0 &&
-            !((indexOfSelectedCell >= 14 && indexOfSelectedCell % 14 != 0
-                    && indexOfSelectedCell -15 in 0 until 196
-                    && updatedBoardGrid[indexOfSelectedCell-15]==_gameSate.value.activPlayer_id) ||
-            (indexOfSelectedCell >= 14 && (indexOfSelectedCell - 13) % 14 != 0
-                    && indexOfSelectedCell - 13 in 0 until 196
-                    && updatedBoardGrid[indexOfSelectedCell-13]==_gameSate.value.activPlayer_id)||
-            (indexOfSelectedCell <= 181 && indexOfSelectedCell % 14 != 0
-                    && indexOfSelectedCell + 13 in 0 until 196
-                    && updatedBoardGrid[indexOfSelectedCell +13]==_gameSate.value.activPlayer_id)||
-            (indexOfSelectedCell <= 181 && (indexOfSelectedCell - 13) % 14 != 0
-                    && indexOfSelectedCell + 15 in 0 until 196
-                    && updatedBoardGrid[indexOfSelectedCell+15]==_gameSate.value.activPlayer_id))
-        ){
-            return false
-        }
-
-        for (pos in positionen) {
-            val index = pos.second * _gameSate.value.board.boardSize+ pos.first
-            if (updatedBoardGrid[index] != 0) {
-                return false
-            }
-        }
-        return checkIfSameCollorArround(positionen)
-    }
-
-    fun checkIfSameCollorArround(positionen: MutableList<Pair<Int, Int>>): Boolean {
-        val updatedBoardGrid = _gameSate.value.boardGrid.copyOf()
-        val indexesAroundPolyomino = mutableListOf<Int>()
-
-        val activPlayer = _gameSate.value.activPlayer_id
-
-        for (pos in positionen) {
-            val index = pos.second * _gameSate.value.board.boardSize + pos.first
-            if (index >= 14) indexesAroundPolyomino.add(index - 14)
-            if (index.mod(14) != 0) indexesAroundPolyomino.add(index - 1)
-            if ((index - 13).mod(14) != 0) indexesAroundPolyomino.add(index + 1)
-            if (index <= 195) indexesAroundPolyomino.add(index + 14)
-            indexesAroundPolyomino.forEach {
-                if (it < 0 || it >= 196) {
-                    return@forEach
-                } else if (updatedBoardGrid[it] == activPlayer) {
-                    return false
-                }
-            }
-        }
-        return true
-    }
 
     private fun nextPlayer(player_id: Int) {
         val newPlayer = if (player_id == 1) {
@@ -326,7 +213,7 @@ class AppViewModel() : ViewModel() {
                     board = newBoard,
                     boardGrid = newBoard.boardGrid,
                     activPlayer = state.activPlayer.copy(
-                        points = state.activPlayer.points + state.selectedPolyomino.points)
+                        points = state.activPlayer.points - state.selectedPolyomino.points)
                 )
             }
         }else{
@@ -411,6 +298,7 @@ class AppViewModel() : ViewModel() {
                 selectedPolyomino = updatedPolyomino.copy(isSelected = true)
             )
         }
+        Log.d("AppViewModel", "activPlayer poly : ${_gameSate.value.activPlayer.polyominos}")
     }
 
     private fun rotateRight() {

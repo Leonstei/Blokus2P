@@ -39,7 +39,6 @@ data class Polyomino(
     }
 
     private fun generateAllTransformations(cells: List<Pair<Int, Int>>): List<PolyominoVariant> {
-        val variants = mutableSetOf<List<Pair<Int, Int>>>()
         val polyominoVariants = mutableSetOf<PolyominoVariant>()
         var rotation = 0
 
@@ -47,17 +46,17 @@ data class Polyomino(
         repeat(4) {
             polyominoVariants.add(
                 PolyominoVariant(
-                cells = normalize(current),
-                isFlipped = false,
-                rotation = rotation
-            )
+                    cells = normalize(current),
+                    isFlipped = false,
+                    rotation = rotation
+                )
             )
             polyominoVariants.add(
                 PolyominoVariant(
-                cells = normalize(flipHorizontal(current)),
-                isFlipped = true,
-                rotation = rotation
-            )
+                    cells = normalize(flipHorizontal(current)),
+                    isFlipped = true,
+                    rotation = rotation
+                )
             )
             current = rotate90(current)
             rotation += 90
