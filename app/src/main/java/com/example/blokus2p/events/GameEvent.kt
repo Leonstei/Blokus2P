@@ -1,8 +1,8 @@
-package com.example.blokus2p.model.Events
+package com.example.blokus2p.events
 
 import androidx.compose.ui.graphics.Color
 
-sealed interface GameEvent :AppEvent {
+sealed interface GameEvent : AppEvent {
     data class GameStarted(val playerCount: Int) : GameEvent
     data class GameEnded(val winner: Int) : GameEvent
     data class GameRestart(val nameActivPlayer: String, val namePlayerTwo: String,

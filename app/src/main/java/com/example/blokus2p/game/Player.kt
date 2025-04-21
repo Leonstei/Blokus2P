@@ -1,10 +1,13 @@
 package com.example.blokus2p.game
 
 import androidx.compose.ui.graphics.Color
+import com.example.blokus2p.ai.AiInterface
+import com.example.blokus2p.model.Move
 
 data class Player(
     val id: Int = 0,
     val name: String = "",
+    val isActiv: Boolean = false,
     val color: Color = Color.Black,
     val points: Int = 0,
     val polyominos: List<Polyomino> =listOf(
@@ -122,4 +125,8 @@ data class Player(
     ),
     val placedPolyomino: Polyomino = Polyomino(),
     val polyominoIsPlaced: Boolean = false,
+    val availableEdges: List<Int> = listOf(),
+    val availableMoves: List<Move> = listOf(),
+    val isAi: Boolean = false,
+    val ai: AiInterface? = null,
 )

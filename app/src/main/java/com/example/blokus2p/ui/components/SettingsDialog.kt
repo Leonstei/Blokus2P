@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.example.blokus2p.model.Events.GameEvent
+import com.example.blokus2p.events.GameEvent
 import com.example.blokus2p.game.GameState
 
 @Composable
@@ -39,10 +39,11 @@ fun SettingsDialog(
     gameState: GameState
 ) {
     // Temporäre State-Variablen, um Änderungen zu speichern
+    val playerTwo = gameState.players.filter { !it.isActiv }
     var playerOneName by remember { mutableStateOf(gameState.activPlayer.name) }
-    var playerTwoName by remember { mutableStateOf(gameState.playerTwo.name) }
+    var playerTwoName by remember { mutableStateOf(playerTwo.first().name) }
     var playerOneColor by remember { mutableStateOf(gameState.activPlayer.color) }
-    var playerTwoColor by remember { mutableStateOf(gameState.playerTwo.color) }
+    var playerTwoColor by remember { mutableStateOf(playerTwo.first().color) }
 
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(

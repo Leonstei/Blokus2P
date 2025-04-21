@@ -27,12 +27,13 @@ import androidx.compose.ui.unit.times
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.blokus2p.R
-import com.example.blokus2p.model.Events.GameEvent
+import com.example.blokus2p.events.GameEvent
 import com.example.blokus2p.game.Polyomino
-import com.example.blokus2p.model.Events.PolyominoEvent
+import com.example.blokus2p.events.PolyominoEvent
 import com.example.blokus2p.ui.components.SettingsDialog
 import com.example.blokus2p.viewModel.AppViewModel
 import com.example.blokus2p.game.GameState
+import com.example.blokus2p.game.Player
 
 @Composable
 fun BlockusScreen(viewModel: AppViewModel = viewModel()) {
@@ -154,7 +155,7 @@ private fun TransformableBoard(
                                     )
                                 )
                                 .background(
-                                    when (gameState.boardGrid[index]) {
+                                    when (gameState.board.boardGrid[index]) {
                                         0 -> Color.LightGray
                                         1 -> gameState.playerOneColor
                                         else -> gameState.playerTwoColor
@@ -245,7 +246,7 @@ fun BlockusBoard(
                                     )
                                 )
                                 .background(
-                                    when (gameState.boardGrid[index]) {
+                                    when (gameState.board.boardGrid[index]) {
                                         0 -> Color.LightGray
                                         1 -> gameState.playerOneColor
                                         else -> gameState.playerTwoColor
@@ -260,7 +261,7 @@ fun BlockusBoard(
 //                                    }
 //                                }
                                 .clickable {
-                                    if (gameState.boardGrid[index] == 0) {
+                                    if (gameState.board.boardGrid[index] == 0) {
                                         onEvent(GameEvent.PlacePolyomino(col, row))
                                     }
                                 }
@@ -280,17 +281,13 @@ fun BlockusBoard(
 
 
 @Composable
-fun Polyominos( cellSize: Dp, onEvent: (PolyominoEvent) -> Unit,gameState: GameState) {
+fun Polyominos(cellSize: Dp, onEvent: (PolyominoEvent) -> Unit, gameState: GameState) {
+    val playerTwo = gameState.players.filter { player: Player ->  !player.isActiv}
     if (gameState.activPlayer_id == gameState.activPlayer.id) {
         PolyominoRow(gameState.activPlayer.polyominos, cellSize, onEvent,gameState,gameState.activPlayer.id)
         Spacer(modifier = Modifier.height(12.dp))
-        PolyominoRow(gameState.playerTwo.polyominos, cellSize, onEvent,gameState,gameState.playerTwo.id)
-    } else {
-        PolyominoRow(gameState.playerTwo.polyominos, cellSize, onEvent,gameState,gameState.playerTwo.id)
-        Spacer(modifier = Modifier.height(12.dp))
-        PolyominoRow(gameState.activPlayer.polyominos, cellSize, onEvent,gameState,gameState.activPlayer.id)
+        PolyominoRow(playerTwo.first().polyominos, cellSize, onEvent,gameState,playerTwo.first().id)
     }
-
 }
 @Composable
 fun PolyominoRow(

@@ -11,6 +11,13 @@ data class Polyomino(
     val allVariants: List<PolyominoVariant> by lazy {
         generateAllTransformations(cells)
     }
+    fun getAllTransformations():List<List<Pair<Int,Int>>> {
+        val allTransformations: MutableSet<List<Pair<Int,Int>>> = mutableSetOf()
+        allVariants.forEach {  polyominoVariant ->
+            allTransformations.add(polyominoVariant.cells)
+        }
+        return allTransformations.toList()
+    }
 
     val currentVariant: List<Pair<Int, Int>>
         get() = allVariants[variantIndex % allVariants.size].cells
@@ -86,5 +93,6 @@ data class PolyominoVariant(
 
 data class PlacedPolyomino(
     val playerId: Int,
+    val polyomino: Polyomino,
     val cells: List<Pair<Int, Int>>
 )

@@ -7,7 +7,7 @@ class BlokusRules: GameRules {
 
     override fun isValidPlacement(
         player: Player,
-        polyomino: Polyomino,
+        polyominoCells: List<Pair<Int,Int>>,
         board: GameBoard,
         selectedPosition: Pair<Int, Int>
     ): Boolean {
@@ -19,8 +19,9 @@ class BlokusRules: GameRules {
 
         val selectedIndex = selectedPosition.second * board.boardSize + selectedPosition.first
         val boardIndexesOfPolyomino: MutableList<Int> = mutableListOf()
-        polyomino.cells.forEach { (x, y) ->
-            if(x+selectedPosition.first >13 || x+selectedPosition.first <0) return false
+        polyominoCells.forEach { (x, y) ->
+            if(x+selectedPosition.first >13 || x+selectedPosition.first <0)
+                return false
             boardIndexesOfPolyomino.add(y * board.boardSize + x + selectedIndex)
         }
 
