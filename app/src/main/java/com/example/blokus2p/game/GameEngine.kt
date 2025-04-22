@@ -3,7 +3,6 @@ package com.example.blokus2p.game
 import com.example.blokus2p.model.Move
 
 class GameEngine {
-
     fun place(player: Player, polyomino: Polyomino, col: Int, row: Int, board: GameBoard,rules: GameRules):GameBoard? {
         if (!rules.isValidPlacement(player, polyomino.cells, board, Pair(col, row))) {
             return null
@@ -22,6 +21,11 @@ class GameEngine {
             boardGrid = newGrid,
             placedPolyominos = board.placedPolyominos + placedPoly
         )
+    }
+
+    fun placeAiMove(player: Player, polyomino: Polyomino, col: Int, row: Int, board: GameBoard,rules: GameRules, orientation: List<Pair<Int,Int>>) : GameBoard?{
+        val newBoard =place(player,polyomino.copy(cells = orientation),col,row,board,rules)
+        return newBoard
     }
 
     fun undoplace(board: GameBoard):GameBoard?{
@@ -43,12 +47,12 @@ class GameEngine {
         }else return null
     }
 
-    fun calculateNewAvailableEdges(player: Player, board: GameBoard): List<Int> {
+    fun calculateNewAvailableEdges(player: Player, board: GameBoard): Set<Int> {
         val newAvailableEdges: MutableSet<Int> = mutableSetOf()
         val lastPlacedPolyominosFromPlayer = board.placedPolyominos.filter { it.playerId == player.id }
         val lastPlacedPolyominoFromPlayer = lastPlacedPolyominosFromPlayer.lastOrNull()
 
-        if (lastPlacedPolyominoFromPlayer == null) return newAvailableEdges.toList()
+        if (lastPlacedPolyominoFromPlayer == null) return newAvailableEdges.toSet()
 
         lastPlacedPolyominoFromPlayer.cells.forEach { (x, y) ->
             val position = y * board.boardSize + x
@@ -56,18 +60,14 @@ class GameEngine {
             val rightTopEdge = position - 13
             val leftBottomEdge = position + 13
             val rightBottomEdge = position + 15
-            if (leftTopEdge in 0 until 196 && board.boardGrid[leftTopEdge] == 0) newAvailableEdges.add(
-                leftTopEdge
-            )
-            if (rightTopEdge in 0 until 196 && board.boardGrid[rightTopEdge] == 0) newAvailableEdges.add(
-                rightTopEdge
-            )
-            if (leftBottomEdge in 0 until 196 && board.boardGrid[leftBottomEdge] == 0) newAvailableEdges.add(
-                leftBottomEdge
-            )
-            if (rightBottomEdge in 0 until 196 && board.boardGrid[rightBottomEdge] == 0) newAvailableEdges.add(
-                rightBottomEdge
-            )
+            if (leftTopEdge in 0 until 196 && board.boardGrid[leftTopEdge] == 0
+                && position % 14 != 0) newAvailableEdges.add(leftTopEdge)
+            if (rightTopEdge in 0 until 196 && board.boardGrid[rightTopEdge] == 0
+                && (position-13) % 14 != 0) newAvailableEdges.add(rightTopEdge)
+            if (leftBottomEdge in 0 until 196 && board.boardGrid[leftBottomEdge] == 0
+                && position % 14 != 0 ) newAvailableEdges.add(leftBottomEdge)
+            if (rightBottomEdge in 0 until 196 && board.boardGrid[rightBottomEdge] == 0
+                && (position-13) % 14 != 0) newAvailableEdges.add(rightBottomEdge)
         }
         val filteredEdges = newAvailableEdges.filter { edge ->
             val cellAbove = edge - 14
@@ -83,8 +83,14 @@ class GameEngine {
             aboveOk && leftOk && rightOk && belowOk
         }
 
-
-        return filteredEdges.toList()
+        return filteredEdges.toSet()
+    }
+    fun notCheckForNotAvailableEdges(edges: Set<Int>, board: GameBoard):Set<Int>{
+        val notAvailableEdges : MutableSet<Int> = mutableSetOf()
+        edges.forEach { x->
+            if (board.boardGrid[x] != 0) notAvailableEdges.add(x)
+        }
+        return notAvailableEdges
     }
 
     fun calculateAllMovesOfAPlayer(player: Player,board: GameBoard,rules: GameRules):List<Move>{

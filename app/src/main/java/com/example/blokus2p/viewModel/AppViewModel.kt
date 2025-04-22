@@ -13,7 +13,6 @@ import com.example.blokus2p.events.AppEvent
 import com.example.blokus2p.events.GameEvent
 import com.example.blokus2p.game.Polyomino
 import com.example.blokus2p.events.PolyominoEvent
-import com.example.blokus2p.game.BlokusBoard
 import com.example.blokus2p.game.GameBoard
 import com.example.blokus2p.model.Move
 import kotlinx.coroutines.delay
@@ -22,7 +21,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.LinkedList
 
 class AppViewModel() : ViewModel() {
     private val _gameSate = MutableStateFlow(GameState())
@@ -37,8 +35,8 @@ class AppViewModel() : ViewModel() {
     init {
         _gameSate.update {
             it.copy(
-                players = listOf(Player(1, "Player 1",true, Color.Blue, 0, availableEdges =  listOf(143)),
-                    Player(2, "Player 2",false, Color.Magenta, 0,availableEdges =  listOf(52),isAi = true, ai = RandomAi())),
+                players = listOf(Player(1, "Player 1",true, Color.Blue, 0, availableEdges =  setOf(143)),
+                    Player(2, "Player 2",false, Color.Magenta, 0,availableEdges =  setOf(52),isAi = true, ai = RandomAi())),
                 activPlayer_id = 1,
                 activPlayer = Player(1, "Player 1",true, Color.Blue, 0),
                 playerOneColor = androidx.compose.ui.graphics.Color.Blue,
@@ -119,27 +117,28 @@ class AppViewModel() : ViewModel() {
             row,_gameSate.value.board, rules
         )
         updateBoard(newBoard)
-
         updateAvailableEdgesActivPlayer()
         nextPlayer(_gameSate.value.activPlayer_id)
-        updateAvailableEdgesActivPlayer()
         checkForAiTurn()
     }
 
     private fun checkForAiTurn() {
         val activePlayer = _gameSate.value.activPlayer
         if (activePlayer.isAi && activePlayer.ai != null) {
+            updateAvailableEdgesActivPlayer()
             val aiMove = _gameSate.value.activPlayer.ai!!.getNextMove(_gameSate.value)
             Log.d("AppViewModel", "aiMove ${aiMove}")
+            if(aiMove == null) Log.d("AppViewModel", "available edges ${activePlayer.availableEdges}")
             aiMove?.let {
-//                val newBoard = GameEngine().place(
-//                    _gameSate.value.activPlayer,
-//                    aiMove.polyomino,
-//                    aiMove.position.first,
-//                    aiMove.position.second,_gameSate.value.board, rules
-//                )
-//                updateBoard(newBoard)
-//                nextPlayer(_gameSate.value.activPlayer_id)
+                selectPolyomino(aiMove.polyomino, Pair(aiMove.position.first, aiMove.position.second))
+                val newBoard = GameEngine().placeAiMove(
+                    _gameSate.value.activPlayer,
+                    aiMove.polyomino,
+                    aiMove.position.first,
+                    aiMove.position.second, _gameSate.value.board, rules, aiMove.orientation
+                )
+                updateBoard(newBoard)
+                nextPlayer(_gameSate.value.activPlayer_id)
             }
         }
     }
@@ -307,29 +306,24 @@ class AppViewModel() : ViewModel() {
         }
     }
 
-    private fun setSelectedCellFirstAi(){
-        _gameSate.update { state->
-            state.copy(
-                selectedPolyomino = state.selectedPolyomino.copy(
-                    cells = state.selectedPolyomino.currentVariant.map {
-                            cell->
-                        Pair(
-                            cell.first - _gameSate.value.selectedPolyomino.selectedCell.first
-                            ,cell.second - _gameSate.value.selectedPolyomino.selectedCell.second
-                        )
-                    }
-                )
-            )
-        }
-    }
 
     private fun updateAvailableEdgesActivPlayer(){
-        val avilableEdges = GameEngine().calculateNewAvailableEdges(_gameSate.value.activPlayer,_gameSate.value.board)
+        val avilableEdges = _gameSate.value.activPlayer.availableEdges
+        val newAvilableEdges = GameEngine().calculateNewAvailableEdges(_gameSate.value.activPlayer, _gameSate.value.board)
+        val notAvilableEdges = GameEngine().notCheckForNotAvailableEdges(avilableEdges, _gameSate.value.board)
+        val updatedPlayer = _gameSate.value.activPlayer.copy(
+            availableEdges = avilableEdges.plus(newAvilableEdges).minus(notAvilableEdges)
+        )
+        val newPlayers = _gameSate.value.players.map { player ->
+            if (player.id == updatedPlayer.id) updatedPlayer else player
+        }
         _gameSate.update { state ->
             state.copy(
-                activPlayer = _gameSate.value.activPlayer.copy(availableEdges = avilableEdges)
+                players = newPlayers,
+                activPlayer = updatedPlayer
             )
         }
+        Log.d("AppViewModel", "available edges ${_gameSate.value.activPlayer.availableEdges}")
     }
 
     private fun updateBoard(newBoard: GameBoard?) {

@@ -125,7 +125,7 @@ data class Player(
     ),
     val placedPolyomino: Polyomino = Polyomino(),
     val polyominoIsPlaced: Boolean = false,
-    val availableEdges: List<Int> = listOf(),
+    val availableEdges: Set<Int> = setOf(),
     val availableMoves: List<Move> = listOf(),
     val isAi: Boolean = false,
     val ai: AiInterface? = null,
