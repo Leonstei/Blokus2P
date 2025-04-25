@@ -9,12 +9,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,26 +36,38 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.blokus2p.events.GameEvent
 import com.example.blokus2p.game.GameState
+import com.example.blokus2p.model.PlayerType
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsDialog(
     onDismissRequest: () -> Unit,
     onEvent: (GameEvent) -> Unit,
     gameState: GameState
 ) {
-    // Temporäre State-Variablen, um Änderungen zu speichern
-    val playerTwo = gameState.players.filter { !it.isActiv }
-    var playerOneName by remember { mutableStateOf(gameState.activPlayer.name) }
-    var playerTwoName by remember { mutableStateOf(playerTwo.first().name) }
-    var playerOneColor by remember { mutableStateOf(gameState.activPlayer.color) }
-    var playerTwoColor by remember { mutableStateOf(playerTwo.first().color) }
+    val playerOne = gameState.activPlayer
+    val playerTwo = gameState.players.first { !it.isActiv } // Assuming there are exactly two players
+
+    var playerOneName by remember { mutableStateOf(playerOne.name) }
+    var playerTwoName by remember { mutableStateOf(playerTwo.name) }
+    var playerOneColor by remember { mutableStateOf(playerOne.color) }
+    var playerTwoColor by remember { mutableStateOf(playerTwo.color) }
+
+    // State for selected player types
+    var playerOneType by remember { mutableStateOf(if (!playerOne.isAi) PlayerType.Human else PlayerType.RandomAI) } // You might need to store player type in your Player class
+    var playerTwoType by remember { mutableStateOf(if (!playerTwo.isAi) PlayerType.Human else PlayerType.RandomAI) } // You might need to store player type in your Player class
+
+    // State for dropdown menu expansion
+    var expandedPlayerOne by remember { mutableStateOf(false) }
+    var expandedPlayerTwo by remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier
                 .padding(24.dp)
                 .fillMaxWidth()
-                .height(620.dp)
+                .height(680.dp) // Increased height to accommodate dropdowns
         ) {
             Column(
                 modifier = Modifier
@@ -65,42 +82,109 @@ fun SettingsDialog(
                     text = "Einstellungen",
                     style = MaterialTheme.typography.bodyLarge
                 )
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Spieler 1 Einstellungen
+                Text("Spieler 1", style = MaterialTheme.typography.bodyMedium)
                 TextField(
                     value = playerOneName,
                     onValueChange = { playerOneName = it },
-                    label = { Text("Spieler 1 Name") },
+                    label = { Text("Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Spacer(modifier = Modifier.height(4.dp))
+                // Spieler 1 Type Dropdown
+                ExposedDropdownMenuBox(
+                    expanded = expandedPlayerOne,
+                    onExpandedChange = { expandedPlayerOne = !expandedPlayerOne }
+                ) {
+                    TextField(
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth(),
+                        readOnly = true,
+                        value = playerOneType.name,
+                        onValueChange = {},
+                        label = { Text("Typ") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPlayerOne) },
+                        colors = ExposedDropdownMenuDefaults.textFieldColors()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedPlayerOne,
+                        onDismissRequest = { expandedPlayerOne = false }
+                    ) {
+                        PlayerType.entries.forEach { selectionOption ->
+                            DropdownMenuItem(
+                                text = { Text(selectionOption.name) },
+                                onClick = {
+                                    playerOneType = selectionOption
+                                    expandedPlayerOne = false
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
 
                 ColorPicker(
                     selectedColor = playerOneColor,
                     onColorChange = { playerOneColor = it },
-                    label = "Spieler 1 Farbe"
+                    label = "Farbe"
                 )
-
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Spieler 2 Einstellungen
+                Text("Spieler 2", style = MaterialTheme.typography.bodyMedium)
                 TextField(
                     value = playerTwoName,
                     onValueChange = { playerTwoName = it },
-                    label = { Text("Spieler 2 Name") },
+                    label = { Text("Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Spacer(modifier = Modifier.height(4.dp))
+                // Spieler 2 Type Dropdown
+                ExposedDropdownMenuBox(
+                    expanded = expandedPlayerTwo,
+                    onExpandedChange = { expandedPlayerTwo = !expandedPlayerTwo }
+                ) {
+                    TextField(
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth(),
+                        readOnly = true,
+                        value = playerTwoType.name,
+                        onValueChange = {},
+                        label = { Text("Typ") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPlayerTwo) },
+                        colors = ExposedDropdownMenuDefaults.textFieldColors()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedPlayerTwo,
+                        onDismissRequest = { expandedPlayerTwo = false }
+                    ) {
+                        PlayerType.entries.forEach { selectionOption ->
+                            DropdownMenuItem(
+                                text = { Text(selectionOption.name) },
+                                onClick = {
+                                    playerTwoType = selectionOption
+                                    expandedPlayerTwo = false
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
 
                 ColorPicker(
                     selectedColor = playerTwoColor,
                     onColorChange = { playerTwoColor = it },
-                    label = "Spieler 2 Farbe"
+                    label = "Farbe"
                 )
-
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -108,7 +192,9 @@ fun SettingsDialog(
                 ) {
                     TextButton(
                         onClick = {
-                            onEvent(GameEvent.GameRestart(playerOneName, playerTwoName, playerOneColor, playerTwoColor))
+                            // You need to update your GameRestart event or create a new one
+                            // to include the selected player types.
+                            onEvent(GameEvent.GameRestart(playerOneName, playerTwoName, playerOneColor, playerTwoColor,playerOneType, playerTwoType))
                             onDismissRequest()
                         },
                         modifier = Modifier.padding(4.dp)
@@ -117,7 +203,9 @@ fun SettingsDialog(
                     }
                     TextButton(
                         onClick = {
-                            onEvent(GameEvent.ChangePlayerSettings(playerOneName, playerTwoName, playerOneColor, playerTwoColor))
+                            // You need to update your ChangePlayerSettings event or create a new one
+                            // to include the selected player types.
+                            onEvent(GameEvent.ChangePlayerSettings(playerOneName, playerTwoName, playerOneColor, playerTwoColor, playerOneType, playerTwoType))
                             onDismissRequest()
                         },
                         modifier = Modifier.padding(4.dp)
@@ -129,6 +217,7 @@ fun SettingsDialog(
         }
     }
 }
+
 
 @Composable
 fun ColorPicker(

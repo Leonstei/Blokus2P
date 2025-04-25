@@ -1,5 +1,14 @@
 package com.example.blokus2p.game
 
+import android.util.Log
+
+
+data class PolyominoVariant(
+    val cells: List<Pair<Int, Int>>,
+    val isFlipped: Boolean,
+    val rotation: Int
+)
+
 data class Polyomino(
     val name: String = "",
     val points: Int = 0,
@@ -27,14 +36,22 @@ data class Polyomino(
         val next = allVariants.firstOrNull {
             it.rotation == (current.rotation + 90) % 360 && it.isFlipped == current.isFlipped
         } ?: current
-        return copy(variantIndex = allVariants.indexOf(next))
+        val selectedCellIndex = currentVariant.indexOf(selectedCell)
+        val currentRotated = rotate90(currentVariant)
+        val selectedCellNormalized = normalizeOneCell(currentRotated,currentRotated.get(selectedCellIndex))
+
+        return copy(variantIndex = allVariants.indexOf(next), selectedCell = selectedCellNormalized)
     }
     fun rotatedLeft(): Polyomino {
         val current = allVariants[variantIndex]
         val next = allVariants.firstOrNull {
             it.rotation == (current.rotation - 90 + 360) % 360 && it.isFlipped == current.isFlipped
         } ?: current
-        return copy(variantIndex = allVariants.indexOf(next))
+        val selectedCellIndex = currentVariant.indexOf(selectedCell)
+        val currentRotated = rotate90Left(currentVariant)
+        val selectedCellNormalized = normalizeOneCell(currentRotated,currentRotated.get(selectedCellIndex))
+
+        return copy(variantIndex = allVariants.indexOf(next), selectedCell = selectedCellNormalized)
     }
 
     fun flippHorizontal(): Polyomino {
@@ -42,7 +59,11 @@ data class Polyomino(
         val next = allVariants.firstOrNull {
             it.rotation == current.rotation  && it.isFlipped != current.isFlipped
         } ?: current
-        return copy(variantIndex = allVariants.indexOf(next))
+        val selectedCellIndex = currentVariant.indexOf(selectedCell)
+        val currentRotated = flipHorizontal(currentVariant)
+        val selectedCellNormalized = normalizeOneCell(currentRotated,currentRotated.get(selectedCellIndex))
+
+        return copy(variantIndex = allVariants.indexOf(next), selectedCell = selectedCellNormalized)
     }
 
     private fun generateAllTransformations(cells: List<Pair<Int, Int>>): List<PolyominoVariant> {
@@ -74,6 +95,8 @@ data class Polyomino(
 
     private fun rotate90(cells: List<Pair<Int, Int>>): List<Pair<Int, Int>> =
         cells.map { Pair(-it.second, it.first) }
+    private fun rotate90Left(cells: List<Pair<Int, Int>>): List<Pair<Int, Int>> =
+        cells.map { Pair(it.second, -it.first) }
 
     private fun flipHorizontal(cells: List<Pair<Int, Int>>): List<Pair<Int, Int>> =
         cells.map { Pair(-it.first, it.second) }
@@ -81,16 +104,14 @@ data class Polyomino(
     private fun normalize(cells: List<Pair<Int, Int>>): List<Pair<Int, Int>> {
         val minX = cells.minOf { it.first }
         val minY = cells.minOf { it.second }
-        return cells.map { Pair(it.first - minX, it.second - minY) }.sortedBy { it.first * 10 + it.second }
+        return cells.map { Pair(it.first - minX, it.second - minY) }.sortedWith(compareBy({ it.second }, { it.first }))
+    }
+    private fun normalizeOneCell(cells: List<Pair<Int, Int>>,selectedCell: Pair<Int, Int>): Pair<Int, Int> {
+        val minX = cells.minOf { it.first }
+        val minY = cells.minOf { it.second }
+        return  Pair(selectedCell.first - minX, selectedCell.second - minY)
     }
 }
-
-data class PolyominoVariant(
-    val cells: List<Pair<Int, Int>>,
-    val isFlipped: Boolean,
-    val rotation: Int
-)
-
 data class PlacedPolyomino(
     val playerId: Int,
     val polyomino: Polyomino,

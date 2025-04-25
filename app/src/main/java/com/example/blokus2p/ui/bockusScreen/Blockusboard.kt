@@ -267,7 +267,7 @@ fun BlockusBoard(
                                 }
                                 .padding(1.dp)
                         ) {
-                            Text("$index")
+                            //Text("$index")
                             if (index == 52 || index == 143) {
                                 Text("X")
                             }
@@ -316,8 +316,10 @@ fun Polyomino(
     gameState: GameState,
     player: Int
 ){
-    val borderColor = if (gameState.selectedPolyomino.name == polyomino.name && player == gameState.activPlayer_id) Color.Red else Color.Transparent
-
+    var borderColor = if (gameState.selectedPolyomino.name == polyomino.name && player == gameState.activPlayer_id) Color.Red else Color.Transparent
+    if (gameState.activPlayer.color == Color.Red && player == gameState.activPlayer_id) {
+        borderColor = Color.Black
+    }
     val minX = polyomino.currentVariant.minOf { it.first }
     val minY = polyomino.currentVariant.minOf { it.second }
     val maxX = polyomino.currentVariant.maxOf { it.first } +1
@@ -347,7 +349,7 @@ fun Polyomino(
                         1.dp, if (polyomino.selectedCell == Pair(x, y) &&
                             polyomino.name == gameState.selectedPolyomino.name &&
                             player == gameState.activPlayer_id
-                        ) Color.Red else Color.Transparent
+                        ) borderColor else Color.Transparent
                     )
                     .size(cellSize)
                     .background(if (player == 1) gameState.playerOneColor else gameState.playerTwoColor)
