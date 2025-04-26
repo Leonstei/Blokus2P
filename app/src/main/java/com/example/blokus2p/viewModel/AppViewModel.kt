@@ -96,7 +96,7 @@ class AppViewModel() : ViewModel() {
                 players = listOf(Player(1, "Player 1",true, Color.Blue, 0, availableEdges =  setOf(143)),
                     Player(2, "Player 2",false, Color.Magenta, 0,availableEdges =  setOf(52),isAi = true, ai = RandomAi())),
                 activPlayer_id = 1,
-                activPlayer = Player(1, "Player 1",true, Color.Blue, 0),
+                activPlayer = Player(1, "Player 1",true, Color.Blue, 0, availableEdges =  setOf(143)),
                 playerOneColor = Color.Blue,
                 playerTwoColor = Color.Magenta,
                 board = BlokusBoard()

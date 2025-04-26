@@ -25,12 +25,17 @@ class BlokusRules: GameRules {
             boardIndexesOfPolyomino.add(y * board.boardSize + x + selectedIndex)
         }
 
+        var bordIndexIsInEdges:Boolean = false
         for (index in boardIndexesOfPolyomino) {
             if (index !in 0 until 196) return false
             if (board.boardGrid[index] != 0) {
                 return false
             }
+            if(index in player.availableEdges) bordIndexIsInEdges = true
         }
+
+//        if(!bordIndexIsInEdges)
+//            return false
 
 
         if (

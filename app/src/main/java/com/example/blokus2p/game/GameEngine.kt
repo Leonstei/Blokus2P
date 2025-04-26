@@ -1,5 +1,6 @@
 package com.example.blokus2p.game
 
+import android.util.Log
 import com.example.blokus2p.model.Move
 
 class GameEngine {
@@ -95,6 +96,7 @@ class GameEngine {
 
     fun calculateAllMovesOfAPlayer(player: Player,board: GameBoard,rules: GameRules):List<Move>{
         val validMoves = mutableListOf<Move>()
+        val shapes: MutableList<List<Pair<Int,Int>>> = mutableListOf()
 
         for (polyomino in player.polyominos) {
             // Transformationen: Rotationen & Spiegelungen
@@ -104,21 +106,18 @@ class GameEngine {
                 for (edge in player.availableEdges) {
                     // Probiere alle Verschiebungen des Polyominos von der Edge aus
                     for (cell in shape) {
+                        val newShape = normalizeShapeForCell(cell,shape)
+                        shapes.add(newShape)
                         val edgeX = edge%board.boardSize
                         val edgeY:Int = edge/board.boardSize
-                        val offsetX = edgeX - cell.first
-                        val offsetY = edgeY - cell.second
-
-                        val col = offsetX
-                        val row = offsetY
 
                         // Ist der Zug erlaubt?
-                        if (rules.isValidPlacement(player, shape, board, Pair(col, row))) {
+                        if (rules.isValidPlacement(player, newShape, board, Pair(edgeX, edgeY))) {
                             validMoves.add(
                                 Move(
                                     polyomino = polyomino,
-                                    orientation = shape,
-                                    position = Pair(col, row)
+                                    orientation = newShape,
+                                    position = Pair(edgeX, edgeY)
                                 )
                             )
                         }
@@ -126,18 +125,25 @@ class GameEngine {
                 }
             }
         }
-
+        Log.d("AppViewModel", "validMoves ${validMoves.size}")
         return validMoves
     }
+
+    private fun normalizeShapeForCell(cell: Pair<Int,Int>, shape: List<Pair<Int,Int>>):List<Pair<Int,Int>>  {
+        return shape.map { (x,y)->
+            Pair(x-cell.first,y-cell.second)
+        }
+    }
+
     fun calculateNewMoves(player: Player){
         val validMoves = mutableListOf<Move>()
         //val newEdges = calculateAllAvailableEdges()
-        for (polyomino in player.polyominos) {
-            // Transformationen: Rotationen & Spiegelungen
-            val transformedShapes = polyomino.getAllTransformations()
+        for (edge in player.availableEdges) {
+            for (polyomino in player.polyominos) {
+                // Transformationen: Rotationen & Spiegelungen
+                val transformedShapes = polyomino.getAllTransformations()
 
-            for (shape in transformedShapes) {
-                for (edge in player.availableEdges) {
+                for (shape in transformedShapes) {
 
                 }
             }

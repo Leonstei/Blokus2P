@@ -13,6 +13,15 @@ class RandomAi:AiInterface {
     }
     override fun getNextMove(gameState: GameState): Move? {
         val moves = GameEngine().calculateAllMovesOfAPlayer(gameState.activPlayer,gameState.board,BlokusRules())
+        if (moves.isNotEmpty()){
+            moves.sortedBy { move ->
+                move.polyomino.points
+            }
+            moves.filter { move->
+                move.polyomino.points == moves.first().polyomino.points
+            }
+        }
         return moves.randomOrNull() // wählt zufällig einen legalen Zug
     }
+
 }
