@@ -113,10 +113,12 @@ class AppViewModel() : ViewModel() {
             col,
             row,_gameSate.value.board, rules
         )
-        updateBoard(newBoard)
-        updateAvailableEdgesActivPlayer()
-        nextPlayer(_gameSate.value.activPlayer_id)
-        checkForAiTurn()
+        if (newBoard != null){
+            updateBoard(newBoard)
+            updateAvailableEdgesActivPlayer()
+            nextPlayer(_gameSate.value.activPlayer_id)
+            checkForAiTurn()
+        }
     }
 
     private fun checkForAiTurn() {
@@ -217,6 +219,7 @@ class AppViewModel() : ViewModel() {
 
     private fun flippPolyomino() {
         val selected = _gameSate.value.selectedPolyomino
+        if(selected.name == "")return
         val updatedPolyomino = selected.flippHorizontal()
         _gameSate.update { state ->
             state.copy(
@@ -236,7 +239,7 @@ class AppViewModel() : ViewModel() {
 
     private fun rotateLeft() {
         val selected = _gameSate.value.selectedPolyomino
-
+        if(selected.name == "")return
         val updatedPolyomino = selected.rotatedLeft()
 
         _gameSate.update { state ->
@@ -257,6 +260,7 @@ class AppViewModel() : ViewModel() {
 
     private fun rotateRight() {
         val selected = _gameSate.value.selectedPolyomino
+        if(selected.name == "")return
         val updatedPolyomino = selected.rotatedRight()
 
         _gameSate.update { state ->

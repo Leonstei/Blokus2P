@@ -96,7 +96,6 @@ class GameEngine {
 
     fun calculateAllMovesOfAPlayer(player: Player,board: GameBoard,rules: GameRules):List<Move>{
         val validMoves = mutableListOf<Move>()
-        val shapes: MutableList<List<Pair<Int,Int>>> = mutableListOf()
 
         for (polyomino in player.polyominos) {
             // Transformationen: Rotationen & Spiegelungen
@@ -107,7 +106,6 @@ class GameEngine {
                     // Probiere alle Verschiebungen des Polyominos von der Edge aus
                     for (cell in shape) {
                         val newShape = normalizeShapeForCell(cell,shape)
-                        shapes.add(newShape)
                         val edgeX = edge%board.boardSize
                         val edgeY:Int = edge/board.boardSize
 
