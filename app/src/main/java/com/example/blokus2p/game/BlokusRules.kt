@@ -34,19 +34,19 @@ class BlokusRules: GameRules {
             if(index in player.availableEdges) bordIndexIsInEdges = true
         }
 
-//        if(!bordIndexIsInEdges)
-//            return false
-
-
-        if (
-            player.points != 0 &&
-            !((selectedIndex >= 14 && selectedIndex % 14 != 0 && selectedIndex - 15 in 0 until 196 && board.boardGrid[selectedIndex - 15] == player.id) ||
-                    (selectedIndex >= 14 && (selectedIndex - 13) % 14 != 0 && selectedIndex - 13 in 0 until 196 && board.boardGrid[selectedIndex - 13] == player.id) ||
-                    (selectedIndex <= 181 && selectedIndex % 14 != 0 && selectedIndex + 13 in 0 until 196 && board.boardGrid[selectedIndex + 13] == player.id) ||
-                    (selectedIndex <= 181 && (selectedIndex - 13) % 14 != 0 && selectedIndex + 15 in 0 until 196 && board.boardGrid[selectedIndex + 15] == player.id))
-        ) {
+        if(!bordIndexIsInEdges)
             return false
-        }
+
+
+//        if (
+//            player.points != 0 &&
+//            !((selectedIndex >= 14 && selectedIndex % 14 != 0 && selectedIndex - 15 in 0 until 196 && board.boardGrid[selectedIndex - 15] == player.id) ||
+//                    (selectedIndex >= 14 && (selectedIndex - 13) % 14 != 0 && selectedIndex - 13 in 0 until 196 && board.boardGrid[selectedIndex - 13] == player.id) ||
+//                    (selectedIndex <= 181 && selectedIndex % 14 != 0 && selectedIndex + 13 in 0 until 196 && board.boardGrid[selectedIndex + 13] == player.id) ||
+//                    (selectedIndex <= 181 && (selectedIndex - 13) % 14 != 0 && selectedIndex + 15 in 0 until 196 && board.boardGrid[selectedIndex + 15] == player.id))
+//        ) {
+//            return false
+//        }
 
 
         val indexesAroundPolyomino: MutableSet<Int> = mutableSetOf()
