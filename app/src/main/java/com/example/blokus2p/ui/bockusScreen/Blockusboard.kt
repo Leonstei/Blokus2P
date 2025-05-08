@@ -267,8 +267,8 @@ fun BlockusBoard(
                                 }
                                 .padding(1.dp)
                         ) {
-                            //Text("$index")
-                            if (index == 52 || index == 143) {
+                            Text("$index")
+                            if (index == 65 || index == 130) {
                                 Text("X")
                             }
                         }

@@ -17,7 +17,7 @@ class RandomAi:AiInterface {
             val newMoves = sortedMoves.filter { move->
                 move.polyomino.points == moves.first().polyomino.points
             }
-            Log.d("AppViewModel", "validMoves2 ${newMoves.size}")
+            //Log.d("AppViewModel", "validMoves2 ${newMoves.size}")
             return newMoves.randomOrNull()
         }
         return moves.randomOrNull() // wählt zufällig einen legalen Zug

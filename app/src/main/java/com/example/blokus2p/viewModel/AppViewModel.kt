@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.example.blokus2p.ai.AiInterface
+import com.example.blokus2p.ai.MinmaxAi
 import com.example.blokus2p.ai.RandomAi
 import com.example.blokus2p.game.BlokusRules
 import com.example.blokus2p.game.GameEngine
@@ -24,15 +25,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.time.measureTime
 
-class AppViewModel() : ViewModel() {
+class AppViewModel : ViewModel() {
     private val _gameSate = MutableStateFlow(GameState())
     val timerState: StateFlow<GameState> = _gameSate.asStateFlow()
 
     private val _polyominoState = MutableStateFlow(PolyominoSate())
     val polyominoState: StateFlow<PolyominoSate> = _polyominoState.asStateFlow()
 
-    private var selectedPosition: Pair<Int, Int>? = null
     private val rules = BlokusRules()
 
     init {
@@ -46,7 +47,7 @@ class AppViewModel() : ViewModel() {
         }
     }
 
-    fun handlePolyominoEvent(event: PolyominoEvent) {
+    private fun handlePolyominoEvent(event: PolyominoEvent) {
         when (event) {
             is PolyominoEvent.PolyominoSelected -> {
                 selectPolyomino(event.polyomino,event.selectedCell)
@@ -65,7 +66,7 @@ class AppViewModel() : ViewModel() {
         }
     }
 
-    fun handleGameEvent(event: GameEvent) {
+    private fun handleGameEvent(event: GameEvent) {
         when (event) {
             is GameEvent.GameStarted -> {
             }
@@ -93,13 +94,31 @@ class AppViewModel() : ViewModel() {
     private fun setInitialGameState() {
         _gameSate.update {
             it.copy(
-                players = listOf(Player(1, "Player 1",true, Color.Blue, 0, availableEdges =  setOf(143)),
-                    Player(2, "Player 2",false, Color.Magenta, 0,availableEdges =  setOf(52),isAi = true, ai = RandomAi())),
+                players = listOf(
+                    Player(1, "Player 1",true, false, Color.Blue, 0,
+                        availableEdges =  setOf(130)),
+                    Player(2, "Player 2",false, true,Color.Magenta, 0,
+                        availableEdges =  setOf(65),isAi = true, ai = RandomAi())),
                 activPlayer_id = 1,
-                activPlayer = Player(1, "Player 1",true, Color.Blue, 0, availableEdges =  setOf(143)),
+                activPlayer = Player(1, "Player 1",true, false,Color.Blue, 0, availableEdges =  setOf(143)),
                 playerOneColor = Color.Blue,
                 playerTwoColor = Color.Magenta,
                 board = BlokusBoard()
+            )
+        }
+        val activPlayer = _gameSate.value.players.first { player -> player.id == _gameSate.value.activPlayer_id }
+        _gameSate.update {
+            it.copy(
+                players = it.players.map { player ->
+                    player.copy(availableMoves = GameEngine().calculateAllMovesOfAPlayer(
+                            player,
+                            _gameSate.value.board,
+                            rules))
+                },
+                activPlayer = activPlayer.copy(availableMoves = GameEngine().calculateAllMovesOfAPlayer(
+                    activPlayer,
+                    _gameSate.value.board,
+                    rules))
             )
         }
     }
@@ -115,18 +134,20 @@ class AppViewModel() : ViewModel() {
         )
         if (newBoard != null){
             updateBoard(newBoard)
+            updatePolyominosOfActivPlayer(_gameSate.value.activPlayer_id)
             updateAvailableEdgesActivPlayer()
+            updateAvailableMoves()
             nextPlayer(_gameSate.value.activPlayer_id)
             checkForAiTurn()
         }
     }
 
+
     private fun checkForAiTurn() {
         val activePlayer = _gameSate.value.activPlayer
         if (activePlayer.isAi && activePlayer.ai != null) {
-            updateAvailableEdgesActivPlayer()
             val aiMove = _gameSate.value.activPlayer.ai!!.getNextMove(_gameSate.value)
-            Log.d("AppViewModel", "aiMove ${aiMove}")
+            Log.d("AppViewModel", "aiMove $aiMove")
             if(aiMove == null) Log.d("AppViewModel", "available edges ${activePlayer.availableEdges}")
             aiMove?.let {
                 selectPolyomino(aiMove.polyomino, Pair(aiMove.position.first, aiMove.position.second))
@@ -137,8 +158,29 @@ class AppViewModel() : ViewModel() {
                     aiMove.position.second, _gameSate.value.board, rules, aiMove.orientation
                 )
                 updateBoard(newBoard)
+                updatePolyominosOfActivPlayer(_gameSate.value.activPlayer_id)
+                updateAvailableEdgesActivPlayer()
+                updateAvailableMoves()
                 nextPlayer(_gameSate.value.activPlayer_id)
             }
+        }
+    }
+
+    private fun updatePolyominosOfActivPlayer(currentPlayerId: Int){
+        _gameSate.update { gameSate->
+            val updatedPlayers = gameSate.players.map { player ->
+                if (player.id == currentPlayerId) {
+                    player.copy(
+                        polyominos = player.polyominos.filterNot { it.name == player.placedPolyomino.name }
+                    )
+                } else {
+                    player
+                }
+            }
+            gameSate.copy(
+                players = updatedPlayers,
+                activPlayer = updatedPlayers.first { it.id == currentPlayerId }
+            )
         }
     }
 
@@ -149,7 +191,6 @@ class AppViewModel() : ViewModel() {
             val updatedPlayers = gameState.players.map { player ->
                 if (player.id == currentPlayerId) {
                     player.copy(
-                        polyominos = player.polyominos.filterNot { it.name == player.placedPolyomino.name },
                         polyominoIsPlaced = false,
                         isActiv = false
                     )
@@ -157,7 +198,6 @@ class AppViewModel() : ViewModel() {
                     player
                 }
             }
-
             // Neuen aktiven Spieler bestimmen
             val currentIndex = updatedPlayers.indexOfFirst { it.id == currentPlayerId }
             val nextIndex = (currentIndex + 1) % updatedPlayers.size
@@ -197,11 +237,11 @@ class AppViewModel() : ViewModel() {
         _gameSate.value.players.map { player ->
             if (player.isActiv) updatedPlayers.add(
                 player.copy( name = namePlayerOne, color = colorPlayerOne,
-                    isAi = if (playerOneType != Human) true else false,
+                    isAi = playerOneType != Human,
                     ai = getAiByTyp(playerOneType)))
             if(!player.isActiv) updatedPlayers.add(
                 player.copy(name = namePlayerTwo, color = colorPlayerTwo,
-                    isAi = if (playerTwoType != Human) true else false,
+                    isAi = playerTwoType != Human,
                     ai = getAiByTyp(playerTwoType)))
         }
         _gameSate.update { state ->
@@ -332,6 +372,44 @@ class AppViewModel() : ViewModel() {
         }
         Log.d("AppViewModel", "available edges ${_gameSate.value.activPlayer.availableEdges}")
     }
+    private fun updateAvailableMoves() {
+        val activePlayer = _gameSate.value.activPlayer
+        val availableMoves = activePlayer.availableMoves
+
+        val allAvailableMoves = GameEngine().calculateAllMovesOfAPlayer(activePlayer, _gameSate.value.board, rules)
+        val notAvailableMoves2 =
+            GameEngine().calculateNotAvailableMoves(activePlayer, _gameSate.value.board )
+
+        val newAvailableMoves = GameEngine().calculateNewMoves(activePlayer, _gameSate.value.board, rules)
+//        newAvailableMoves.forEach { move->
+//            if(!allAvailableMoves.contains(move)){
+//                Log.d("AppViewModel", "move not in allMoves but in newMoves $move")
+//            }
+//        }
+
+        //val notAvailableMoves = GameEngine().calculateNotAvailableMovesOptimized(activePlayer, _gameSate.value.board)
+        //val finalMoves = availableMoves.plus(newAvailableMoves).minus(notAvailableMoves2.toSet())
+//        if (allAvailableMoves.size < finalMoves.size ){
+//            Log.d("AppViewModel", "all moves: $allAvailableMoves")
+//            Log.d("AppViewModel", "finalMoves : $finalMoves")
+//            Log.d("AppViewModel", "new Moves : $newAvailableMoves")
+//            Log.d("AppViewModel", "not moves2 : $notAvailableMoves2")
+//        }
+        val updatedPlayer = activePlayer.copy(
+            availableMoves = availableMoves.plus(newAvailableMoves).minus(notAvailableMoves2.toSet())
+        )
+        val newPlayers = _gameSate.value.players.map { player ->
+            if (player.id == updatedPlayer.id) updatedPlayer else player
+        }
+        _gameSate.update { state ->
+            state.copy(
+                players = newPlayers,
+                activPlayer = updatedPlayer
+            )
+        }
+        Log.d("AppViewModel", "available moves after update ${_gameSate.value.activPlayer.availableMoves.size}")
+
+    }
 
     private fun updateBoard(newBoard: GameBoard?) {
         if (newBoard != null) {
@@ -355,6 +433,8 @@ class AppViewModel() : ViewModel() {
         }
     }
     private fun updateBoardUndo(newBoard: GameBoard?){
+        // Hier wird der letzte Zug rückgängig gemacht
+        // es könnte sein das availableEdges und availableMoves nicht mehr stimmen
         if (newBoard != null) {
             val lastPlacedPolyomino = _gameSate.value.board.placedPolyominos.lastOrNull()
             if (lastPlacedPolyomino != null){
@@ -378,20 +458,17 @@ class AppViewModel() : ViewModel() {
                     )
                 }
             }
-
-//            Log.d("AppViewModel", "Activ Player = ${_gameSate.value.activPlayer}")
-//            Log.d("AppViewModel", "board = ${_gameSate.value.board}")
         } else {
             Log.d("AppViewModel", "Undo konnte nicht ausgeführt werden")
         }
     }
 
-    fun getAiByTyp(playerType: PlayerType,): AiInterface?{
-        when (playerType){
-            Human -> return null
-            MinimaxAI -> return RandomAi()
-            RandomAI -> return RandomAi()
-            MonteCarloAI -> return RandomAi()
+    private fun getAiByTyp(playerType: PlayerType): AiInterface?{
+        return when (playerType){
+            Human -> null
+            MinimaxAI -> MinmaxAi()
+            RandomAI -> RandomAi()
+            MonteCarloAI -> RandomAi()
         }
     }
 }

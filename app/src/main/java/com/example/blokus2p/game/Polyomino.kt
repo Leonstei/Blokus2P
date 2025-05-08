@@ -14,8 +14,8 @@ data class Polyomino(
     val points: Int = 0,
     val isSelected: Boolean = false,
     val cells: List<Pair<Int, Int>> = listOf(),
-    val selectedCell: Pair<Int, Int> = Pair(0, 0),  // Zelle, die ausgewählt ist
-    val variantIndex: Int = 0  // Welche Variante ist aktiv
+    val selectedCell: Pair<Int, Int> = Pair(0, 0),
+    val variantIndex: Int = 0
 ) {
     val allVariants: List<PolyominoVariant> by lazy {
         generateAllTransformations(cells)
@@ -115,5 +115,6 @@ data class Polyomino(
 data class PlacedPolyomino(
     val playerId: Int,
     val polyomino: Polyomino,
-    val cells: List<Pair<Int, Int>>
+    val cells: List<Pair<Int, Int>>,
+    val placePosition: Pair<Int, Int>
 )

@@ -20,21 +20,21 @@ class BlokusRules: GameRules {
         val selectedIndex = selectedPosition.second * board.boardSize + selectedPosition.first
         val boardIndexesOfPolyomino: MutableList<Int> = mutableListOf()
         polyominoCells.forEach { (x, y) ->
-            if(x+selectedPosition.first >13 || x+selectedPosition.first <0)
+            if (x + selectedPosition.first > 13 || x + selectedPosition.first < 0)
                 return false
             boardIndexesOfPolyomino.add(y * board.boardSize + x + selectedIndex)
         }
 
-        var bordIndexIsInEdges:Boolean = false
+        var bordIndexIsInEdges: Boolean = false
         for (index in boardIndexesOfPolyomino) {
             if (index !in 0 until 196) return false
             if (board.boardGrid[index] != 0) {
                 return false
             }
-            if(index in player.availableEdges) bordIndexIsInEdges = true
+            if (index in player.availableEdges) bordIndexIsInEdges = true
         }
 
-        if(!bordIndexIsInEdges)
+        if (!bordIndexIsInEdges)
             return false
 
 
