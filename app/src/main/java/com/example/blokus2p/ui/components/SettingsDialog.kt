@@ -34,8 +34,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.example.blokus2p.ai.MinmaxAi
+import com.example.blokus2p.ai.MonteCarloTreeSearchAi
+import com.example.blokus2p.ai.RandomAi
 import com.example.blokus2p.events.GameEvent
 import com.example.blokus2p.game.GameState
+import com.example.blokus2p.game.Player
 import com.example.blokus2p.model.PlayerType
 
 
@@ -55,8 +59,8 @@ fun SettingsDialog(
     var playerTwoColor by remember { mutableStateOf(playerTwo.color) }
 
     // State for selected player types
-    var playerOneType by remember { mutableStateOf(if (!playerOne.isAi) PlayerType.Human else PlayerType.RandomAI) } // You might need to store player type in your Player class
-    var playerTwoType by remember { mutableStateOf(if (!playerTwo.isAi) PlayerType.Human else PlayerType.RandomAI) } // You might need to store player type in your Player class
+    var playerOneType by remember { mutableStateOf(getPlayerType(playerOne)) } // You might need to store player type in your Player class
+    var playerTwoType by remember { mutableStateOf(getPlayerType(playerTwo)) } // You might need to store player type in your Player class
 
     // State for dropdown menu expansion
     var expandedPlayerOne by remember { mutableStateOf(false) }
@@ -248,6 +252,18 @@ fun ColorPicker(
                 )
             }
         }
+    }
+}
+fun getPlayerType(player: Player): PlayerType {
+    return if (player.isAi) {
+        when (player.ai) {
+            is RandomAi -> PlayerType.RandomAI
+            is MinmaxAi -> PlayerType.MinimaxAI
+            is MonteCarloTreeSearchAi -> PlayerType.MonteCarloAI
+            else -> PlayerType.Human
+        }
+    } else {
+        PlayerType.Human
     }
 }
 

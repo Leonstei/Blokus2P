@@ -72,18 +72,18 @@ data class Player(
 //            false,
 //            cells=listOf(Pair(0, 0), Pair(0, 1), Pair(1, 0), Pair(1, 1), Pair(1, 2))
 //        ),
-//        Polyomino(
-//            "Fünf Kreuz",
-//            5,
-//            false,
-//            cells=listOf(Pair(0, 0), Pair(0, 1), Pair(0, 2), Pair(1, 1), Pair(2, 1))
-//        ),
-//        Polyomino(
-//            "Fünf Plus",
-//            5,
-//            false,
-//            cells=listOf(Pair(1, 0), Pair(1, 1), Pair(0, 1), Pair(1, 2), Pair(2, 1))
-//        ),
+        Polyomino(
+            "Fünf Kreuz",
+            5,
+            false,
+            cells=listOf(Pair(0, 0), Pair(0, 1), Pair(0, 2), Pair(1, 1), Pair(2, 1))
+        ),
+        Polyomino(
+            "Fünf Plus",
+            5,
+            false,
+            cells=listOf(Pair(1, 0), Pair(1, 1), Pair(0, 1), Pair(1, 2), Pair(2, 1))
+        ),
         Polyomino(
             "Vier",
             4,

@@ -2,24 +2,55 @@ package com.example.blokus2p.ai
 
 import android.util.Log
 import com.example.blokus2p.game.BlokusRules
-import com.example.blokus2p.game.GameBoard
 import com.example.blokus2p.game.GameEngine
 import com.example.blokus2p.game.GameState
 import com.example.blokus2p.game.Player
 import com.example.blokus2p.model.Move
 import com.example.blokus2p.model.ScoredMove
-import kotlin.time.measureTime
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 class MinmaxAi : AiInterface {
-    override fun getNextMove(gameState: GameState): Move? {
-        val depth = 1 // Set the depth for the minimax algorithm
+    suspend override fun getNextMove(gameState: GameState): Move? {
+        val depth = 3 // Set the depth for the minimax algorithm
         val bestMove = findBestMove(gameState, depth)
         return bestMove
     }
 
-    private fun findBestMove(gameState: GameState, depth: Int): Move? {
-        val maximizingPlayer = maximizingPlayer(gameState)
-        val scoredMove = minimax(depth, gameState,maximizingPlayer)
+    private suspend fun findBestMoveParallel(
+        gameState: GameState,
+        depth: Int
+    ): Move? = coroutineScope {
+        val maximizingPlayer = getMaximizingPlayer(gameState)
+        val currentPlayer = gameState.players[gameState.activPlayer_id - 1]
+        val moves = getMoves(currentPlayer)
+        val currentdepth = depth-1
+
+
+        val semaphore = Semaphore(permits = 4) // max 8 gleichzeitig
+
+        val deferredResults = moves.map { move ->
+            async(Dispatchers.Default) {
+                semaphore.withPermit {
+                    val newState = makeMove(gameState, move, currentPlayer)
+                    minmaxAlphaBeta(currentdepth, newState, maximizingPlayer, Int.MIN_VALUE, Int.MAX_VALUE)
+                        .copy(move = move)
+                }
+            }
+        }
+
+        val results = deferredResults.awaitAll()
+        val best = if (currentPlayer.id == maximizingPlayer.id) {
+            results.maxByOrNull { it.score }
+        } else {
+            results.minByOrNull { it.score }
+        }
+        best?.move
+    }
+    private suspend fun findBestMove(gameState: GameState, depth: Int): Move? {
+        val maximizingPlayer = getMaximizingPlayer(gameState)
+        val scoredMove = minmaxAlphaBeta(depth, gameState,maximizingPlayer,Int.MIN_VALUE, Int.MAX_VALUE)
         //Log.d("AppViewModel", "Score: ${scoredMove.score}")
         return scoredMove.move
     }
@@ -29,18 +60,16 @@ class MinmaxAi : AiInterface {
     }
 
     fun makeMove(gameState: GameState, move: Move,player: Player): GameState  {
-        var newBoard: GameBoard
-        var updatedPlayers: List<Player>
 
         val rules = BlokusRules()
-        newBoard = GameEngine().placeAiMove(
+        val newBoard = GameEngine().placeAiMove(
             player,
             move.polyomino,
             move.position.first,
             move.position.second,gameState.board, rules, move.orientation
         ) ?: return gameState
 
-         updatedPlayers = gameState.players.map { p ->
+        val updatedPlayers = gameState.players.map { p ->
             if (p.id == player.id) {
                 val newPolyominos = p.polyominos.toMutableList().apply { remove(move.polyomino) }
 
@@ -59,10 +88,9 @@ class MinmaxAi : AiInterface {
                     availableEdges = finalEdges,
                     availableMoves = finalMoves
                 )
-                // Neuen Player zurückgeben
-
             } else {
-                p.copy(isActiv = true) // Unverändert übernehmen
+                val opponentNotAvailableMoves = GameEngine().calculateNotAvailableMoves(p, newBoard)
+                p.copy(isActiv = true, availableMoves = p.availableMoves.minus(opponentNotAvailableMoves.toSet())) // Unverändert übernehmen
             }
         }
 
@@ -74,7 +102,7 @@ class MinmaxAi : AiInterface {
     }
 
 
-    fun minimax(depth: Int, gameState: GameState,maximizingPlayer: Player): ScoredMove {
+    fun minmaxAlphaBeta(depth: Int, gameState: GameState, maximizingPlayer: Player,alpha:Int,beta:Int): ScoredMove {
         // Basisfall: Bei Erreichung der maximalen Tiefe oder Spielende
         if (depth == 0 || gameOver(gameState)) {
             return ScoredMove(
@@ -84,32 +112,58 @@ class MinmaxAi : AiInterface {
             )
         }
 
-        var bestScore = if (maximizingPlayer.id == gameState.activPlayer_id) Int.MIN_VALUE else Int.MAX_VALUE
+        var currentAlpha = alpha
+        var currentBeta = beta
         var bestMove: Move? = null
 
         val currentPlayer = gameState.players[gameState.activPlayer_id-1]
+        val isMaximizingPly = (currentPlayer.id == maximizingPlayer.id)
         val possibleMoves = getMoves(currentPlayer)
 
-        for (move in possibleMoves) {
-            val newGameState = makeMove(gameState, move, currentPlayer)
-            // Hier war ein Fehler: Wir müssen newGameState verwenden, nicht gameState
-            val scoredMove = minimax(depth - 1, newGameState,maximizingPlayer)
-            val score = scoredMove.score
+        if(isMaximizingPly){
+            var maxScore = Int.MIN_VALUE // Bester Wert für diesen maximierenden Knoten
+            for (move in possibleMoves) {
+                val newGameState = makeMove(gameState, move, currentPlayer)
+                val scoredMoveRecursive = minmaxAlphaBeta(depth - 1, newGameState, maximizingPlayer, currentAlpha, currentBeta)
+                val score = scoredMoveRecursive.score // Erhaltener Score vom Kindknoten
 
-            if ((maximizingPlayer.id == gameState.activPlayer_id && score > bestScore) ) {
-                bestScore = score
-                bestMove = move
+                if (score > maxScore) {
+                    maxScore = score
+                    bestMove = move
+                }
+                currentAlpha = maxOf(currentAlpha, maxScore) // Alpha aktualisieren: Bester Wert, den der Maximierer bisher auf diesem Pfad garantieren kann
+
+                if (beta <= currentAlpha) { // Pruning-Bedingung
+                    //Log.d("AppViewModel", "Moves Skiped: ${possibleMoves.size- possibleMoves.indexOf(move)}")
+                    break // Beta-Cutoff: Der Minimierer-Elternknoten wird diesen Pfad nicht wählen
+                }
             }
-        }
+            return ScoredMove(bestMove, maxScore, depth)
+        }else { // Minimierender Spieler ist am Zug
+            var minScore = Int.MAX_VALUE // Bester Wert für diesen minimierenden Knoten
+            for (move in possibleMoves) {
+                val newGameState = makeMove(gameState, move, currentPlayer)
+                // Rekursiver Aufruf für den nächsten Zustand, alpha und beta weitergeben
+                val scoredMoveRecursive = minmaxAlphaBeta(depth - 1, newGameState, maximizingPlayer, currentAlpha, currentBeta)
+                val score = scoredMoveRecursive.score // Erhaltener Score vom Kindknoten
 
-        return ScoredMove(
-            move = bestMove,
-            score = bestScore,
-            depth = depth
-        )
+                if (score < minScore) {
+                    minScore = score
+                    bestMove = move
+                }
+                currentBeta = minOf(currentBeta, minScore) // Beta aktualisieren: Bester Wert, den der Minimierer bisher auf diesem Pfad garantieren kann (aus Maximierer-Sicht niedrig)
+
+                if (currentBeta <= alpha) { // Pruning-Bedingung
+                    //Log.d("AppViewModel", "Moves Skiped: ${possibleMoves.size- possibleMoves.indexOf(move)}")
+                    break // Alpha-Cutoff: Der Maximierer-Elternknoten wird diesen Pfad nicht wählen
+                }
+            }
+            return ScoredMove(bestMove, minScore, depth)
+        }
     }
 
-    fun maximizingPlayer(gameState: GameState): Player {
+
+    fun getMaximizingPlayer(gameState: GameState): Player {
         gameState.players.forEach {player->
             if (player.isMaximizing)
                 return player
@@ -122,19 +176,16 @@ class MinmaxAi : AiInterface {
     }
 
     fun evaluate(gameState: GameState): Int {
-        val maximizingPlayer = maximizingPlayer(gameState)
+        val maximizingPlayer = getMaximizingPlayer(gameState)
         val opponent = gameState.players[maximizingPlayer.id  % gameState.players.size]
 
         // Grundwertung: Punktedifferenz
-        var score = maximizingPlayer.points - opponent.points
+        var score = (maximizingPlayer.points - opponent.points) * 3
         score += (maximizingPlayer.availableMoves.size - opponent.availableMoves.size)
 
         //Kontrolle über das Zentrum bewerten
         val centerControl = evaluateCenterControl(maximizingPlayer, opponent, gameState)
-        score += centerControl * 2
-
-        // Implement evaluation function to rate board positions
-        //Log.d("AppViewModel", "Score: $score")
+        score += centerControl * 4
         return score
     }
 

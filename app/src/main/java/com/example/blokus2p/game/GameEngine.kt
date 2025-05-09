@@ -54,7 +54,7 @@ class GameEngine {
         val lastPlacedPolyominosFromPlayer = board.placedPolyominos.filter { it.playerId == player.id }
         val lastPlacedPolyominoFromPlayer = lastPlacedPolyominosFromPlayer.lastOrNull()
 
-        if (lastPlacedPolyominoFromPlayer == null) return newAvailableEdges.toSet()
+        if (lastPlacedPolyominoFromPlayer == null) return setOf(65,130)
 
         lastPlacedPolyominoFromPlayer.cells.forEach { (x, y) ->
             val position = y * board.boardSize + x
@@ -304,14 +304,12 @@ class GameEngine {
     }
 
     fun checkForGameEnd(players :List<Player>): Boolean {
+        var countPlayersFinished= 0
         for (player in players) {
-            if (player.polyominos.isEmpty()) {
-                return true
-            }
-            if (player.availableEdges.isEmpty()) {
-                return true
+            if (player.polyominos.isEmpty() || player.availableEdges.isEmpty() || player.availableMoves.isEmpty()) {
+                countPlayersFinished ++
             }
         }
-        return false
+        return countPlayersFinished == players.size
     }
 }

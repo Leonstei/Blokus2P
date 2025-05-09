@@ -3,6 +3,7 @@ package com.example.blokus2p.viewModel
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.blokus2p.ai.AiInterface
 import com.example.blokus2p.ai.MinmaxAi
 import com.example.blokus2p.ai.RandomAi
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlin.time.measureTime
 
 class AppViewModel : ViewModel() {
@@ -98,7 +100,7 @@ class AppViewModel : ViewModel() {
                     Player(1, "Player 1",true, false, Color.Blue, 0,
                         availableEdges =  setOf(130)),
                     Player(2, "Player 2",false, true,Color.Magenta, 0,
-                        availableEdges =  setOf(65),isAi = true, ai = RandomAi())),
+                        availableEdges =  setOf(65),isAi = true, ai = MinmaxAi())),
                 activPlayer_id = 1,
                 activPlayer = Player(1, "Player 1",true, false,Color.Blue, 0, availableEdges =  setOf(143)),
                 playerOneColor = Color.Blue,
@@ -146,22 +148,26 @@ class AppViewModel : ViewModel() {
     private fun checkForAiTurn() {
         val activePlayer = _gameSate.value.activPlayer
         if (activePlayer.isAi && activePlayer.ai != null) {
-            val aiMove = _gameSate.value.activPlayer.ai!!.getNextMove(_gameSate.value)
-            Log.d("AppViewModel", "aiMove $aiMove")
-            if(aiMove == null) Log.d("AppViewModel", "available edges ${activePlayer.availableEdges}")
-            aiMove?.let {
-                selectPolyomino(aiMove.polyomino, Pair(aiMove.position.first, aiMove.position.second))
-                val newBoard = GameEngine().placeAiMove(
-                    _gameSate.value.activPlayer,
-                    aiMove.polyomino,
-                    aiMove.position.first,
-                    aiMove.position.second, _gameSate.value.board, rules, aiMove.orientation
-                )
-                updateBoard(newBoard)
-                updatePolyominosOfActivPlayer(_gameSate.value.activPlayer_id)
-                updateAvailableEdgesActivPlayer()
-                updateAvailableMoves()
-                nextPlayer(_gameSate.value.activPlayer_id)
+            viewModelScope.launch {
+                val aiMove = _gameSate.value.activPlayer.ai?.getNextMove(_gameSate.value)
+                Log.d("AppViewModel", "aiMove $aiMove")
+                aiMove?.let {
+                    selectPolyomino(
+                        aiMove.polyomino,
+                        Pair(aiMove.position.first, aiMove.position.second)
+                    )
+                    val newBoard = GameEngine().placeAiMove(
+                        _gameSate.value.activPlayer,
+                        aiMove.polyomino,
+                        aiMove.position.first,
+                        aiMove.position.second, _gameSate.value.board, rules, aiMove.orientation
+                    )
+                    updateBoard(newBoard)
+                    updatePolyominosOfActivPlayer(_gameSate.value.activPlayer_id)
+                    updateAvailableEdgesActivPlayer()
+                    updateAvailableMoves()
+                    nextPlayer(_gameSate.value.activPlayer_id)
+                }
             }
         }
     }
@@ -374,13 +380,15 @@ class AppViewModel : ViewModel() {
     }
     private fun updateAvailableMoves() {
         val activePlayer = _gameSate.value.activPlayer
+        val opponentPlayer = _gameSate.value.players.first { player -> player.id != activePlayer.id }
+        val board = _gameSate.value.board
         val availableMoves = activePlayer.availableMoves
 
-        val allAvailableMoves = GameEngine().calculateAllMovesOfAPlayer(activePlayer, _gameSate.value.board, rules)
-        val notAvailableMoves2 =
-            GameEngine().calculateNotAvailableMoves(activePlayer, _gameSate.value.board )
+        val allAvailableMoves = GameEngine().calculateAllMovesOfAPlayer(activePlayer, board, rules)
+        val notAvailableMoves = GameEngine().calculateNotAvailableMoves(activePlayer, board )
+        val opponentNotAvailableMoves = GameEngine().calculateNotAvailableMoves(opponentPlayer, board)
 
-        val newAvailableMoves = GameEngine().calculateNewMoves(activePlayer, _gameSate.value.board, rules)
+        val newAvailableMoves = GameEngine().calculateNewMoves(activePlayer, board, rules)
 //        newAvailableMoves.forEach { move->
 //            if(!allAvailableMoves.contains(move)){
 //                Log.d("AppViewModel", "move not in allMoves but in newMoves $move")
@@ -388,7 +396,9 @@ class AppViewModel : ViewModel() {
 //        }
 
         //val notAvailableMoves = GameEngine().calculateNotAvailableMovesOptimized(activePlayer, _gameSate.value.board)
-        //val finalMoves = availableMoves.plus(newAvailableMoves).minus(notAvailableMoves2.toSet())
+        val finalMoves = (availableMoves.plus(newAvailableMoves).minus(notAvailableMoves.toSet())).sortedByDescending { move ->
+            move.polyomino.points
+        }.toSet()
 //        if (allAvailableMoves.size < finalMoves.size ){
 //            Log.d("AppViewModel", "all moves: $allAvailableMoves")
 //            Log.d("AppViewModel", "finalMoves : $finalMoves")
@@ -396,10 +406,17 @@ class AppViewModel : ViewModel() {
 //            Log.d("AppViewModel", "not moves2 : $notAvailableMoves2")
 //        }
         val updatedPlayer = activePlayer.copy(
-            availableMoves = availableMoves.plus(newAvailableMoves).minus(notAvailableMoves2.toSet())
+            availableMoves = finalMoves
         )
         val newPlayers = _gameSate.value.players.map { player ->
-            if (player.id == updatedPlayer.id) updatedPlayer else player
+            if (player.id == updatedPlayer.id) updatedPlayer else if (player.id == opponentPlayer.id) {
+                player.copy(
+                    availableMoves = (player.availableMoves.minus(opponentNotAvailableMoves.toSet())).sortedByDescending { move ->
+                        move.polyomino.points
+                    }.toSet())
+            } else {
+                player
+            }
         }
         _gameSate.update { state ->
             state.copy(
@@ -441,11 +458,13 @@ class AppViewModel : ViewModel() {
                 if (lastPlacedPolyomino.playerId != _gameSate.value.activPlayer.id) nextPlayer(_gameSate.value.activPlayer_id)
                 var newPolyominos = _gameSate.value.activPlayer.polyominos
                 newPolyominos  = mutableListOf(lastPlacedPolyomino.polyomino).plus(newPolyominos)
+                val newAvailableEdges = GameEngine().calculateNewAvailableEdges(_gameSate.value.activPlayer, newBoard)
 
                 val updatedPlayer = _gameSate.value.activPlayer.copy(
                     polyominos = newPolyominos ,
                     points = _gameSate.value.activPlayer.points - lastPlacedPolyomino.polyomino.points,
-                    placedPolyomino =  Polyomino()
+                    placedPolyomino =  Polyomino(),
+                    availableEdges = newAvailableEdges
                 )
                 val newPlayers = _gameSate.value.players.map { player ->
                     if (player.id == updatedPlayer.id) updatedPlayer else player
