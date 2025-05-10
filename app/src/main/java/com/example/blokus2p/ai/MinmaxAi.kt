@@ -13,7 +13,10 @@ import kotlinx.coroutines.sync.withPermit
 
 class MinmaxAi : AiInterface {
     suspend override fun getNextMove(gameState: GameState): Move? {
-        val depth = 3 // Set the depth for the minimax algorithm
+        var depth = 3
+        if(gameState.activPlayer.availableMoves.size > 100){
+            depth--
+        }
         val bestMove = findBestMove(gameState, depth)
         return bestMove
     }

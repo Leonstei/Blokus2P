@@ -10,11 +10,17 @@ class GameEngine {
             return null
         }
         val newGrid = board.boardGrid.copyOf()
+        var newBitBoard = player.bitBoard.copyOf()
 
         val placedCells = polyomino.cells.map { cell ->
             Pair(cell.first + col, cell.second + row)
         }
 
+        var sum = 0
+        placedCells.forEach { (x, y) ->
+            sum += y * board.boardSize + x
+        }
+        //newBitBoard and sum
         placedCells.forEach { (x, y) ->
             newGrid[y * board.boardSize + x] = player.id
         }
