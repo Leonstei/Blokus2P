@@ -5,29 +5,51 @@ import com.example.blokus2p.model.Move
 import kotlin.time.measureTime
 
 class GameEngine {
-    fun place(player: Player, polyomino: Polyomino, col: Int, row: Int, board: GameBoard,rules: GameRules):GameBoard? {
+    fun place(
+        player: Player,
+        polyomino: Polyomino,
+        col: Int,
+        row: Int,
+        board: GameBoard,
+        rules: GameRules
+    ): GameBoard? {
         if (!rules.isValidPlacement(player, polyomino.cells, board, Pair(col, row))) {
             return null
         }
+
+        val boardSize = board.boardSize
         val newGrid = board.boardGrid.copyOf()
-        var newBitBoard = player.bitBoard.copyOf()
+        val newBitBoard = player.bitBoard.copyOf()
 
         val placedCells = polyomino.cells.map { cell ->
             Pair(cell.first + col, cell.second + row)
         }
 
-        var sum = 0
-        placedCells.forEach { (x, y) ->
-            sum += y * board.boardSize + x
+        val placedCellsIndexed = placedCells.map { (x, y) ->
+            y * boardSize + x
         }
-        //newBitBoard and sum
-        placedCells.forEach { (x, y) ->
-            newGrid[y * board.boardSize + x] = player.id
+        val timeTaken = measureTime {
+            placedCellsIndexed.forEach {
+                val wordIndex = it / 64
+                val bitIndex = it % 64
+                newBitBoard[wordIndex] = newBitBoard[wordIndex] or (1L shl bitIndex)
+            }
         }
-        val placedPoly = PlacedPolyomino(player.id, polyomino, placedCells, Pair(col,row))
+        Log.d("AppViewModel", "Time taken change LongArray: $timeTaken ")
+
+        val timemesure = measureTime {
+            placedCells.forEach { (x, y) ->
+                newGrid[y * board.boardSize + x] = player.id
+            }
+        }
+        Log.d("AppViewModel", "Time taken change intArray: $timemesure ")
+
+
+        val placedPoly = PlacedPolyomino(player.id, polyomino, placedCells, Pair(col, row))
+
         return board.copyWith(
             boardGrid = newGrid,
-            placedPolyominos = board.placedPolyominos + placedPoly
+            placedPolyominos = board.placedPolyominos + placedPoly,
         )
     }
 
@@ -203,73 +225,7 @@ class GameEngine {
         //Log.d("AppViewModel", "not validMoves fun1 ${notValidMoves.size}")
         return notValidMoves
     }
-//    fun calculateNotAvailableMovesOptimized(player: Player, board: GameBoard): Set<Move> {
-//        val notValidMoves = mutableSetOf<Move>() // Use a Set for the result as well
-//        val timeTaken = measureTime { // Use measureTimeMillis
-//
-//            // 1. Find the last polyomino placed by the current player
-//            val lastPlacedByPlayer = board.placedPolyominos.lastOrNull { it.playerId == player.id }
-//                ?: return emptySet() // If player hasn't placed anything, no moves become invalid based on this logic
-//
-//            // --- Optimization: Pre-calculate forbidden cells using a Set ---
-//            val forbiddenCells = mutableSetOf<Pair<Int, Int>>()
-//
-//            // 2. Add cells from the player's last placed piece
-//            // Original code added only placePosition, which seems incorrect.
-//            // Let's assume we should forbid placing *on* any cell of the last piece.
-//            forbiddenCells.addAll(lastPlacedByPlayer.cells)
-//
-//            // 3. Add cells from ALL opponent pieces (Fixes > 2 player issue and "only last" issue)
-//            board.placedPolyominos.forEach { placedPiece ->
-//                if (placedPiece.playerId != player.id) {
-//                    forbiddenCells.addAll(placedPiece.cells)
-//                }
-//            }
-//            // Note: Depending on game rules, you might only need cells placed *after* the player's last move,
-//            // or *all* occupied cells regardless of player. The logic above assumes any opponent cell is forbidden.
-//            // Adjust this part based on your specific game's rules for invalidation.
-//
-//            // --- Optimization: Filter using Set lookups ---
-//            for (move in player.availableMoves) {
-//                var isInvalid = false
-//
-//                // Condition 1: Polyomino shape already used in the last move
-//                if (move.polyomino.name == lastPlacedByPlayer.polyomino.name) {
-//                    isInvalid = true
-//                } else {
-//                    // Condition 2: Placement position itself is forbidden (optional based on rules)
-//                    // Your original code had this check. It might be redundant if condition 3 is comprehensive.
-//                    // Keep it if placing the *anchor* on a specific forbidden cell is disallowed independently.
-//                    // if (forbiddenCells.contains(move.position)) {
-//                    //     isInvalid = true
-//                    // } else {
-//
-//                    // Condition 3: Any cell of the move overlaps with forbidden cells
-//                    for (cellOffset in move.orientation) {
-//                        val absoluteCellPosition = Pair(
-//                            cellOffset.first + move.position.first,
-//                            cellOffset.second + move.position.second
-//                        )
-//                        // --- Performance Gain: O(1) average time lookup ---
-//                        if (forbiddenCells.contains(absoluteCellPosition)) {
-//                            isInvalid = true
-//                            break // No need to check further cells for this move
-//                        }
-//                    }
-//                    // } // End of else for condition 2
-//                }
-//
-//
-//                if (isInvalid) {
-//                    notValidMoves.add(move)
-//                }
-//            }
-//        } // End of measureTimeMillis
-//
-//        //Log.d("AppViewModel", "Time taken to calculate notAvailable moves (Optimized): $timeTaken ms")
-//        Log.d("AppViewModel", "Not valid moves count fun3: ${notValidMoves.size}")
-//        return notValidMoves
-//    }
+
 
     fun calculateNewMoves(player: Player, board: GameBoard, rules: GameRules): List<Move> {
         val validMoves = mutableListOf<Move>()
