@@ -164,9 +164,9 @@ class GameEngine {
         return validMoves.toSet()
     }
 
-    private fun normalizeShapeForCell(cell: Pair<Int,Int>, shape: List<Pair<Int,Int>>):List<Pair<Int,Int>>  {
-        return shape.map { (x,y)->
-            Pair(x-cell.first,y-cell.second)
+    private fun normalizeShapeForCell(cell: Int, shape: List<Int>):List<Pair<Int,Int>>  {
+        return shape.map {
+            Pair(it,it)
         }
     }
 

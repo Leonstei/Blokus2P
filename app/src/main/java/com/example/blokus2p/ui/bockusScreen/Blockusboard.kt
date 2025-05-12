@@ -324,6 +324,8 @@ fun Polyomino(
     val minY = polyomino.currentVariant.minOf { it.second }
     val maxX = polyomino.currentVariant.maxOf { it.first } +1
     val maxY = polyomino.currentVariant.maxOf { it.second } +1
+
+
     Box(
         modifier = Modifier
             .width(cellSize * maxX)

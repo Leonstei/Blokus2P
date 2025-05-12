@@ -108,21 +108,21 @@ class AppViewModel : ViewModel() {
                 board = BlokusBoard()
             )
         }
-        val activPlayer = _gameSate.value.players.first { player -> player.id == _gameSate.value.activPlayer_id }
-        _gameSate.update {
-            it.copy(
-                players = it.players.map { player ->
-                    player.copy(availableMoves = GameEngine().calculateAllMovesOfAPlayer(
-                            player,
-                            _gameSate.value.board,
-                            rules))
-                },
-                activPlayer = activPlayer.copy(availableMoves = GameEngine().calculateAllMovesOfAPlayer(
-                    activPlayer,
-                    _gameSate.value.board,
-                    rules))
-            )
-        }
+//        val activPlayer = _gameSate.value.players.first { player -> player.id == _gameSate.value.activPlayer_id }
+//        _gameSate.update {
+//            it.copy(
+//                players = it.players.map { player ->
+//                    player.copy(availableMoves = GameEngine().calculateAllMovesOfAPlayer(
+//                            player,
+//                            _gameSate.value.board,
+//                            rules))
+//                },
+//                activPlayer = activPlayer.copy(availableMoves = GameEngine().calculateAllMovesOfAPlayer(
+//                    activPlayer,
+//                    _gameSate.value.board,
+//                    rules))
+//            )
+//        }
     }
 
     private fun placePolyomino(col: Int, row: Int) {
@@ -350,10 +350,10 @@ class AppViewModel : ViewModel() {
         _gameSate.update { state->
             state.copy(
                 selectedPolyomino = state.selectedPolyomino.copy(
-                    cells = state.selectedPolyomino.currentVariant.map { cell->
-                        Pair(cell.first - _gameSate.value.selectedPolyomino.selectedCell.first
-                            ,cell.second - _gameSate.value.selectedPolyomino.selectedCell.second)
-                    }
+//                    cells = state.selectedPolyomino.currentVariant.map { cell->
+//                        Pair(cell.first - _gameSate.value.selectedPolyomino.selectedCell.first
+//                            ,cell.second - _gameSate.value.selectedPolyomino.selectedCell.second)
+//                    }
                 )
             )
         }
