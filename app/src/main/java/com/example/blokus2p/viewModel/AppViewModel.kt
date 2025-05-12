@@ -52,7 +52,7 @@ class AppViewModel : ViewModel() {
     private fun handlePolyominoEvent(event: PolyominoEvent) {
         when (event) {
             is PolyominoEvent.PolyominoSelected -> {
-                selectPolyomino(event.polyomino,event.selectedCell)
+                selectPolyomino(event.polyomino,event.selectedCell2)
             }
 
             is PolyominoEvent.PolyominoRotate -> {
@@ -154,7 +154,8 @@ class AppViewModel : ViewModel() {
                 aiMove?.let {
                     selectPolyomino(
                         aiMove.polyomino,
-                        Pair(aiMove.position.first, aiMove.position.second)
+                        Polyomino().pairToIndex(aiMove.position)
+                        //Pair(aiMove.position.first, aiMove.position.second)
                     )
                     val newBoard = GameEngine().placeAiMove(
                         _gameSate.value.activPlayer,
@@ -325,17 +326,17 @@ class AppViewModel : ViewModel() {
         }
     }
 
-    private fun selectPolyomino(polyomino: Polyomino,selectedCell : Pair<Int,Int>){
+    private fun selectPolyomino(polyomino: Polyomino,selectedCell : Int){
         _gameSate.update { state ->
             state.copy(
                 selectedPolyomino = polyomino.copy(
-                    selectedCell = selectedCell
+                    selectedCell2 = selectedCell
                 ),
                 activPlayer = _gameSate.value.activPlayer.copy(
                     polyominos = _gameSate.value.activPlayer.polyominos.map {
                         if (it.name == polyomino.name) {
                             it.copy(isSelected = true,
-                                selectedCell = selectedCell
+                                selectedCell2 = selectedCell
                             )
                         } else {
                             it.copy(isSelected = false)

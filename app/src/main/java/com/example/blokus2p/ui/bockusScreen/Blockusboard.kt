@@ -285,9 +285,9 @@ fun BlockusBoard(
 fun Polyominos(cellSize: Dp, onEvent: (PolyominoEvent) -> Unit, gameState: GameState) {
     val playerTwo = gameState.players.filter { player: Player ->  !player.isActiv}
     if (gameState.activPlayer_id == gameState.activPlayer.id) {
-        PolyominoRow(gameState.activPlayer.polyominos, cellSize, onEvent,gameState,gameState.activPlayer.id)
+        PolyominoRow(gameState.activPlayer.newPolyominos, cellSize, onEvent,gameState,gameState.activPlayer.id)
         Spacer(modifier = Modifier.height(12.dp))
-        PolyominoRow(playerTwo.first().polyominos, cellSize, onEvent,gameState,playerTwo.first().id)
+        PolyominoRow(playerTwo.first().newPolyominos, cellSize, onEvent,gameState,playerTwo.first().id)
     }
 }
 @Composable
@@ -316,14 +316,26 @@ fun Polyomino(
     gameState: GameState,
     player: Int
 ){
-    var borderColor = if (gameState.selectedPolyomino.name == polyomino.name && player == gameState.activPlayer_id) Color.Red else Color.Transparent
-    if (gameState.activPlayer.color == Color.Red && player == gameState.activPlayer_id) {
+    // Berechne alle (x,y)-Paare aus den linearen Indices
+    val boardWidth = 14
+    val coords: List<Pair<Int,Int>> = polyomino.currentVariant.map { index ->
+        val x = index % boardWidth
+        val y = index / boardWidth
+        x to y
+    }
+    // Randfarbe bestimmen
+    var borderColor = if (gameState.selectedPolyomino.name == polyomino.name
+        && player == gameState.activPlayer_id) Color.Red else Color.Transparent
+    if (gameState.activPlayer.color == Color.Red
+        && player == gameState.activPlayer_id
+    ) {
         borderColor = Color.Black
     }
-    val minX = polyomino.currentVariant.minOf { it.first }
-    val minY = polyomino.currentVariant.minOf { it.second }
-    val maxX = polyomino.currentVariant.maxOf { it.first } +1
-    val maxY = polyomino.currentVariant.maxOf { it.second } +1
+
+    val minX = coords.minOf { it.first }
+    val minY = coords.minOf { it.second }
+    val maxX = coords.maxOf { it.first } +1
+    val maxY = coords.maxOf { it.second } +1
 
 
     Box(
@@ -332,7 +344,7 @@ fun Polyomino(
             .height(cellSize * maxY)
             .border(2.dp, borderColor)
     ) {
-        polyomino.currentVariant.forEach { (x, y) ->
+        coords.forEach { (x, y) ->
             Box(
                 modifier = Modifier
                     .offset(
@@ -343,12 +355,12 @@ fun Polyomino(
                         if (player == gameState.activPlayer.id) onEvent(
                             PolyominoEvent.PolyominoSelected(
                                 polyomino,
-                                Pair(x, y)
+                                y*boardWidth+x
                             )
                         )
                     }
                     .border(
-                        1.dp, if (polyomino.selectedCell == Pair(x, y) &&
+                        1.dp, if (polyomino.selectedCell2 == y*boardWidth+x &&
                             polyomino.name == gameState.selectedPolyomino.name &&
                             player == gameState.activPlayer_id
                         ) borderColor else Color.Transparent
