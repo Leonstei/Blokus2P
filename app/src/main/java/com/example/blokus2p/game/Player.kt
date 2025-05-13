@@ -3,6 +3,7 @@ package com.example.blokus2p.game
 import androidx.compose.ui.graphics.Color
 import com.example.blokus2p.ai.AiInterface
 import com.example.blokus2p.model.Move
+import com.example.blokus2p.model.Move2
 
 data class Player(
     val id: Int = 0,
@@ -47,19 +48,19 @@ data class Player(
             "Fünf W",
             5,
             false,
-            cells2=listOf(0, 14, 15, 29, 12)
+            cells2=listOf(0, 14, 15, 29, 30)
         ),
         Polyomino(
             "Fünf Z",
             5,
             false,
-            cells2=listOf(0, 14, 15, 16, 12)
+            cells2=listOf(0, 14, 15, 16, 30)
         ),
         Polyomino(
             "Fünf LangeL",
             5,
             false,
-            cells2=listOf(0, 14, 28, 29, 12)
+            cells2=listOf(0, 14, 28, 29, 30)
         ),
         Polyomino(
             "Fünf C",
@@ -241,7 +242,7 @@ data class Player(
     val placedPolyomino: Polyomino = Polyomino(),
     val polyominoIsPlaced: Boolean = false,
     val availableEdges: Set<Int> = setOf(),
-    val availableMoves: Set<Move> = setOf(),
+    val availableMoves: Set<Move2> = setOf(),
     val isAi: Boolean = false,
     val ai: AiInterface? = null,
 )

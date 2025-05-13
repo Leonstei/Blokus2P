@@ -2,6 +2,7 @@ package com.example.blokus2p.game
 
 import android.util.Log
 import com.example.blokus2p.model.Move
+import com.example.blokus2p.model.Move2
 import kotlin.time.measureTime
 
 class GameEngine {
@@ -124,34 +125,32 @@ class GameEngine {
         return notAvailableEdges
     }
 
-    fun calculateAllMovesOfAPlayer(player: Player,board: GameBoard,rules: GameRules):Set<Move>{
-        val validMoves = mutableListOf<Move>()
-
-            for (polyomino in player.polyominos) {
+    fun calculateAllMovesOfAPlayer(player: Player, board: BlokusBoard2, rules: GameRules):Set<Move2>{
+        val validMoves = mutableListOf<Move2>()
+            for (polyomino in player.newPolyominos) {
                 // Transformationen: Rotationen & Spiegelungen
                 val transformedShapes = polyomino.getAllTransformations()
-
                 for (shape in transformedShapes) {
                     for (edge in player.availableEdges) {
                         // Probiere alle Verschiebungen des Polyominos von der Edge aus
                         for (cell in shape) {
                             val newShape = normalizeShapeForCell(cell, shape)
-                            val edgeX = edge % board.boardSize
-                            val edgeY: Int = edge / board.boardSize
-
+                            val boardPositions = newShape.map { cell ->
+                                cell + edge
+                            }
                             // Ist der Zug erlaubt?
                             if (rules.isValidPlacement(
                                     player,
-                                    newShape,
+                                    boardPositions,
                                     board,
-                                    Pair(edgeX, edgeY)
+                                    edge
                                 )
                             ) {
                                 validMoves.add(
-                                    Move(
+                                    Move2(
                                         polyomino = polyomino,
-                                        orientation = newShape,
-                                        position = Pair(edgeX, edgeY)
+                                        orientation = boardPositions,
+                                        position = edge
                                     )
                                 )
                             }
@@ -164,9 +163,9 @@ class GameEngine {
         return validMoves.toSet()
     }
 
-    private fun normalizeShapeForCell(cell: Int, shape: List<Int>):List<Pair<Int,Int>>  {
-        return shape.map {
-            Pair(it,it)
+    private fun normalizeShapeForCell(cell: Int, shape: List<Int>): List<Int> {
+        return shape.map { index ->
+            index - cell
         }
     }
 
@@ -183,7 +182,7 @@ class GameEngine {
         Log.d("AppViewModel", "not validMoves fun2 ${notAvailableMoves.size}")
         return notAvailableMoves
     }
-    fun calculateNotAvailableMoves(player: Player, board: GameBoard):List<Move>{
+    fun calculateNotAvailableMoves(player: Player, board: GameBoard):List<Move2>{
 
         val lastPlacedPolyominosFromPlayer =
             board.placedPolyominos.filter { it.playerId == player.id }
@@ -212,19 +211,23 @@ class GameEngine {
         }
 
         val notValidMoves  = player.availableMoves.filter { move ->
-            notAvailableEdges.contains(move.position) ||
-                    move.orientation.any { cell ->
-                        cell.copy(
-                            first = cell.first + move.position.first,
-                            second = cell.second + move.position.second
-                        ) in notAvailableEdges
-                    } || move.polyomino.name == lastPlacedPolyominoFromPlayer.polyomino.name
+            notAvailableEdges.contains(indexToPair(move.position,14))
+                    //||
+//                    move.orientation.any { cell ->
+//                        cell.copy(
+//                            first = cell.first + move.position.first,
+//                            second = cell.second + move.position.second
+//                        ) in notAvailableEdges
+//                    }
+                    || move.polyomino.name == lastPlacedPolyominoFromPlayer.polyomino.name
 
         }
 
         //Log.d("AppViewModel", "not validMoves fun1 ${notValidMoves.size}")
         return notValidMoves
     }
+    fun pairToIndex(pair: Pair<Int,Int>,boardSize: Int): Int = pair.second * boardSize + pair.first
+    fun indexToPair(index: Int, width: Int): Pair<Int, Int> = Pair(index % width, index / width)
 
 
     fun calculateNewMoves(player: Player, board: GameBoard, rules: GameRules): List<Move> {
@@ -248,11 +251,11 @@ class GameEngine {
                         val edgeY: Int = edge / board.boardSize
 
                         // Ist der Zug erlaubt?
-                        if (rules.isValidPlacement(player, newShape, board, Pair(edgeX, edgeY))) {
+                        if (rules.isValidPlacement(player, listOf(Pair(edgeX,edgeY)), board, Pair(edgeX, edgeY))) {
                             validMoves.add(
                                 Move(
                                     polyomino = polyomino,
-                                    orientation = newShape,
+                                    orientation = listOf(Pair(edgeX,edgeY)),
                                     position = Pair(edgeX, edgeY)
                                 )
                             )

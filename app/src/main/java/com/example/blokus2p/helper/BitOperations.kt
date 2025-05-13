@@ -1,5 +1,7 @@
 package com.example.blokus2p.helper
 
+import kotlin.time.measureTime
+
 /**
  * Setzt das Bit im Bitboard auf 1 für den gegebenen linearen Index.
  */
