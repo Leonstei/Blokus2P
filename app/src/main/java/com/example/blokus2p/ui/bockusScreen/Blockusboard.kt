@@ -34,6 +34,7 @@ import com.example.blokus2p.ui.components.SettingsDialog
 import com.example.blokus2p.viewModel.AppViewModel
 import com.example.blokus2p.game.GameState
 import com.example.blokus2p.game.Player
+import com.example.blokus2p.helper.isBitSet
 
 @Composable
 fun BlockusScreen(viewModel: AppViewModel = viewModel()) {
@@ -155,10 +156,11 @@ private fun TransformableBoard(
                                     )
                                 )
                                 .background(
-                                    when (gameState.board.boardGrid[index]) {
-                                        0 -> Color.LightGray
-                                        1 -> gameState.playerOneColor
-                                        else -> gameState.playerTwoColor
+                                    when (isBitSet(gameState.board.boardGrid,index)) {
+                                        false -> Color.LightGray
+                                        else ->
+                                            if(isBitSet(gameState.activPlayer.bitBoard,index)) gameState.playerOneColor
+                                            else gameState.playerTwoColor
                                     }
                                 )
 
@@ -246,12 +248,13 @@ fun BlockusBoard(
                                     )
                                 )
                                 .background(
-                                    when (gameState.board.boardGrid[index]) {
-                                        0 -> Color.LightGray
-                                        1 -> gameState.playerOneColor
-                                        else -> gameState.playerTwoColor
-                                    }
-                                )
+                                when (isBitSet(gameState.board.boardGrid,index)) {
+                                    false -> Color.LightGray
+                                    else ->
+                                        if(isBitSet(gameState.activPlayer.bitBoard,index)) gameState.playerOneColor
+                                        else gameState.playerTwoColor
+                                }
+                            )
 //                                .pointerInput(isZooming) {
 //                                    // Diese pointerInput blockiert Klicks während des Zoomens
 //                                    detectTapGestures {
@@ -261,7 +264,7 @@ fun BlockusBoard(
 //                                    }
 //                                }
                                 .clickable {
-                                    if (gameState.board.boardGrid[index] == 0) {
+                                    if ( !isBitSet(gameState.board.boardGrid,index)) {
                                         onEvent(GameEvent.PlacePolyomino(col, row))
                                     }
                                 }

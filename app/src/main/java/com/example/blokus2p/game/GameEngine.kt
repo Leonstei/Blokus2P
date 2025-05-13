@@ -1,6 +1,8 @@
 package com.example.blokus2p.game
 
 import android.util.Log
+import com.example.blokus2p.helper.isBitSet
+import com.example.blokus2p.helper.setBit
 import com.example.blokus2p.model.Move
 import com.example.blokus2p.model.Move2
 import kotlin.time.measureTime
@@ -9,28 +11,29 @@ class GameEngine {
     fun place(
         player: Player,
         polyomino: Polyomino,
-        col: Int,
-        row: Int,
-        board: GameBoard,
+        position:Int,
+        board: BlokusBoard2,
         rules: GameRules
-    ): GameBoard? {
-        if (!rules.isValidPlacement(player, polyomino.cells, board, Pair(col, row))) {
+    ): BlokusBoard2? {
+        if (!rules.isValidPlacement(player, polyomino.cells2, board, position)) {
             return null
         }
 
-        val boardSize = board.boardSize
         val newGrid = board.boardGrid.copyOf()
         val newBitBoard = player.bitBoard.copyOf()
 
-        val placedCells = polyomino.cells.map { cell ->
-            Pair(cell.first + col, cell.second + row)
+        val placedCells = polyomino.cells2.map { index ->
+            index + position
+        }
+        placedCells.forEach {
+            setBit(newGrid, it)
         }
 
-        val placedCellsIndexed = placedCells.map { (x, y) ->
-            y * boardSize + x
-        }
+//        val placedCellsIndexed = placedCells.map { (x, y) ->
+//            y * boardSize + x
+//        }
         val timeTaken = measureTime {
-            placedCellsIndexed.forEach {
+            placedCells.forEach {
                 val wordIndex = it / 64
                 val bitIndex = it % 64
                 newBitBoard[wordIndex] = newBitBoard[wordIndex] or (1L shl bitIndex)
@@ -38,15 +41,15 @@ class GameEngine {
         }
         Log.d("AppViewModel", "Time taken change LongArray: $timeTaken ")
 
-        val timemesure = measureTime {
-            placedCells.forEach { (x, y) ->
-                newGrid[y * board.boardSize + x] = player.id
-            }
-        }
-        Log.d("AppViewModel", "Time taken change intArray: $timemesure ")
+//        val timemesure = measureTime {
+//            placedCells.forEach { (x, y) ->
+//                newGrid[y * board.boardSize + x] = player.id
+//            }
+//        }
+//        Log.d("AppViewModel", "Time taken change intArray: $timemesure ")
 
 
-        val placedPoly = PlacedPolyomino(player.id, polyomino, placedCells, Pair(col, row))
+        val placedPoly = PlacedPolyomino2(player.id, polyomino, placedCells, position)
 
         return board.copyWith(
             boardGrid = newGrid,
@@ -54,23 +57,20 @@ class GameEngine {
         )
     }
 
-    fun placeAiMove(player: Player, polyomino: Polyomino, col: Int, row: Int, board: GameBoard,rules: GameRules, orientation: List<Pair<Int,Int>>) : GameBoard?{
-        val newBoard =place(player,polyomino.copy(cells = orientation),col,row,board,rules)
+    fun placeAiMove(player: Player, polyomino: Polyomino, position:Int, board: BlokusBoard2,rules: GameRules, orientation: List<Int>) : BlokusBoard2?{
+        val newBoard =place(player,polyomino.copy(cells2 = orientation),position,board,rules)
         return newBoard
     }
 
-    fun undoplace(board: GameBoard):GameBoard?{
+    fun undoplace(board: BlokusBoard2):BlokusBoard2?{
         val lastPlacedPolyomino = board.placedPolyominos.lastOrNull()
         if (lastPlacedPolyomino != null) {
             val newGrid = board.boardGrid.copyOf()
-            lastPlacedPolyomino.cells.forEach{ ( x, y) ->
-                newGrid[y * board.boardSize + x] = 0
+
+            lastPlacedPolyomino.cells.forEach{ index ->
+                setBit(newGrid, index)
             }
 
-            val newBoard = board
-            for (cell in lastPlacedPolyomino.cells) {
-                newBoard.boardGrid[cell.first+ cell.second  * board.boardSize] = 0
-            }
             return board.copyWith(
                 boardGrid = newGrid,
                 placedPolyominos = board.placedPolyominos - lastPlacedPolyomino
@@ -78,27 +78,26 @@ class GameEngine {
         }else return null
     }
 
-    fun calculateNewAvailableEdges(player: Player, board: GameBoard): Set<Int> {
+    fun calculateNewAvailableEdges(player: Player, board: BlokusBoard2): Set<Int> {
         val newAvailableEdges: MutableSet<Int> = mutableSetOf()
         val lastPlacedPolyominosFromPlayer = board.placedPolyominos.filter { it.playerId == player.id }
         val lastPlacedPolyominoFromPlayer = lastPlacedPolyominosFromPlayer.lastOrNull()
 
         if (lastPlacedPolyominoFromPlayer == null) return setOf(65,130)
 
-        lastPlacedPolyominoFromPlayer.cells.forEach { (x, y) ->
-            val position = y * board.boardSize + x
-            val leftTopEdge = position - 15
-            val rightTopEdge = position - 13
-            val leftBottomEdge = position + 13
-            val rightBottomEdge = position + 15
-            if (leftTopEdge in 0 until 196 && board.boardGrid[leftTopEdge] == 0
-                && position % 14 != 0) newAvailableEdges.add(leftTopEdge)
-            if (rightTopEdge in 0 until 196 && board.boardGrid[rightTopEdge] == 0
-                && (position-13) % 14 != 0) newAvailableEdges.add(rightTopEdge)
-            if (leftBottomEdge in 0 until 196 && board.boardGrid[leftBottomEdge] == 0
-                && position % 14 != 0 ) newAvailableEdges.add(leftBottomEdge)
-            if (rightBottomEdge in 0 until 196 && board.boardGrid[rightBottomEdge] == 0
-                && (position-13) % 14 != 0) newAvailableEdges.add(rightBottomEdge)
+        lastPlacedPolyominoFromPlayer.cells.forEach { index ->
+            val leftTopEdge = index - 15
+            val rightTopEdge = index - 13
+            val leftBottomEdge = index + 13
+            val rightBottomEdge = index + 15
+            if (leftTopEdge in 0 until 196 && isBitSet(board.boardGrid,leftTopEdge)
+                && index % 14 != 0) newAvailableEdges.add(leftTopEdge)
+            if (rightTopEdge in 0 until 196 && isBitSet(board.boardGrid,rightTopEdge)
+                && (index-13) % 14 != 0) newAvailableEdges.add(rightTopEdge)
+            if (leftBottomEdge in 0 until 196 && isBitSet(board.boardGrid,leftBottomEdge)
+                && index % 14 != 0 ) newAvailableEdges.add(leftBottomEdge)
+            if (rightBottomEdge in 0 until 196 && isBitSet(board.boardGrid,rightBottomEdge)
+                && (index-13) % 14 != 0) newAvailableEdges.add(rightBottomEdge)
         }
         val filteredEdges = newAvailableEdges.filter { edge ->
             val cellAbove = edge - 14
@@ -106,10 +105,10 @@ class GameEngine {
             val cellRight = edge + 1
             val cellBelow = edge + 14
 
-            val aboveOk = cellAbove !in 0 until 196 || board.boardGrid[cellAbove] != player.id
-            val leftOk = cellLeft !in 0 until 196 || board.boardGrid[cellLeft] != player.id
-            val rightOk = cellRight !in 0 until 196 || board.boardGrid[cellRight] != player.id
-            val belowOk = cellBelow !in 0 until 196 || board.boardGrid[cellBelow] != player.id
+            val aboveOk = cellAbove !in 0 until 196 || !isBitSet(player.bitBoard,cellAbove)
+            val leftOk = cellLeft !in 0 until 196 || !isBitSet(player.bitBoard,cellLeft)
+            val rightOk = cellRight !in 0 until 196 || !isBitSet(player.bitBoard,cellRight)
+            val belowOk = cellBelow !in 0 until 196 || !isBitSet(player.bitBoard,cellBelow)
 
             aboveOk && leftOk && rightOk && belowOk
         }
@@ -117,10 +116,10 @@ class GameEngine {
         return filteredEdges.toSet()
     }
 
-    fun notCheckForNotAvailableEdges(edges: Set<Int>, board: GameBoard):Set<Int>{
+    fun notCheckForNotAvailableEdges(edges: Set<Int>, board: BlokusBoard2):Set<Int>{
         val notAvailableEdges : MutableSet<Int> = mutableSetOf()
-        edges.forEach { x->
-            if (board.boardGrid[x] != 0) notAvailableEdges.add(x)
+        edges.forEach { index->
+            if (isBitSet(board.boardGrid, index)) notAvailableEdges.add(index)
         }
         return notAvailableEdges
     }
@@ -135,7 +134,7 @@ class GameEngine {
                         // Probiere alle Verschiebungen des Polyominos von der Edge aus
                         for (cell in shape) {
                             val newShape = normalizeShapeForCell(cell, shape)
-                            val boardPositions = newShape.map { cell ->
+                            val boardPositions = newShape.map {
                                 cell + edge
                             }
                             // Ist der Zug erlaubt?
@@ -182,7 +181,7 @@ class GameEngine {
         Log.d("AppViewModel", "not validMoves fun2 ${notAvailableMoves.size}")
         return notAvailableMoves
     }
-    fun calculateNotAvailableMoves(player: Player, board: GameBoard):List<Move2>{
+    fun calculateNotAvailableMoves(player: Player, board: BlokusBoard2):List<Move2>{
 
         val lastPlacedPolyominosFromPlayer =
             board.placedPolyominos.filter { it.playerId == player.id }
@@ -195,7 +194,7 @@ class GameEngine {
         val lastPlacedPolyominoFromOtherPlayer =
             lastPlacedPolyominosFromOtherPlayer.lastOrNull()
 
-        val notAvailableEdges: MutableList<Pair<Int, Int>> =
+        val notAvailableEdges: MutableList<Int> =
             mutableListOf(lastPlacedPolyominoFromPlayer.placePosition)
 
         if (lastPlacedPolyominoFromOtherPlayer != null) {
@@ -204,34 +203,25 @@ class GameEngine {
             }
         }
         lastPlacedPolyominoFromPlayer.cells.forEach {
-            notAvailableEdges.add(Pair(it.first+1,it.second))
-            notAvailableEdges.add(Pair(it.first-1,it.second))
-            notAvailableEdges.add(Pair(it.first,it.second+1))
-            notAvailableEdges.add(Pair(it.first,it.second-1))
+            notAvailableEdges.add(it+1)
+            notAvailableEdges.add(it-1)
+            notAvailableEdges.add(it+14)
+            notAvailableEdges.add(it-14)
         }
 
         val notValidMoves  = player.availableMoves.filter { move ->
-            notAvailableEdges.contains(indexToPair(move.position,14))
-                    //||
-//                    move.orientation.any { cell ->
-//                        cell.copy(
-//                            first = cell.first + move.position.first,
-//                            second = cell.second + move.position.second
-//                        ) in notAvailableEdges
-//                    }
-                    || move.polyomino.name == lastPlacedPolyominoFromPlayer.polyomino.name
-
+            notAvailableEdges.contains(move.position) ||
+                    move.orientation.any { cell ->
+                        cell in notAvailableEdges
+                    } || move.polyomino.name == lastPlacedPolyominoFromPlayer.polyomino.name
         }
 
         //Log.d("AppViewModel", "not validMoves fun1 ${notValidMoves.size}")
         return notValidMoves
     }
-    fun pairToIndex(pair: Pair<Int,Int>,boardSize: Int): Int = pair.second * boardSize + pair.first
-    fun indexToPair(index: Int, width: Int): Pair<Int, Int> = Pair(index % width, index / width)
 
-
-    fun calculateNewMoves(player: Player, board: GameBoard, rules: GameRules): List<Move> {
-        val validMoves = mutableListOf<Move>()
+    fun calculateNewMoves(player: Player, board: BlokusBoard2, rules: GameRules): List<Move2> {
+        val validMoves = mutableListOf<Move2>()
         val newEdges = calculateNewAvailableEdges(player, board)
 
         val lastPlacedPolyominosFromPlayer = board.placedPolyominos.filter { it.playerId == player.id }
@@ -247,16 +237,17 @@ class GameEngine {
                     // Probiere alle Verschiebungen des Polyominos von der Edge aus
                     for (cell in shape) {
                         val newShape = normalizeShapeForCell(cell, shape)
-                        val edgeX = edge % board.boardSize
-                        val edgeY: Int = edge / board.boardSize
+                        val boardPositions = newShape.map {
+                            cell + edge
+                        }
 
                         // Ist der Zug erlaubt?
-                        if (rules.isValidPlacement(player, listOf(Pair(edgeX,edgeY)), board, Pair(edgeX, edgeY))) {
+                        if (rules.isValidPlacement(player, boardPositions, board, edge)) {
                             validMoves.add(
-                                Move(
+                                Move2(
                                     polyomino = polyomino,
-                                    orientation = listOf(Pair(edgeX,edgeY)),
-                                    position = Pair(edgeX, edgeY)
+                                    orientation = boardPositions,
+                                    position = edge
                                 )
                             )
                         }

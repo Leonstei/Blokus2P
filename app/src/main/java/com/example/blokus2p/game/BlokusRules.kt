@@ -77,9 +77,9 @@ class BlokusRules: GameRules {
     ): Boolean {
 
         val boardIndexesOfPolyomino: MutableList<Int> = mutableListOf()
-        polyominoCells.forEach { index ->
-            boardIndexesOfPolyomino.add(index + selectedPosition)
-        }
+//        polyominoCells.forEach { index ->
+//            boardIndexesOfPolyomino.add(index + selectedPosition)
+//        }
 
         val timeTaken3 = measureTime {
             val boardIndexLeft: MutableList<Int> = mutableListOf()

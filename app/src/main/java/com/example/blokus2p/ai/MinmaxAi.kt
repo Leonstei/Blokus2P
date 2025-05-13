@@ -13,7 +13,7 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 
 class MinmaxAi : AiInterface {
-    suspend override fun getNextMove(gameState: GameState): Move? {
+    suspend override fun getNextMove(gameState: GameState): Move2? {
         var depth = 3
         if(gameState.activPlayer.availableMoves.size > 100){
             depth--

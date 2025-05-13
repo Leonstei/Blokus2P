@@ -9,6 +9,6 @@ data class GameState(
     val activPlayer: Player = Player(),
     val playerOneColor: Color = Color.Black,
     val playerTwoColor: Color = Color.Black,
-    var board: GameBoard = BlokusBoard(),
+    var board: BlokusBoard2 = BlokusBoard2(),
     val selectedPolyomino: Polyomino = Polyomino()
 )

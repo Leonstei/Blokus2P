@@ -5,10 +5,11 @@ import com.example.blokus2p.game.BlokusRules
 import com.example.blokus2p.game.GameEngine
 import com.example.blokus2p.game.GameState
 import com.example.blokus2p.model.Move
+import com.example.blokus2p.model.Move2
 import kotlin.random.Random
 
 class RandomAi:AiInterface {
-    override suspend fun getNextMove(gameState: GameState): Move? {
+    override suspend fun getNextMove(gameState: GameState): Move2? {
         return null
 //        //val moves = GameEngine().calculateAllMovesOfAPlayer(gameState.activPlayer,gameState.board,BlokusRules())
 //        val moves = gameState.activPlayer.availableMoves

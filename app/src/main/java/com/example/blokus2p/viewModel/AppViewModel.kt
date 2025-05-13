@@ -105,7 +105,7 @@ class AppViewModel : ViewModel() {
                 activPlayer = Player(1, "Player 1",true, false,Color.Blue, 0, availableEdges =  setOf(143)),
                 playerOneColor = Color.Blue,
                 playerTwoColor = Color.Magenta,
-                board = BlokusBoard()
+                board = BlokusBoard2()
             )
         }
         val activPlayer = _gameSate.value.players.first { player -> player.id == _gameSate.value.activPlayer_id }
@@ -131,8 +131,8 @@ class AppViewModel : ViewModel() {
         val newBoard = GameEngine().place(
             _gameSate.value.activPlayer,
             _gameSate.value.selectedPolyomino,
-            col,
-            row,_gameSate.value.board, rules
+            col + row *_gameSate.value.board.boardSize,
+            _gameSate.value.board, rules
         )
         if (newBoard != null){
             updateBoard(newBoard)
@@ -154,14 +154,13 @@ class AppViewModel : ViewModel() {
                 aiMove?.let {
                     selectPolyomino(
                         aiMove.polyomino,
-                        Polyomino().pairToIndex(aiMove.position)
-                        //Pair(aiMove.position.first, aiMove.position.second)
+                        aiMove.position
                     )
                     val newBoard = GameEngine().placeAiMove(
                         _gameSate.value.activPlayer,
                         aiMove.polyomino,
-                        aiMove.position.first,
-                        aiMove.position.second, _gameSate.value.board, rules, aiMove.orientation
+                        aiMove.position,
+                        _gameSate.value.board, rules, aiMove.orientation
                     )
                     updateBoard(newBoard)
                     updatePolyominosOfActivPlayer(_gameSate.value.activPlayer_id)
@@ -430,7 +429,7 @@ class AppViewModel : ViewModel() {
 
     }
 
-    private fun updateBoard(newBoard: GameBoard?) {
+    private fun updateBoard(newBoard: BlokusBoard2?) {
         if (newBoard != null) {
             val updatedPlayer = _gameSate.value.activPlayer.copy(
                 points =  _gameSate.value.activPlayer.points + _gameSate.value.selectedPolyomino.points,
@@ -451,7 +450,7 @@ class AppViewModel : ViewModel() {
             Log.d("AppViewModel", "Polyomino konnte nicht platziert werden")
         }
     }
-    private fun updateBoardUndo(newBoard: GameBoard?){
+    private fun updateBoardUndo(newBoard: BlokusBoard2?){
         // Hier wird der letzte Zug rückgängig gemacht
         // es könnte sein das availableEdges und availableMoves nicht mehr stimmen
         if (newBoard != null) {
