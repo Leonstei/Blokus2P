@@ -39,6 +39,25 @@ fun orBitBoard(dest: LongArray, source: LongArray) {
 }
 
 /**
+ * Führt eine AND-Operation zwischen zwei BitBoards durch (in-place).
+ */
+fun andBitBoard(dest: LongArray, source: LongArray) {
+    for (i in dest.indices) {
+        dest[i] = dest[i] and source[i]
+    }
+}
+
+/**
+ * Invertiert ein BitBoard (in-place).
+ * Alle gesetzten Bits werden gelöscht und umgekehrt.
+ */
+fun invBitBoard(dest: LongArray) {
+    for (i in dest.indices) {
+        dest[i] = dest[i].inv()
+    }
+}
+
+/**
  * Prüft, ob zwei BitBoards überlappende Bits haben.
  */
 fun hasOverlap(a: LongArray, b: LongArray): Boolean {

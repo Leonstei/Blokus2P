@@ -12,7 +12,7 @@ data class Player(
     val isMaximizing: Boolean = false,
     val color: Color = Color.Black,
     val points: Int = 0,
-    val bitBoard: LongArray = LongArray(16),
+    val bitBoard: LongArray = LongArray(4),
     val newPolyominos: List<Polyomino> = listOf(
         Polyomino(
             "Fünf",

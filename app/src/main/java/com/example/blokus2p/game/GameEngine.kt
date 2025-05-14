@@ -1,6 +1,7 @@
 package com.example.blokus2p.game
 
 import android.util.Log
+import com.example.blokus2p.helper.clearBit
 import com.example.blokus2p.helper.isBitSet
 import com.example.blokus2p.helper.setBit
 import com.example.blokus2p.model.Move
@@ -15,7 +16,10 @@ class GameEngine {
         board: BlokusBoard2,
         rules: GameRules
     ): BlokusBoard2? {
-        if (!rules.isValidPlacement(player, polyomino.cells2, board, position)) {
+        val positionOnBoard = polyomino.cells2.map { index ->
+            index + position
+        }
+        if (!rules.isValidPlacement(player, positionOnBoard, board, position)) {
             return null
         }
 
@@ -68,7 +72,7 @@ class GameEngine {
             val newGrid = board.boardGrid.copyOf()
 
             lastPlacedPolyomino.cells.forEach{ index ->
-                setBit(newGrid, index)
+                clearBit(newGrid, index)
             }
 
             return board.copyWith(
@@ -90,13 +94,13 @@ class GameEngine {
             val rightTopEdge = index - 13
             val leftBottomEdge = index + 13
             val rightBottomEdge = index + 15
-            if (leftTopEdge in 0 until 196 && isBitSet(board.boardGrid,leftTopEdge)
+            if (leftTopEdge in 0 until 196 && !isBitSet(board.boardGrid,leftTopEdge)
                 && index % 14 != 0) newAvailableEdges.add(leftTopEdge)
-            if (rightTopEdge in 0 until 196 && isBitSet(board.boardGrid,rightTopEdge)
+            if (rightTopEdge in 0 until 196 && !isBitSet(board.boardGrid,rightTopEdge)
                 && (index-13) % 14 != 0) newAvailableEdges.add(rightTopEdge)
-            if (leftBottomEdge in 0 until 196 && isBitSet(board.boardGrid,leftBottomEdge)
+            if (leftBottomEdge in 0 until 196 && !isBitSet(board.boardGrid,leftBottomEdge)
                 && index % 14 != 0 ) newAvailableEdges.add(leftBottomEdge)
-            if (rightBottomEdge in 0 until 196 && isBitSet(board.boardGrid,rightBottomEdge)
+            if (rightBottomEdge in 0 until 196 && !isBitSet(board.boardGrid,rightBottomEdge)
                 && (index-13) % 14 != 0) newAvailableEdges.add(rightBottomEdge)
         }
         val filteredEdges = newAvailableEdges.filter { edge ->
@@ -135,7 +139,7 @@ class GameEngine {
                         for (cell in shape) {
                             val newShape = normalizeShapeForCell(cell, shape)
                             val boardPositions = newShape.map {
-                                cell + edge
+                                it + edge
                             }
                             // Ist der Zug erlaubt?
                             if (rules.isValidPlacement(
@@ -229,7 +233,7 @@ class GameEngine {
 
         if (lastPlacedPolyominoFromPlayer == null) return emptyList()
 
-        for (polyomino in player.polyominos) {
+        for (polyomino in player.newPolyominos) {
             // Transformationen: Rotationen & Spiegelungen
             val transformedShapes = polyomino.getAllTransformations()
             for (shape in transformedShapes) {
@@ -238,7 +242,7 @@ class GameEngine {
                     for (cell in shape) {
                         val newShape = normalizeShapeForCell(cell, shape)
                         val boardPositions = newShape.map {
-                            cell + edge
+                            it + edge
                         }
 
                         // Ist der Zug erlaubt?
@@ -262,7 +266,7 @@ class GameEngine {
     fun checkForGameEnd(players :List<Player>): Boolean {
         var countPlayersFinished= 0
         for (player in players) {
-            if (player.polyominos.isEmpty() || player.availableEdges.isEmpty() || player.availableMoves.isEmpty()) {
+            if (player.newPolyominos.isEmpty() || player.availableEdges.isEmpty() || player.availableMoves.isEmpty()) {
                 countPlayersFinished ++
             }
         }

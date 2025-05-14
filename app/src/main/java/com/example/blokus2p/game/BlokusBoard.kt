@@ -15,7 +15,7 @@ data class BlokusBoard(
  }
 data class BlokusBoard2(
     val boardSize : Int = 14,
-    val boardGrid : LongArray = LongArray(7),
+    val boardGrid : LongArray = LongArray(4),
     val placedPolyominos: List<PlacedPolyomino2> = listOf(),
 ) {
     //    override fun copyWith(
@@ -31,5 +31,25 @@ data class BlokusBoard2(
             boardGrid = boardGrid,
             placedPolyominos = placedPolyominos
         )
+
+//    override fun equals(other: Any?): Boolean {
+//        if (this === other) return true
+//        if (javaClass != other?.javaClass) return false
+//
+//        other as BlokusBoard2
+//
+//        if (boardSize != other.boardSize) return false
+//        if (!boardGrid.contentEquals(other.boardGrid)) return false
+//        if (placedPolyominos != other.placedPolyominos) return false
+//
+//        return true
+//    }
+//
+//    override fun hashCode(): Int {
+//        var result = boardSize
+//        result = 31 * result + boardGrid.contentHashCode()
+//        result = 31 * result + placedPolyominos.hashCode()
+//        return result
+//    }
 
 }

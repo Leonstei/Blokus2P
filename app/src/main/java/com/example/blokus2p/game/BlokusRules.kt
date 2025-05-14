@@ -81,7 +81,7 @@ class BlokusRules: GameRules {
 //            boardIndexesOfPolyomino.add(index + selectedPosition)
 //        }
 
-        val timeTaken3 = measureTime {
+//        val timeTaken3 = measureTime {
             val boardIndexLeft: MutableList<Int> = mutableListOf()
             val boardIndexRight: MutableList<Int> = mutableListOf()
             polyominoCells.forEach { index ->
@@ -91,8 +91,8 @@ class BlokusRules: GameRules {
             if(boardIndexLeft.isNotEmpty() && boardIndexRight.isNotEmpty()) {
                 return false
             }
-        }
-        Log.d("AppViewModel", "Time taken check out of edge: $timeTaken3 ")
+//        }
+//        Log.d("AppViewModel", "Time taken check out of edge: $timeTaken3 ")
 
         var bordIndexIsInEdges = false
         for (index in polyominoCells) {
@@ -107,23 +107,23 @@ class BlokusRules: GameRules {
         if (!bordIndexIsInEdges)
             return false
 
-        val timeTaken = measureTime {
-            val indexesAroundPolyomino: MutableSet<Int> = mutableSetOf()
-            polyominoCells.forEach {
-                if (it >= 14) indexesAroundPolyomino.add(it - 14)
-                if (it.mod(14) != 0) indexesAroundPolyomino.add(it - 1)
-                if ((it - 13).mod(14) != 0) indexesAroundPolyomino.add(it + 1)
-                if (it <= 195) indexesAroundPolyomino.add(it + 14)
-            }
-            indexesAroundPolyomino.forEach {
-                if (it < 0 || it >= 196) {
-                    return@forEach
-                } else if (isBitSet(player.bitBoard, it)) {
-                    return false
-                }
-            }
-        }
-        Log.d("AppViewModel", "Time taken checkindexesAroundPolyomino: $timeTaken ")
+//        val timeTaken = measureTime {
+//            val indexesAroundPolyomino: MutableSet<Int> = mutableSetOf()
+//            polyominoCells.forEach {
+//                if (it >= 14) indexesAroundPolyomino.add(it - 14)
+//                if (it.mod(14) != 0) indexesAroundPolyomino.add(it - 1)
+//                if ((it - 13).mod(14) != 0) indexesAroundPolyomino.add(it + 1)
+//                if (it <= 195) indexesAroundPolyomino.add(it + 14)
+//            }
+//            indexesAroundPolyomino.forEach {
+//                if (it < 0 || it >= 196) {
+//                    return@forEach
+//                } else if (isBitSet(player.bitBoard, it)) {
+//                    return false
+//                }
+//            }
+//        }
+//        Log.d("AppViewModel", "Time taken checkindexesAroundPolyomino: $timeTaken ")
 
         val indexesAroundPolyomino: MutableSet<Int> = mutableSetOf()
         polyominoCells.forEach {
@@ -140,15 +140,15 @@ class BlokusRules: GameRules {
             }
         }
 
-        val timeTaken2 = measureTime {
-            polyominoCells.forEach {
-                if (it >= 14  && isBitSet(player.bitBoard, it - 14)) return false
-                if (it.mod(14) != 0 && it - 1 >= 0 && isBitSet(player.bitBoard, it - 1)) return false
-                if ((it - 13).mod(14) != 0 && it + 1 < 196 && isBitSet(player.bitBoard, it + 1)) return false
-                if (it < 182 && isBitSet(player.bitBoard, it + 14)) return false
-            }
-        }
-        Log.d("AppViewModel", "Time taken checkindexesAroundPolyomino2: $timeTaken2 ")
+//        val timeTaken2 = measureTime {
+//            polyominoCells.forEach {
+//                if (it >= 14  && isBitSet(player.bitBoard, it - 14)) return false
+//                if (it.mod(14) != 0 && it - 1 >= 0 && isBitSet(player.bitBoard, it - 1)) return false
+//                if ((it - 13).mod(14) != 0 && it + 1 < 196 && isBitSet(player.bitBoard, it + 1)) return false
+//                if (it < 182 && isBitSet(player.bitBoard, it + 14)) return false
+//            }
+//        }
+//        Log.d("AppViewModel", "Time taken checkindexesAroundPolyomino2: $timeTaken2 ")
 
 
         return true
