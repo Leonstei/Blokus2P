@@ -1,5 +1,6 @@
 package com.example.blokus2p.ui.bockusScreen
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -201,6 +202,8 @@ fun BlockusBoard(
         offset += offsetChange
         isZooming = true  // Setzt isZooming auf true, wenn eine Zoom-Geste erkannt wird
     }
+    val playerone = gameState.players.filter { player: Player ->  player.id == 1}.first()
+    val playertwo = gameState.players.filter { player: Player ->  player.id == 2}.first()
 
     Box(
         Modifier
@@ -210,23 +213,6 @@ fun BlockusBoard(
                 translationX = offset.x,
                 translationY = offset.y
             )
-//            .pointerInput(Unit) {
-//                // Nutze pointerInput für das Erkennen von Multi-Touch und Klicks
-//                detectTransformGestures(
-//                    onGesture = { _, pan, zoom, _ ->
-//                        if (zoom != 1f) {
-//                            // Wenn eine Zoom-Geste stattfindet, aktualisieren wir den Zoom-Faktor
-//                            scale = (scale * zoom).coerceIn(1f, 3f)
-//                            offset += pan
-//                            isZooming = true
-//                        } else {
-//                            // Kein Zoom -> könnte ein Klick sein, Zoom wird beendet
-//                            isZooming = false
-//                        }
-//                    }
-//                )
-//            }
-            //.transformable(state = state)
             .background(Color.Blue)
     ) {
         Column(
@@ -251,18 +237,13 @@ fun BlockusBoard(
                                 when (isBitSet(gameState.board.boardGrid,index)) {
                                     false -> Color.LightGray
                                     else ->
-                                        if(isBitSet(gameState.activPlayer.bitBoard,index)) gameState.playerOneColor
-                                        else gameState.playerTwoColor
+                                        if(isBitSet(playerone.bitBoard,index)) gameState.playerOneColor
+                                        else if(isBitSet(playertwo.bitBoard,index)){gameState.playerTwoColor} else {
+                                            Color.Transparent
+                                        }
+
                                 }
                             )
-//                                .pointerInput(isZooming) {
-//                                    // Diese pointerInput blockiert Klicks während des Zoomens
-//                                    detectTapGestures {
-//                                        if (!isZooming && gameState.boardGrid[index] == 0) {
-//                                            onEvent(GameEvent.PlacePolyomino(col, row))
-//                                        }
-//                                    }
-//                                }
                                 .clickable {
                                     if ( !isBitSet(gameState.board.boardGrid,index)) {
                                         onEvent(GameEvent.PlacePolyomino(col, row))

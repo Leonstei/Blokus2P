@@ -5,3 +5,8 @@ data class ScoredMove(
     val score: Int,
     val depth: Int = 0
 )
+data class ScoredMove2(
+    val move: Move2?,
+    val score: Int,
+    val depth: Int = 0
+)
