@@ -98,6 +98,7 @@ class GameEngine {
 
     fun calculateAllMovesOfAPlayer(player: Player,board: GameBoard,rules: GameRules):Set<Move>{
         val validMoves = mutableListOf<Move>()
+        val timeTaken = measureTime {
 
             for (polyomino in player.polyominos) {
                 // Transformationen: Rotationen & Spiegelungen
@@ -131,7 +132,9 @@ class GameEngine {
                     }
                 }
             }
+        }
             Log.d("AppViewModel", "validMoves ${validMoves.size}")
+            Log.d("AppViewModel", "Time taken to calculate all moves: $timeTaken ")
 
         return validMoves.toSet()
     }
@@ -156,45 +159,47 @@ class GameEngine {
         return notAvailableMoves
     }
     fun calculateNotAvailableMoves(player: Player, board: GameBoard):List<Move>{
+        var notValidMoves = listOf<Move>()
 
-        val lastPlacedPolyominosFromPlayer =
-            board.placedPolyominos.filter { it.playerId == player.id }
-        val lastPlacedPolyominoFromPlayer = lastPlacedPolyominosFromPlayer.lastOrNull()
-        if (lastPlacedPolyominoFromPlayer == null) return emptyList()
+        val timeTaken = measureTime {
+            val lastPlacedPolyominosFromPlayer =
+                board.placedPolyominos.filter { it.playerId == player.id }
+            val lastPlacedPolyominoFromPlayer = lastPlacedPolyominosFromPlayer.lastOrNull()
+            if (lastPlacedPolyominoFromPlayer == null) return emptyList()
 
-        //funktioniert nicht bei mehr als 2 Spielern
-        val lastPlacedPolyominosFromOtherPlayer =
-            board.placedPolyominos.filter { it.playerId != player.id }
-        val lastPlacedPolyominoFromOtherPlayer =
-            lastPlacedPolyominosFromOtherPlayer.lastOrNull()
+            //funktioniert nicht bei mehr als 2 Spielern
+            val lastPlacedPolyominosFromOtherPlayer =
+                board.placedPolyominos.filter { it.playerId != player.id }
+            val lastPlacedPolyominoFromOtherPlayer =
+                lastPlacedPolyominosFromOtherPlayer.lastOrNull()
 
-        val notAvailableEdges: MutableList<Pair<Int, Int>> =
-            mutableListOf(lastPlacedPolyominoFromPlayer.placePosition)
+            val notAvailableEdges: MutableList<Pair<Int, Int>> =
+                mutableListOf(lastPlacedPolyominoFromPlayer.placePosition)
 
-        if (lastPlacedPolyominoFromOtherPlayer != null) {
-            lastPlacedPolyominoFromOtherPlayer.cells.forEach {
-                notAvailableEdges.add(it)
+            if (lastPlacedPolyominoFromOtherPlayer != null) {
+                lastPlacedPolyominoFromOtherPlayer.cells.forEach {
+                    notAvailableEdges.add(it)
+                }
+            }
+            lastPlacedPolyominoFromPlayer.cells.forEach {
+                notAvailableEdges.add(Pair(it.first + 1, it.second))
+                notAvailableEdges.add(Pair(it.first - 1, it.second))
+                notAvailableEdges.add(Pair(it.first, it.second + 1))
+                notAvailableEdges.add(Pair(it.first, it.second - 1))
+            }
+            notValidMoves = player.availableMoves.filter { move ->
+                notAvailableEdges.contains(move.position) ||
+                        move.orientation.any { cell ->
+                            cell.copy(
+                                first = cell.first + move.position.first,
+                                second = cell.second + move.position.second
+                            ) in notAvailableEdges
+                        } || move.polyomino.name == lastPlacedPolyominoFromPlayer.polyomino.name
+
             }
         }
-        lastPlacedPolyominoFromPlayer.cells.forEach {
-            notAvailableEdges.add(Pair(it.first+1,it.second))
-            notAvailableEdges.add(Pair(it.first-1,it.second))
-            notAvailableEdges.add(Pair(it.first,it.second+1))
-            notAvailableEdges.add(Pair(it.first,it.second-1))
-        }
-
-        val notValidMoves  = player.availableMoves.filter { move ->
-            notAvailableEdges.contains(move.position) ||
-                    move.orientation.any { cell ->
-                        cell.copy(
-                            first = cell.first + move.position.first,
-                            second = cell.second + move.position.second
-                        ) in notAvailableEdges
-                    } || move.polyomino.name == lastPlacedPolyominoFromPlayer.polyomino.name
-
-        }
-
         //Log.d("AppViewModel", "not validMoves fun1 ${notValidMoves.size}")
+        Log.d("AppViewModel", "Time taken calculate notAvailable moves: $timeTaken")
         return notValidMoves
     }
 //    fun calculateNotAvailableMovesOptimized(player: Player, board: GameBoard): Set<Move> {
@@ -267,6 +272,7 @@ class GameEngine {
 
     fun calculateNewMoves(player: Player, board: GameBoard, rules: GameRules): List<Move> {
         val validMoves = mutableListOf<Move>()
+        val timeTaken = measureTime {
         val newEdges = calculateNewAvailableEdges(player, board)
 
         val lastPlacedPolyominosFromPlayer = board.placedPolyominos.filter { it.playerId == player.id }
@@ -299,6 +305,8 @@ class GameEngine {
                 }
             }
         }
+        }
+        Log.d("AppViewModel", "Time taken calculate new moves: $timeTaken")
 //        Log.d("AppViewModel", "new validMoves ${validMoves.size}")
         return validMoves
     }
