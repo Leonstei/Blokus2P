@@ -16,24 +16,17 @@ class GameEngine {
         board: BlokusBoard2,
         rules: GameRules
     ): BlokusBoard2? {
-        val positionOnBoard = polyomino.cells2.map { index ->
-            index + position
-        }
-        if (!rules.isValidPlacement(player, positionOnBoard, board, position)) {
+        if (!rules.isValidPlacement(player, polyomino.cells2, board, position)) {
             return null
         }
-
         val newGrid = board.boardGrid.copyOf()
 
-//        val placedCells = polyomino.cells2.map { index ->
-//            index + position
-//        }
-        positionOnBoard.forEach {
+        polyomino.cells2.forEach {
             setBit(newGrid, it)
         }
 
 
-        val placedPoly = PlacedPolyomino2(player.id, polyomino, positionOnBoard, position)
+        val placedPoly = PlacedPolyomino2(player.id, polyomino, polyomino.cells2, position)
 
         return board.copyWith(
             boardGrid = newGrid,

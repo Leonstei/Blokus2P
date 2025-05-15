@@ -14,66 +14,66 @@ data class Player(
     val points: Int = 0,
     val bitBoard: LongArray = LongArray(4),
     val newPolyominos: List<Polyomino> = listOf(
-        Polyomino(
-            "Fünf",
-            5,
-            false,
-            cells2=listOf(0, 14, 28, 42, 56)
-        ),
-        Polyomino(
-            "Fünf ZL",
-            5,
-            false,
-            cells2=listOf(0, 14, 28, 29, 43)
-        ),
-        Polyomino(
-            "Fünf 16",
-            5,
-            false,
-            cells2=listOf(0, 14, 15, 29, 16)
-        ),
-        Polyomino(
-            "Fünf L",
-            5,
-            false,
-            cells2=listOf(0, 14, 28, 42, 43)
-        ),
-        Polyomino(
-            "Fünf T",
-            5,
-            false,
-            cells2=listOf(0, 14, 28, 42, 15)
-        ),
-        Polyomino(
-            "Fünf W",
-            5,
-            false,
-            cells2=listOf(0, 14, 15, 29, 30)
-        ),
-        Polyomino(
-            "Fünf Z",
-            5,
-            false,
-            cells2=listOf(0, 14, 15, 16, 30)
-        ),
-        Polyomino(
-            "Fünf LangeL",
-            5,
-            false,
-            cells2=listOf(0, 14, 28, 29, 30)
-        ),
-        Polyomino(
-            "Fünf C",
-            5,
-            false,
-            cells2=listOf(0, 14, 1, 2, 16)
-        ),
-        Polyomino(
-            "Fünf Block",
-            5,
-            false,
-            cells2=listOf(0, 14, 1, 15, 29)
-        ),
+//        Polyomino(
+//            "Fünf",
+//            5,
+//            false,
+//            cells2=listOf(0, 14, 28, 42, 56)
+//        ),
+//        Polyomino(
+//            "Fünf ZL",
+//            5,
+//            false,
+//            cells2=listOf(0, 14, 28, 29, 43)
+//        ),
+//        Polyomino(
+//            "Fünf 16",
+//            5,
+//            false,
+//            cells2=listOf(0, 14, 15, 29, 16)
+//        ),
+//        Polyomino(
+//            "Fünf L",
+//            5,
+//            false,
+//            cells2=listOf(0, 14, 28, 42, 43)
+//        ),
+//        Polyomino(
+//            "Fünf T",
+//            5,
+//            false,
+//            cells2=listOf(0, 14, 28, 42, 15)
+//        ),
+//        Polyomino(
+//            "Fünf W",
+//            5,
+//            false,
+//            cells2=listOf(0, 14, 15, 29, 30)
+//        ),
+//        Polyomino(
+//            "Fünf Z",
+//            5,
+//            false,
+//            cells2=listOf(0, 14, 15, 16, 30)
+//        ),
+//        Polyomino(
+//            "Fünf LangeL",
+//            5,
+//            false,
+//            cells2=listOf(0, 14, 28, 29, 30)
+//        ),
+//        Polyomino(
+//            "Fünf C",
+//            5,
+//            false,
+//            cells2=listOf(0, 14, 1, 2, 16)
+//        ),
+//        Polyomino(
+//            "Fünf Block",
+//            5,
+//            false,
+//            cells2=listOf(0, 14, 1, 15, 29)
+//        ),
         Polyomino(
             "Fünf Kreuz",
             5,

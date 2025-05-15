@@ -17,6 +17,7 @@ import com.example.blokus2p.game.Polyomino
 import com.example.blokus2p.events.PolyominoEvent
 import com.example.blokus2p.game.BlokusBoard2
 import com.example.blokus2p.helper.getUpdatedPlayerBitBoard
+import com.example.blokus2p.helper.mapCellsToBoardIndexes
 import com.example.blokus2p.model.PlayerType
 import com.example.blokus2p.model.PlayerType.Human
 import com.example.blokus2p.model.PlayerType.MinimaxAI
@@ -127,18 +128,20 @@ class AppViewModel : ViewModel() {
     private fun placePolyomino(col: Int, row: Int) {
         if (_gameSate.value.selectedPolyomino.name == "") return
         setSelectedCellFirst()
+        val gameState = _gameSate.value
+        val position = col + row * gameState.board.boardSize
         val newBoard = GameEngine().place(
-            _gameSate.value.activPlayer,
-            _gameSate.value.selectedPolyomino,
-            col + row *_gameSate.value.board.boardSize,
-            _gameSate.value.board, rules
+            gameState.activPlayer,
+            mapCellsToBoardIndexes(gameState.selectedPolyomino,position),
+            position,
+            gameState.board, rules
         )
         if (newBoard != null){
             updateBoard(newBoard)
-            updatePolyominosOfActivPlayer(_gameSate.value.activPlayer_id)
+            updatePolyominosOfActivPlayer(gameState.activPlayer_id)
             updateAvailableEdgesActivPlayer()
             updateAvailableMoves()
-            nextPlayer(_gameSate.value.activPlayer_id)
+            nextPlayer(gameState.activPlayer_id)
             checkForAiTurn()
         }
     }
@@ -155,11 +158,10 @@ class AppViewModel : ViewModel() {
                         aiMove.polyomino,
                         aiMove.position
                     )
-                    val newBoard = GameEngine().placeAiMove(
-                        _gameSate.value.activPlayer,
+                    val newBoard = GameEngine().placeAiMove(_gameSate.value.activPlayer,
                         aiMove.polyomino,
                         aiMove.position,
-                        _gameSate.value.board, rules, aiMove.orientation
+                        _gameSate.value.board, rules,aiMove.orientation
                     )
                     updateBoard(newBoard)
                     updatePolyominosOfActivPlayer(_gameSate.value.activPlayer_id)
@@ -352,10 +354,6 @@ class AppViewModel : ViewModel() {
                     cells2 = state.selectedPolyomino.currentVariant.map { cell->
                         cell - state.selectedPolyomino.selectedCell2
                     }
-//                    cells = state.selectedPolyomino.currentVariant.map { cell->
-//                        Pair(cell.first - _gameSate.value.selectedPolyomino.selectedCell.first
-//                            ,cell.second - _gameSate.value.selectedPolyomino.selectedCell.second)
-//                    }
                 )
             )
         }
@@ -413,9 +411,9 @@ class AppViewModel : ViewModel() {
         val newPlayers = _gameSate.value.players.map { player ->
             if (player.id == updatedPlayer.id) updatedPlayer else if (player.id == opponentPlayer.id) {
                 player.copy(
-//                    availableMoves = (player.availableMoves.minus(opponentNotAvailableMoves.toSet())).sortedByDescending { move ->
-//                        move.polyomino.points
-//                    }.toSet()
+                    availableMoves = (player.availableMoves.minus(opponentNotAvailableMoves.toSet())).sortedByDescending { move ->
+                        move.polyomino.points
+                    }.toSet()
                 )
             } else {
                 player
