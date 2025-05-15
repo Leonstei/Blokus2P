@@ -103,6 +103,7 @@ class GameEngine {
 
     fun calculateAllMovesOfAPlayer(player: Player, board: BlokusBoard2, rules: GameRules):Set<Move2>{
         val validMoves = mutableListOf<Move2>()
+        val timeTaken = measureTime {
             for (polyomino in player.newPolyominos) {
                 // Transformationen: Rotationen & Spiegelungen
                 val transformedShapes = polyomino.getAllTransformations()
@@ -134,7 +135,9 @@ class GameEngine {
                     }
                 }
             }
+        }
             Log.d("AppViewModel", "validMoves ${validMoves.size}")
+            Log.d("AppViewModel", "time taken $timeTaken")
 
         return validMoves.toSet()
     }
