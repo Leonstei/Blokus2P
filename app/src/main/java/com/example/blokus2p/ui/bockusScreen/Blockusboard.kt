@@ -45,7 +45,7 @@ fun BlockusScreen(viewModel: AppViewModel = viewModel()) {
     }
     var isZooming by remember { mutableStateOf(false) }
 
-    Column() {
+    Column {
         PlayerBar(gameState)
         Row {
             if (showDialog) {

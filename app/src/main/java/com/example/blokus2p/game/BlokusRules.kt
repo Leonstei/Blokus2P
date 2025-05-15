@@ -17,6 +17,7 @@ class BlokusRules: GameRules {
         //sind alle felder unbesetzt?
         //sind keine angrenzenden felder in der selben Farbe?
 
+        val timeMesure = measureTime {
         val selectedIndex = selectedPosition.second * board.boardSize + selectedPosition.first
         val boardIndexesOfPolyomino: MutableList<Int> = mutableListOf()
         polyominoCells.forEach { (x, y) ->
@@ -63,7 +64,15 @@ class BlokusRules: GameRules {
                 return false
             }
         }
-
+        if (player.points == 0) {
+            if (boardIndexesOfPolyomino.any { index -> index in player.availableEdges }) {
+                return true
+            } else {
+                return false
+            }
+        }
+        }
+        Log.d("Time", "isValidPlacement: $timeMesure")
         return true
     }
 }
