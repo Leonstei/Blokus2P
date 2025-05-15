@@ -24,36 +24,16 @@ class GameEngine {
         }
 
         val newGrid = board.boardGrid.copyOf()
-        val newBitBoard = player.bitBoard.copyOf()
 
-        val placedCells = polyomino.cells2.map { index ->
-            index + position
-        }
-        placedCells.forEach {
+//        val placedCells = polyomino.cells2.map { index ->
+//            index + position
+//        }
+        positionOnBoard.forEach {
             setBit(newGrid, it)
         }
 
-//        val placedCellsIndexed = placedCells.map { (x, y) ->
-//            y * boardSize + x
-//        }
-        val timeTaken = measureTime {
-            placedCells.forEach {
-                val wordIndex = it / 64
-                val bitIndex = it % 64
-                newBitBoard[wordIndex] = newBitBoard[wordIndex] or (1L shl bitIndex)
-            }
-        }
-        Log.d("AppViewModel", "Time taken change LongArray: $timeTaken ")
 
-//        val timemesure = measureTime {
-//            placedCells.forEach { (x, y) ->
-//                newGrid[y * board.boardSize + x] = player.id
-//            }
-//        }
-//        Log.d("AppViewModel", "Time taken change intArray: $timemesure ")
-
-
-        val placedPoly = PlacedPolyomino2(player.id, polyomino, placedCells, position)
+        val placedPoly = PlacedPolyomino2(player.id, polyomino, positionOnBoard, position)
 
         return board.copyWith(
             boardGrid = newGrid,

@@ -15,12 +15,8 @@ import com.example.blokus2p.events.AppEvent
 import com.example.blokus2p.events.GameEvent
 import com.example.blokus2p.game.Polyomino
 import com.example.blokus2p.events.PolyominoEvent
-import com.example.blokus2p.game.BlokusBoard
 import com.example.blokus2p.game.BlokusBoard2
-import com.example.blokus2p.game.GameBoard
-import com.example.blokus2p.helper.andBitBoard
-import com.example.blokus2p.helper.invBitBoard
-import com.example.blokus2p.helper.orBitBoard
+import com.example.blokus2p.helper.getUpdatedPlayerBitBoard
 import com.example.blokus2p.model.PlayerType
 import com.example.blokus2p.model.PlayerType.Human
 import com.example.blokus2p.model.PlayerType.MinimaxAI
@@ -390,7 +386,7 @@ class AppViewModel : ViewModel() {
         val board = _gameSate.value.board
         val availableMoves = activePlayer.availableMoves
 
-        val allAvailableMoves = GameEngine().calculateAllMovesOfAPlayer(activePlayer, BlokusBoard2(), rules)
+        val allAvailableMoves = GameEngine().calculateAllMovesOfAPlayer(activePlayer, board, rules)
         val notAvailableMoves = GameEngine().calculateNotAvailableMoves(activePlayer, board )
         val opponentNotAvailableMoves = GameEngine().calculateNotAvailableMoves(opponentPlayer, board)
 
@@ -437,17 +433,14 @@ class AppViewModel : ViewModel() {
 
     private fun updateBoard(newBoard: BlokusBoard2?) {
         if (newBoard != null) {
-            val oldBitBoard = _gameSate.value.board.boardGrid.copyOf()
-            invBitBoard(oldBitBoard)
-            andBitBoard(oldBitBoard, newBoard.boardGrid)
-            orBitBoard(oldBitBoard, newBoard.boardGrid)
-            val updatedPlayer = _gameSate.value.activPlayer.copy(
-                points =  _gameSate.value.activPlayer.points + _gameSate.value.selectedPolyomino.points,
-                placedPolyomino = _gameSate.value.selectedPolyomino.copy(),
-                bitBoard = oldBitBoard
+            val gameState = _gameSate.value
+            val updatedPlayerBitBoard = getUpdatedPlayerBitBoard(gameState.board.boardGrid, newBoard.boardGrid,gameState.activPlayer.bitBoard,)
+            val updatedPlayer = gameState.activPlayer.copy(
+                points =  gameState.activPlayer.points + gameState.selectedPolyomino.points,
+                placedPolyomino = gameState.selectedPolyomino.copy(),
+                bitBoard = updatedPlayerBitBoard
             )
-
-            val newPlayers = _gameSate.value.players.map { player ->
+            val newPlayers = gameState.players.map { player ->
                 if (player.id == updatedPlayer.id) updatedPlayer else player
             }
             _gameSate.update { state ->
@@ -461,6 +454,7 @@ class AppViewModel : ViewModel() {
             Log.d("AppViewModel", "Polyomino konnte nicht platziert werden")
         }
     }
+
     private fun updateBoardUndo(newBoard: BlokusBoard2?){
         // Hier wird der letzte Zug rückgängig gemacht
         // es könnte sein das availableEdges und availableMoves nicht mehr stimmen

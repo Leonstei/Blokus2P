@@ -1,5 +1,6 @@
 package com.example.blokus2p.helper
 
+import android.util.Log
 import kotlin.time.measureTime
 
 /**
@@ -37,24 +38,27 @@ fun orBitBoard(dest: LongArray, source: LongArray) {
         dest[i] = dest[i] or source[i]
     }
 }
-
 /**
- * Führt eine AND-Operation zwischen zwei BitBoards durch (in-place).
+ * Führt eine OR-Operation zwischen zwei BitBoards durch und gibt ein neues BitBoard zurück.
+ * Das ursprüngliche BitBoard bleibt unverändert.
  */
-fun andBitBoard(dest: LongArray, source: LongArray) {
-    for (i in dest.indices) {
-        dest[i] = dest[i] and source[i]
-    }
+fun orBitBoardReturn(a: LongArray, b: LongArray): LongArray {
+    return LongArray(a.size) { i -> a[i] or b[i] }
 }
 
 /**
- * Invertiert ein BitBoard (in-place).
+ * Führt eine AND-Operation zwischen zwei BitBoards durch und gibt ein neues BitBoard zurück.
+ */
+fun andBitBoard(a: LongArray, b: LongArray): LongArray {
+    return LongArray(a.size) { i -> a[i] and b[i] }
+}
+
+/**
+ * Gibt das invertierte BitBoard eines gegebenen BitBoards zurück.
  * Alle gesetzten Bits werden gelöscht und umgekehrt.
  */
-fun invBitBoard(dest: LongArray) {
-    for (i in dest.indices) {
-        dest[i] = dest[i].inv()
-    }
+fun invBitBoard(board: LongArray): LongArray {
+    return LongArray(board.size) { i -> board[i].inv() }
 }
 
 /**
@@ -74,4 +78,20 @@ fun clearAll(bitBoard: LongArray) {
     for (i in bitBoard.indices) {
         bitBoard[i] = 0L
     }
+}
+
+/**
+ * Gibt das aktualisierte BitBoard eines Spielers zurück,
+ * basierend auf den Änderungen zwischen dem alten und neuen Spielfeld.
+ *
+ * @param oldBoard Das vorherige Spielfeld (BitBoard)
+ * @param newBoard Das neue Spielfeld (BitBoard)
+ * @param playerBoard Das BitBoard des Spielers
+ * @return Ein neues BitBoard mit den aktualisierten Bits
+ */
+fun getUpdatedPlayerBitBoard(oldBoard: LongArray, newBoard: LongArray,playerBoard:LongArray): LongArray {
+    // Finde alle Bits, die in newBoard gesetzt sind, aber in oldBoard nicht
+    val newBits = andBitBoard(newBoard, invBitBoard(oldBoard))
+    // Füge die neuen Bits dem alten BitBoard hinzu (OR-Operation)
+    return orBitBoardReturn(playerBoard, newBits)
 }
