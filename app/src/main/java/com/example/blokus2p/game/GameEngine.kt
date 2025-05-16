@@ -10,7 +10,7 @@ class GameEngine {
     fun place(
         player: Player,
         polyomino: Polyomino,
-        position:Int,
+        position: Int,
         board: BlokusBoard,
         rules: GameRules
     ): BlokusBoard? {

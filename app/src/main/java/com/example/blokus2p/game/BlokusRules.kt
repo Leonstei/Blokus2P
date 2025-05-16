@@ -24,7 +24,8 @@ class BlokusRules: GameRules {
         }
         var bordIndexIsInEdges = false
         for (index in polyominoCells) {
-            if (index !in 0 until 196) return false
+            if (index !in 0 until 196)
+                return false
             if (isBitSet(board.boardGrid,index)) {
                 return false
             }
