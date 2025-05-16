@@ -11,7 +11,7 @@ fun mapCellsToBoardIndexes(
     position: Int,
 ): Polyomino {
     return polyomino.copy(
-        cells2 = polyomino.cells2.map { index ->
+        cells = polyomino.cells.map { index ->
             index + position
         }
     )

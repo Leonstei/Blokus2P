@@ -1,6 +1,6 @@
 package com.example.blokus2p
 
-import com.example.blokus2p.game.BlokusBoard2
+import com.example.blokus2p.game.BlokusBoard
 import com.example.blokus2p.helper.clearBit
 import com.example.blokus2p.helper.isBitSet
 import com.example.blokus2p.helper.setBit
@@ -11,7 +11,7 @@ class BitOoperationsTest {
 
     @Test
     fun setBitOnBlokusboard2(){
-        val board = BlokusBoard2()
+        val board = BlokusBoard()
         val index = 195
         for(i in 0 until 196 step 2){
             setBit(board.boardGrid, i)
@@ -30,7 +30,7 @@ class BitOoperationsTest {
     }
     @Test
     fun clearBitFromBlokusboard2(){
-        val board = BlokusBoard2()
+        val board = BlokusBoard()
         val index = 0
         for(i in 0 until 196 step 2){
             setBit(board.boardGrid, i)
@@ -48,7 +48,7 @@ class BitOoperationsTest {
 
     @Test
     fun setBitNegativeIndex(){
-        val board = BlokusBoard2()
+        val board = BlokusBoard()
         val index = -1
         assertThrows(ArrayIndexOutOfBoundsException::class.java) {
             setBit(board.boardGrid, index)

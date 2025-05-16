@@ -5,41 +5,35 @@ import com.example.blokus2p.helper.clearBit
 import com.example.blokus2p.helper.isBitSet
 import com.example.blokus2p.helper.setBit
 import com.example.blokus2p.model.Move
-import com.example.blokus2p.model.Move2
-import kotlin.time.measureTime
 
 class GameEngine {
     fun place(
         player: Player,
         polyomino: Polyomino,
         position:Int,
-        board: BlokusBoard2,
+        board: BlokusBoard,
         rules: GameRules
-    ): BlokusBoard2? {
-        if (!rules.isValidPlacement(player, polyomino.cells2, board, position)) {
+    ): BlokusBoard? {
+        if (!rules.isValidPlacement(player, polyomino.cells, board, position)) {
             return null
         }
         val newGrid = board.boardGrid.copyOf()
-
-        polyomino.cells2.forEach {
+        polyomino.cells.forEach {
             setBit(newGrid, it)
         }
-
-
-        val placedPoly = PlacedPolyomino2(player.id, polyomino, polyomino.cells2, position)
-
+        val placedPoly = PlacedPolyomino(player.id, polyomino, polyomino.cells, position)
         return board.copyWith(
             boardGrid = newGrid,
             placedPolyominos = board.placedPolyominos + placedPoly,
         )
     }
 
-    fun placeAiMove(player: Player, polyomino: Polyomino, position:Int, board: BlokusBoard2,rules: GameRules, orientation: List<Int>) : BlokusBoard2?{
-        val newBoard =place(player,polyomino.copy(cells2 = orientation),position,board,rules)
+    fun placeAiMove(player: Player, polyomino: Polyomino, position:Int, board: BlokusBoard, rules: GameRules, orientation: List<Int>) : BlokusBoard?{
+        val newBoard =place(player,polyomino.copy(cells = orientation),position,board,rules)
         return newBoard
     }
 
-    fun undoplace(board: BlokusBoard2):BlokusBoard2?{
+    fun undoplace(board: BlokusBoard):BlokusBoard?{
         val lastPlacedPolyomino = board.placedPolyominos.lastOrNull()
         if (lastPlacedPolyomino != null) {
             val newGrid = board.boardGrid.copyOf()
@@ -52,10 +46,10 @@ class GameEngine {
                 boardGrid = newGrid,
                 placedPolyominos = board.placedPolyominos - lastPlacedPolyomino
             )
-        }else return null
+        } else return null
     }
 
-    fun calculateNewAvailableEdges(player: Player, board: BlokusBoard2): Set<Int> {
+    fun calculateNewAvailableEdges(player: Player, board: BlokusBoard): Set<Int> {
         val newAvailableEdges: MutableSet<Int> = mutableSetOf()
         val lastPlacedPolyominosFromPlayer = board.placedPolyominos.filter { it.playerId == player.id }
         val lastPlacedPolyominoFromPlayer = lastPlacedPolyominosFromPlayer.lastOrNull()
@@ -93,7 +87,7 @@ class GameEngine {
         return filteredEdges.toSet()
     }
 
-    fun notCheckForNotAvailableEdges(edges: Set<Int>, board: BlokusBoard2):Set<Int>{
+    fun notCheckForNotAvailableEdges(edges: Set<Int>, board: BlokusBoard):Set<Int>{
         val notAvailableEdges : MutableSet<Int> = mutableSetOf()
         edges.forEach { index->
             if (isBitSet(board.boardGrid, index)) notAvailableEdges.add(index)
@@ -101,12 +95,16 @@ class GameEngine {
         return notAvailableEdges
     }
 
-    fun calculateAllMovesOfAPlayer(player: Player, board: BlokusBoard2, rules: GameRules):Set<Move2>{
-        val validMoves = mutableListOf<Move2>()
-        val timeTaken = measureTime {
-            for (polyomino in player.newPolyominos) {
+    fun calculateAllMovesOfAPlayer(player: Player, board: BlokusBoard, rules: GameRules):Set<Move>{
+        val validMoves = mutableListOf<Move>()
+//        val timeTaken = measureTime {
+            for (polyomino in player.polyominos) {
                 // Transformationen: Rotationen & Spiegelungen
                 val transformedShapes = polyomino.getAllTransformations()
+//            val timeTaken2 = measureTime {
+//                val transformedShapes = polyomino.getAllTransformations()
+//            }
+//            Log.d("AppViewModel", "getAllTransformations: $timeTaken2")
                 for (shape in transformedShapes) {
                     for (edge in player.availableEdges) {
                         // Probiere alle Verschiebungen des Polyominos von der Edge aus
@@ -124,7 +122,7 @@ class GameEngine {
                                 )
                             ) {
                                 validMoves.add(
-                                    Move2(
+                                    Move(
                                         polyomino = polyomino,
                                         orientation = boardPositions,
                                         position = edge
@@ -135,10 +133,9 @@ class GameEngine {
                     }
                 }
             }
-        }
+        //}
             Log.d("AppViewModel", "validMoves ${validMoves.size}")
-            Log.d("AppViewModel", "time taken $timeTaken")
-
+           // Log.d("AppViewModel", "time taken $timeTaken")
         return validMoves.toSet()
     }
 
@@ -148,60 +145,53 @@ class GameEngine {
         }
     }
 
-    fun calculateNotAvailableMoves2(player: Player, validMoves: List<Move>,board: GameBoard,rules: GameRules): Set<Move> {
-        val notAvailableMoves = mutableSetOf<Move>()
-        validMoves.forEach { move->
-            if(!rules.isValidPlacement(player,move.orientation,board,move.position)){
-                notAvailableMoves.add(move)
+
+    fun calculateNotAvailableMoves(player: Player, board: BlokusBoard):List<Move>{
+
+        var notValidMoves = listOf<Move>()
+        //val timeTaken = measureTime {
+            val lastPlacedPolyominosFromPlayer =
+                board.placedPolyominos.filter { it.playerId == player.id }
+            val lastPlacedPolyominoFromPlayer = lastPlacedPolyominosFromPlayer.lastOrNull()
+            if (lastPlacedPolyominoFromPlayer == null) return emptyList()
+
+            //funktioniert nicht bei mehr als 2 Spielern
+            val lastPlacedPolyominosFromOtherPlayer =
+                board.placedPolyominos.filter { it.playerId != player.id }
+            val lastPlacedPolyominoFromOtherPlayer =
+                lastPlacedPolyominosFromOtherPlayer.lastOrNull()
+
+            val notAvailableEdges: MutableList<Int> =
+                mutableListOf(lastPlacedPolyominoFromPlayer.placePosition)
+
+            if (lastPlacedPolyominoFromOtherPlayer != null) {
+                lastPlacedPolyominoFromOtherPlayer.cells.forEach {
+                    notAvailableEdges.add(it)
+                }
             }
-            if (move.polyomino.name == board.placedPolyominos.last().polyomino.name){
-                notAvailableMoves.add(move)
+            lastPlacedPolyominoFromPlayer.cells.forEach {
+                notAvailableEdges.add(it + 1)
+                notAvailableEdges.add(it - 1)
+                notAvailableEdges.add(it + 14)
+                notAvailableEdges.add(it - 14)
             }
-        }
-        Log.d("AppViewModel", "not validMoves fun2 ${notAvailableMoves.size}")
-        return notAvailableMoves
-    }
-    fun calculateNotAvailableMoves(player: Player, board: BlokusBoard2):List<Move2>{
 
-        val lastPlacedPolyominosFromPlayer =
-            board.placedPolyominos.filter { it.playerId == player.id }
-        val lastPlacedPolyominoFromPlayer = lastPlacedPolyominosFromPlayer.lastOrNull()
-        if (lastPlacedPolyominoFromPlayer == null) return emptyList()
-
-        //funktioniert nicht bei mehr als 2 Spielern
-        val lastPlacedPolyominosFromOtherPlayer =
-            board.placedPolyominos.filter { it.playerId != player.id }
-        val lastPlacedPolyominoFromOtherPlayer =
-            lastPlacedPolyominosFromOtherPlayer.lastOrNull()
-
-        val notAvailableEdges: MutableList<Int> =
-            mutableListOf(lastPlacedPolyominoFromPlayer.placePosition)
-
-        if (lastPlacedPolyominoFromOtherPlayer != null) {
-            lastPlacedPolyominoFromOtherPlayer.cells.forEach {
-                notAvailableEdges.add(it)
+            notValidMoves = player.availableMoves.filter { move ->
+                notAvailableEdges.contains(move.position) ||
+                        move.orientation.any { cell ->
+                            cell in notAvailableEdges
+                        } || move.polyomino.name == lastPlacedPolyominoFromPlayer.polyomino.name
             }
-        }
-        lastPlacedPolyominoFromPlayer.cells.forEach {
-            notAvailableEdges.add(it+1)
-            notAvailableEdges.add(it-1)
-            notAvailableEdges.add(it+14)
-            notAvailableEdges.add(it-14)
-        }
-
-        val notValidMoves  = player.availableMoves.filter { move ->
-            notAvailableEdges.contains(move.position) ||
-                    move.orientation.any { cell ->
-                        cell in notAvailableEdges
-                    } || move.polyomino.name == lastPlacedPolyominoFromPlayer.polyomino.name
-        }
-
+        //}
+        //Log.d("AppViewModel", "not validMoves  $timeTaken")
         //Log.d("AppViewModel", "not validMoves fun1 ${notValidMoves.size}")
         return notValidMoves
     }
 
-    fun calculateNewMoves(player: Player, board: BlokusBoard2, rules: GameRules): List<Move2> {
-        val validMoves = mutableListOf<Move2>()
+    fun calculateNewMoves(player: Player, board: BlokusBoard, rules: GameRules): List<Move> {
+        val validMoves = mutableListOf<Move>()
+        //val timeTaken = measureTime {
+
         val newEdges = calculateNewAvailableEdges(player, board)
 
         val lastPlacedPolyominosFromPlayer = board.placedPolyominos.filter { it.playerId == player.id }
@@ -209,7 +199,7 @@ class GameEngine {
 
         if (lastPlacedPolyominoFromPlayer == null) return emptyList()
 
-        for (polyomino in player.newPolyominos) {
+        for (polyomino in player.polyominos) {
             // Transformationen: Rotationen & Spiegelungen
             val transformedShapes = polyomino.getAllTransformations()
             for (shape in transformedShapes) {
@@ -224,7 +214,7 @@ class GameEngine {
                         // Ist der Zug erlaubt?
                         if (rules.isValidPlacement(player, boardPositions, board, edge)) {
                             validMoves.add(
-                                Move2(
+                                Move(
                                     polyomino = polyomino,
                                     orientation = boardPositions,
                                     position = edge
@@ -235,6 +225,8 @@ class GameEngine {
                 }
             }
         }
+//        }
+//        Log.d("AppViewModel", "calculate newMoves $timeTaken")
 //        Log.d("AppViewModel", "new validMoves ${validMoves.size}")
         return validMoves
     }
@@ -242,7 +234,7 @@ class GameEngine {
     fun checkForGameEnd(players :List<Player>): Boolean {
         var countPlayersFinished= 0
         for (player in players) {
-            if (player.newPolyominos.isEmpty() || player.availableEdges.isEmpty() || player.availableMoves.isEmpty()) {
+            if (player.polyominos.isEmpty() || player.availableEdges.isEmpty() || player.availableMoves.isEmpty()) {
                 countPlayersFinished ++
             }
         }

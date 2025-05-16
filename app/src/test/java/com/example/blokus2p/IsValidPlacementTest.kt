@@ -1,6 +1,6 @@
 package com.example.blokus2p
 
-import com.example.blokus2p.game.BlokusBoard2
+import com.example.blokus2p.game.BlokusBoard
 import com.example.blokus2p.game.BlokusRules
 import com.example.blokus2p.game.Player
 import com.example.blokus2p.helper.setBit
@@ -13,7 +13,7 @@ class IsValidPlacementTest {
     @Test
     fun allCellsOnBoard() {
         val player = Player(1, "Player 1", availableEdges = setOf(15))
-        val board = BlokusBoard2()
+        val board = BlokusBoard()
         val selectedPosition = 15
         val rules = BlokusRules()
 
@@ -32,7 +32,7 @@ class IsValidPlacementTest {
     @Test
     fun allCellsOffBoard() {
         val player = Player(1, "Player 1", availableEdges = setOf(15))
-        val board = BlokusBoard2()
+        val board = BlokusBoard()
         val selectedPosition = -15
         val rules = BlokusRules()
         val result = rules.isValidPlacement(
@@ -48,7 +48,7 @@ class IsValidPlacementTest {
     @Test
     fun cellsGoOverLeftAndRightEdges() {
         val player = Player(1, "Player 1", availableEdges = setOf(14,55))
-        val board = BlokusBoard2()
+        val board = BlokusBoard()
         val selectedPositionLeft = 14
         val selectedPositionRight = 55
         val rules = BlokusRules()
@@ -73,7 +73,7 @@ class IsValidPlacementTest {
     @Test
     fun noCellOnAvailableEdges() {
         val player = Player(1, "Player 1", availableEdges = setOf(14,55))
-        val board = BlokusBoard2()
+        val board = BlokusBoard()
         val selectedPositionTop = 0
         val rules = BlokusRules()
         val resultTop = rules.isValidPlacement(
@@ -89,7 +89,7 @@ class IsValidPlacementTest {
     @Test
     fun cellsOnoccupiedPlaces(){
         val player = Player(1, "Player 1", availableEdges = setOf(14,55))
-        val board = BlokusBoard2()
+        val board = BlokusBoard()
         val selectedPositionTop = 0
         val rules = BlokusRules()
         setBit(board.boardGrid, 14)
@@ -107,7 +107,7 @@ class IsValidPlacementTest {
     @Test
     fun cellsAroundOccupiedPlaces(){
         val player = Player(1, "Player 1", availableEdges = setOf(14,15,17,20))
-        val board = BlokusBoard2()
+        val board = BlokusBoard()
         val selectedPositionTop = 0
         val rules = BlokusRules()
         setBit(player.bitBoard, 0)

@@ -1,6 +1,5 @@
 package com.example.blokus2p.ui.bockusScreen
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -269,9 +268,9 @@ fun BlockusBoard(
 fun Polyominos(cellSize: Dp, onEvent: (PolyominoEvent) -> Unit, gameState: GameState) {
     val playerTwo = gameState.players.filter { player: Player ->  !player.isActiv}
     if (gameState.activPlayer_id == gameState.activPlayer.id) {
-        PolyominoRow(gameState.activPlayer.newPolyominos, cellSize, onEvent,gameState,gameState.activPlayer.id)
+        PolyominoRow(gameState.activPlayer.polyominos, cellSize, onEvent,gameState,gameState.activPlayer.id)
         Spacer(modifier = Modifier.height(12.dp))
-        PolyominoRow(playerTwo.first().newPolyominos, cellSize, onEvent,gameState,playerTwo.first().id)
+        PolyominoRow(playerTwo.first().polyominos, cellSize, onEvent,gameState,playerTwo.first().id)
     }
 }
 @Composable
@@ -344,7 +343,7 @@ fun Polyomino(
                         )
                     }
                     .border(
-                        1.dp, if (polyomino.selectedCell2 == y*boardWidth+x &&
+                        1.dp, if (polyomino.selectedCell == y*boardWidth+x &&
                             polyomino.name == gameState.selectedPolyomino.name &&
                             player == gameState.activPlayer_id
                         ) borderColor else Color.Transparent

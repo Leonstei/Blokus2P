@@ -1,21 +1,18 @@
 package com.example.blokus2p.ai
 
-import android.util.Log
 import com.example.blokus2p.game.BlokusRules
 import com.example.blokus2p.game.GameEngine
 import com.example.blokus2p.game.GameState
-import com.example.blokus2p.game.PlacedPolyomino2
+import com.example.blokus2p.game.PlacedPolyomino
 import com.example.blokus2p.game.Player
 import com.example.blokus2p.model.Move
-import com.example.blokus2p.model.Move2
 import com.example.blokus2p.model.ScoredMove
-import com.example.blokus2p.model.ScoredMove2
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 
 class MinmaxAi : AiInterface {
-    suspend override fun getNextMove(gameState: GameState): Move2? {
+    suspend override fun getNextMove(gameState: GameState): Move? {
         var depth = 3
         if(gameState.activPlayer.availableMoves.size > 100){
             depth--
@@ -27,7 +24,7 @@ class MinmaxAi : AiInterface {
     private suspend fun findBestMoveParallel(
         gameState: GameState,
         depth: Int
-    ): Move2? = coroutineScope {
+    ): Move? = coroutineScope {
         val maximizingPlayer = getMaximizingPlayer(gameState)
         val currentPlayer = gameState.players[gameState.activPlayer_id - 1]
         val moves = getMoves(currentPlayer)
@@ -54,18 +51,18 @@ class MinmaxAi : AiInterface {
         }
         best?.move
     }
-    private suspend fun findBestMove(gameState: GameState, depth: Int): Move2? {
+    private suspend fun findBestMove(gameState: GameState, depth: Int): Move? {
         val maximizingPlayer = getMaximizingPlayer(gameState)
         val scoredMove = minmaxAlphaBeta(depth, gameState,maximizingPlayer,Int.MIN_VALUE, Int.MAX_VALUE)
         //Log.d("AppViewModel", "Score: ${scoredMove.score}")
         return scoredMove.move
     }
 
-    fun getMoves(player: Player): Set<Move2> {
+    fun getMoves(player: Player): Set<Move> {
         return player.availableMoves
     }
 
-    fun makeMove(gameState: GameState, move: Move2,player: Player): GameState  {
+    fun makeMove(gameState: GameState, move: Move, player: Player): GameState  {
         val rules = BlokusRules()
         val newBoard = GameEngine().placeAiMove(
             player,
@@ -109,10 +106,10 @@ class MinmaxAi : AiInterface {
 
     fun minmaxAlphaBeta(
         depth: Int, gameState: GameState, maximizingPlayer: Player,alpha:Int,beta:Int
-    ): ScoredMove2 {
+    ): ScoredMove {
         // Basisfall: Bei Erreichung der maximalen Tiefe oder Spielende
         if (depth == 0 || gameOver(gameState)) {
-            return ScoredMove2(
+            return ScoredMove(
                 move = null,
                 score = evaluate(gameState),
                 depth = depth
@@ -121,7 +118,7 @@ class MinmaxAi : AiInterface {
 
         var currentAlpha = alpha
         var currentBeta = beta
-        var bestMove: Move2? = null
+        var bestMove: Move? = null
 
         val currentPlayer = gameState.players[gameState.activPlayer_id-1]
         val isMaximizingPly = (currentPlayer.id == maximizingPlayer.id)
@@ -145,7 +142,7 @@ class MinmaxAi : AiInterface {
                     break // Beta-Cutoff: Der Minimierer-Elternknoten wird diesen Pfad nicht wählen
                 }
             }
-            return ScoredMove2(bestMove, maxScore, depth)
+            return ScoredMove(bestMove, maxScore, depth)
         }else { // Minimierender Spieler ist am Zug
             var minScore = Int.MAX_VALUE // Bester Wert für diesen minimierenden Knoten
             for (move in possibleMoves) {
@@ -165,7 +162,7 @@ class MinmaxAi : AiInterface {
                     break // Alpha-Cutoff: Der Maximierer-Elternknoten wird diesen Pfad nicht wählen
                 }
             }
-            return ScoredMove2(bestMove, minScore, depth)
+            return ScoredMove(bestMove, minScore, depth)
         }
     }
 
@@ -210,7 +207,7 @@ class MinmaxAi : AiInterface {
     }
 
     fun distancToCenterForPolyomino(
-        polyomino: PlacedPolyomino2
+        polyomino: PlacedPolyomino
     ): Double {
         val centerX = 6.5
         val centerY = 6.5
