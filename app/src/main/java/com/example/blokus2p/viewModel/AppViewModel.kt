@@ -152,6 +152,10 @@ class AppViewModel : ViewModel() {
         val activePlayer = _gameSate.value.activPlayer
         if (activePlayer.isAi && activePlayer.ai != null) {
             viewModelScope.launch {
+                val timeTaken = measureTime {
+                    val aiMove = _gameSate.value.activPlayer.ai?.getNextMove(_gameSate.value)
+                }
+                Log.d("AppViewModel", "AI took $timeTaken")
                 val aiMove = _gameSate.value.activPlayer.ai?.getNextMove(_gameSate.value)
                 Log.d("AppViewModel", "aiMove $aiMove")
                 aiMove?.let {
