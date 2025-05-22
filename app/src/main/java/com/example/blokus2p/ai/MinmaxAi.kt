@@ -12,9 +12,9 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 
 class MinmaxAi : AiInterface {
-    suspend override fun getNextMove(gameState: GameState): Move? {
+    override fun getNextMove(gameState: GameState): Move? {
         var depth = 3
-        if(gameState.activPlayer.availableMoves.size > 100){
+        if(gameState.activPlayer.availableMoves.size > 50){
             depth--
         }
         val bestMove = findBestMove(gameState, depth)
@@ -51,7 +51,7 @@ class MinmaxAi : AiInterface {
         }
         best?.move
     }
-    private suspend fun findBestMove(gameState: GameState, depth: Int): Move? {
+    private fun findBestMove(gameState: GameState, depth: Int): Move? {
         val maximizingPlayer = getMaximizingPlayer(gameState)
         val scoredMove = minmaxAlphaBeta(depth, gameState,maximizingPlayer,Int.MIN_VALUE, Int.MAX_VALUE)
         //Log.d("AppViewModel", "Score: ${scoredMove.score}")
@@ -122,11 +122,21 @@ class MinmaxAi : AiInterface {
 
         val currentPlayer = gameState.players[gameState.activPlayer_id-1]
         val isMaximizingPly = (currentPlayer.id == maximizingPlayer.id)
+
         val possibleMoves = getMoves(currentPlayer)
+        val filterdMoves = if (possibleMoves.size > 200){
+            possibleMoves.filterIndexed { index, move ->
+                index % 4 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
+            }
+        }else {
+            possibleMoves.filterIndexed { index, move ->
+                index % 3 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
+            }
+        }
 
         if(isMaximizingPly){
             var maxScore = Int.MIN_VALUE // Bester Wert für diesen maximierenden Knoten
-            for (move in possibleMoves) {
+            for (move in filterdMoves) {
                 val newGameState = makeMove(gameState, move, currentPlayer)
                 val scoredMoveRecursive = minmaxAlphaBeta(depth - 1, newGameState, maximizingPlayer, currentAlpha, currentBeta)
                 val score = scoredMoveRecursive.score // Erhaltener Score vom Kindknoten
@@ -189,7 +199,7 @@ class MinmaxAi : AiInterface {
 
         //Kontrolle über das Zentrum bewerten
         val centerControl = evaluateCenterControl(maximizingPlayer, opponent, gameState)
-        score += centerControl * 4
+        score += centerControl
         return score
     }
 

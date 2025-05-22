@@ -1,8 +1,13 @@
 package com.example.blokus2p.game
 
+import android.util.Log
+import com.example.blokus2p.model.PolyominoNames
+import com.example.blokus2p.model.polyominoVariants
+import com.example.blokus2p.model.polyominoVariantsDistinct
+
 
 data class Polyomino(
-    val name: String = "",
+    val name: PolyominoNames = PolyominoNames.NULL,
     val points: Int = 0,
     val isSelected: Boolean = false,
     val cells: List<Int> = listOf(),
@@ -10,20 +15,18 @@ data class Polyomino(
     val variantIndex: Int = 0,
     val boardSize: Int = 14
 ) {
-    private val allVariants: List<PolyominoVariant> by lazy {
-        generateAllTransformations(cells)
+    private val allVariants: List<PolyominoVariant> = polyominoVariants[name] ?: emptyList()
+
+    val distinctVariants: List<List<Int>> = polyominoVariantsDistinct[name] ?: emptyList()
+
+    private val oldVariants: List<PolyominoVariant> by lazy {
+            generateAllTransformations(cells)
     }
     private val cachedTransformations: List<List<Int>> by lazy {
-        allVariants.map { it.cells }.distinct()
+        oldVariants.map { it.cells }.distinct()
     }
+
     fun getAllTransformations():List<List<Int>> = cachedTransformations
-//    {
-//        val allTransformations: MutableSet<List<Int>> = mutableSetOf()
-//        allVariants.forEach {  polyominoVariant ->
-//            allTransformations.add(polyominoVariant.cells)
-//        }
-//        return allTransformations.toList()
-//    }
 
     val currentVariant: List<Int>
         get() = allVariants[variantIndex % allVariants.size].cells
@@ -67,8 +70,6 @@ data class Polyomino(
         cellIndices: List<Int>,
     ): List<PolyominoVariant> {
         val seen = mutableSetOf<PolyominoVariant>()
-
-
         var rotation = 0
         var currentCells = toPairs(cellIndices)
 
@@ -92,6 +93,7 @@ data class Polyomino(
             currentCells = rotate90(currentCells)
             rotation += 90
         }
+        //Log.d("AppViewModel", "generateAllTransformations: $seen")
 
         return seen.toList()
     }

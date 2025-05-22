@@ -1,6 +1,6 @@
 package com.example.blokus2p.game
 
-import android.util.Log
+//import android.util.Log
 import com.example.blokus2p.helper.isBitSet
 import kotlin.time.measureTime
 

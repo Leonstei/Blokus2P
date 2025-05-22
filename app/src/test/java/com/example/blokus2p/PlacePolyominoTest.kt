@@ -8,6 +8,7 @@ import com.example.blokus2p.game.Polyomino
 import com.example.blokus2p.helper.isBitSet
 import com.example.blokus2p.helper.mapCellsToBoardIndexes
 import com.example.blokus2p.helper.setBit
+import com.example.blokus2p.model.PolyominoNames
 import junit.framework.TestCase.assertTrue
 import org.junit.Test
 import kotlin.time.measureTime
@@ -17,7 +18,7 @@ class PlacePolyominoTest {
     val selectedPosition = 130
     val rules = BlokusRules()
     val gameEngine = GameEngine()
-    val einnerPolyomino = Polyomino("Eins", 1, false, cells=listOf(0))
+    val einnerPolyomino = Polyomino(PolyominoNames.EINS, 1, false, cells=listOf(0))
     @Test
     fun placePolyomino() {
         val takenTime = measureTime {
