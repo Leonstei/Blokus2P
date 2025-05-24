@@ -8,18 +8,20 @@ import com.example.blokus2p.model.Move
 import kotlin.random.Random
 
 class RandomAi:AiInterface {
-    override suspend fun getNextMove(gameState: GameState): Move? {
+    override fun getNextMove(gameState: GameState): Move? {
         //val moves = GameEngine().calculateAllMovesOfAPlayer(gameState.activPlayer,gameState.board,BlokusRules())
         val moves = gameState.activPlayer.availableMoves
-        if (moves.isNotEmpty()){
-            val sortedMoves = moves.sortedBy { move ->
-                move.polyomino.points
+        if(gameState.activPlayer.id == 2){
+            if (moves.isNotEmpty()){
+                val sortedMoves = moves.sortedBy { move ->
+                    move.polyomino.points
+                }
+                val newMoves = sortedMoves.filter { move->
+                    move.polyomino.points == moves.first().polyomino.points
+                }
+                //Log.d("AppViewModel", "validMoves2 ${newMoves.size}")
+                return newMoves.randomOrNull()
             }
-            val newMoves = sortedMoves.filter { move->
-                move.polyomino.points == moves.first().polyomino.points
-            }
-            //Log.d("AppViewModel", "validMoves2 ${newMoves.size}")
-            return newMoves.randomOrNull()
         }
         return moves.randomOrNull() // wählt zufällig einen legalen Zug
     }

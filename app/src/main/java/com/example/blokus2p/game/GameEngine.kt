@@ -133,7 +133,7 @@ class GameEngine {
                 }
             }
         //}
-            Log.d("AppViewModel", "validMoves ${validMoves.size}")
+//            Log.d("AppViewModel", "validMoves ${validMoves.size}")
 //            Log.d("AppViewModel", "Time taken to calculate all moves: $timeTaken ")
 
         return validMoves.toSet()
@@ -145,7 +145,7 @@ class GameEngine {
         }
     }
 
-    fun calculateNotAvailableMoves2(player: Player, validMoves: List<Move>,board: GameBoard,rules: GameRules): Set<Move> {
+    fun calculateNotAvailableMoves2(player: Player, validMoves: Set<Move>,board: GameBoard,rules: GameRules): Set<Move> {
         val notAvailableMoves = mutableSetOf<Move>()
         validMoves.forEach { move->
             if(!rules.isValidPlacement(player,move.orientation,board,move.position)){
@@ -155,7 +155,7 @@ class GameEngine {
                 notAvailableMoves.add(move)
             }
         }
-        Log.d("AppViewModel", "not validMoves fun2 ${notAvailableMoves.size}")
+  //      Log.d("AppViewModel", "not validMoves fun2 ${notAvailableMoves.size}")
         return notAvailableMoves
     }
     fun calculateNotAvailableMoves(player: Player, board: GameBoard):List<Move>{

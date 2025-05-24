@@ -37,7 +37,7 @@ import com.example.blokus2p.game.Player
 
 @Composable
 fun BlockusScreen(viewModel: AppViewModel = viewModel()) {
-    val gameState by viewModel.timerState.collectAsStateWithLifecycle()
+    val gameState by viewModel.gameState.collectAsStateWithLifecycle()
     val cellSize = 28.dp
     val onEvent = viewModel::onEvent
     var showDialog by remember {
