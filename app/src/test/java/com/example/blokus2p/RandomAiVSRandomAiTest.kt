@@ -18,17 +18,17 @@ import org.junit.Test
 
 class RandomAiVSRandomAiTest {
 
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain() // Setzt den Main-Dispatcher zurück
-    }
+//    private val testDispatcher = StandardTestDispatcher()
+//    private val testScope = TestScope(testDispatcher)
+//    @Before
+//    fun setUp() {
+//        Dispatchers.setMain(testDispatcher)
+//    }
+//
+//    @After
+//    fun tearDown() {
+//        Dispatchers.resetMain() // Setzt den Main-Dispatcher zurück
+//    }
     @Test
     fun testRandomAiVsRandomAi() {
         var playerOneWins = 0

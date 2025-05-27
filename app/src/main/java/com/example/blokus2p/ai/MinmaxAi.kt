@@ -28,34 +28,57 @@ class MinmaxAi : AiInterface {
         val maximizingPlayer = getMaximizingPlayer(gameState)
         val currentPlayer = gameState.players[gameState.activPlayer_id - 1]
         val moves = getMoves(currentPlayer)
-        val currentdepth = depth-1
 
-
-        val semaphore = Semaphore(permits = 4) // max 8 gleichzeitig
-
-        val deferredResults = moves.map { move ->
-            async(Dispatchers.Default) {
-                semaphore.withPermit {
-                    val newState = makeMove(gameState, move, currentPlayer)
-                    minmaxAlphaBeta(currentdepth, newState, maximizingPlayer, Int.MIN_VALUE, Int.MAX_VALUE)
-                        .copy(move = move)
-                }
+        val filterdMoves = if (moves.size > 100){
+            moves.filterIndexed { index, move ->
+                index % 4 == 0 && move.polyomino.points == moves.first().polyomino.points
+            }
+        }else {
+            moves.filterIndexed { index, move ->
+                index % 3 == 0 && move.polyomino.points == moves.first().polyomino.points
             }
         }
 
-        val results = deferredResults.awaitAll()
-        val best = if (currentPlayer.id == maximizingPlayer.id) {
-            results.maxByOrNull { it.score }
-        } else {
-            results.minByOrNull { it.score }
-        }
-        best?.move
+        val moveChunks = filterdMoves.chunked((filterdMoves.size / 10) + 1) // Teilt die Züge in Gruppen von 4 auf
+        val currentdepth = depth-1
+
+        val bestResult = moveChunks.flatMap { chunk ->
+            chunk.map { move ->
+                async(Dispatchers.Default) {
+                    val newState = makeMove(gameState, move, currentPlayer)
+                    minmaxAlphaBeta(currentdepth, newState, maximizingPlayer, Int.MIN_VALUE, Int.MAX_VALUE).copy(move = move)
+                }
+            }.awaitAll()
+        }.maxByOrNull { it.score }
+
+        bestResult?.move
+
+
+        //val semaphore = Semaphore(permits = 4) // max 8 gleichzeitig
+//
+//        val deferredResults = moves.map { move ->
+//            async(Dispatchers.Default) {
+//                semaphore.withPermit {
+//                    val newState = makeMove(gameState, move, currentPlayer)
+//                    minmaxAlphaBeta(currentdepth, newState, maximizingPlayer, Int.MIN_VALUE, Int.MAX_VALUE)
+//                        .copy(move = move)
+//                }
+//            }
+//        }
+//
+//        val results = deferredResults.awaitAll()
+//        val best = if (currentPlayer.id == maximizingPlayer.id) {
+//            results.maxByOrNull { it.score }
+//        } else {
+//            results.minByOrNull { it.score }
+//        }
+//        best?.move
     }
     private fun findBestMove(gameState: GameState, depth: Int): Move? {
         val maximizingPlayer = getMaximizingPlayer(gameState)
-        val scoredMove = minmaxAlphaBeta(depth, gameState,maximizingPlayer,Int.MIN_VALUE, Int.MAX_VALUE)
+        val result= minmaxAlphaBeta(depth, gameState,maximizingPlayer,Int.MIN_VALUE, Int.MAX_VALUE)
         //Log.d("AppViewModel", "Score: ${scoredMove.score}")
-        return scoredMove.move
+        return result.move
     }
 
     fun getMoves(player: Player): Set<Move> {
@@ -124,13 +147,13 @@ class MinmaxAi : AiInterface {
         val isMaximizingPly = (currentPlayer.id == maximizingPlayer.id)
 
         val possibleMoves = getMoves(currentPlayer)
-        val filterdMoves = if (possibleMoves.size > 200){
+        val filterdMoves = if (possibleMoves.size > 100){
             possibleMoves.filterIndexed { index, move ->
-                index % 4 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
+                index % 19 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
             }
         }else {
             possibleMoves.filterIndexed { index, move ->
-                index % 3 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
+                index % 11 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
             }
         }
 
@@ -261,5 +284,13 @@ class MinmaxAi : AiInterface {
 //            return bestScore
 //        }
 //    }
+//private suspend fun findBestMove(gameState: GameState, depth: Int): Move? {
+//    val maximizingPlayer = getMaximizingPlayer(gameState)
+//    val result= withContext(Dispatchers.Default) {
+//        minmaxAlphaBeta(depth, gameState,maximizingPlayer,Int.MIN_VALUE, Int.MAX_VALUE)
+//    }
+//    //Log.d("AppViewModel", "Score: ${scoredMove.score}")
+//    return result.move
+//}
 
 }

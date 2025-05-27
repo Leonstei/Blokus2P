@@ -183,22 +183,22 @@ class AppViewModel : ViewModel() {
             //4m 46s
                 aiMove?.let {
                     selectPolyomino(
-                        aiMove.polyomino,
-                        aiMove.position
+                        it.polyomino,
+                        it.position
                     )
                     val newBoard = GameEngine().placeAiMove(
                         _gameState.value.activPlayer,
-                        aiMove.polyomino,
-                        aiMove.position,
-                        _gameState.value.board, rules, aiMove.orientation
+                        it.polyomino,
+                        it.position,
+                        _gameState.value.board, rules, it.orientation
                     )
                     updateBoard(newBoard)
                     updatePolyominosOfActivPlayer(_gameState.value.activPlayer_id)
                     updateAvailableEdgesActivPlayer()
                     updateAvailableMoves()
                     nextPlayer(_gameState.value.activPlayer_id)
-                //}
-            }
+                }
+//            }
         }
     }
 
@@ -269,8 +269,6 @@ class AppViewModel : ViewModel() {
         }else {
             return nextIndex
         }
-
-
     }
 
     private fun undoPlace(){

@@ -1,6 +1,5 @@
 package com.example.blokus2p
 
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.blokus2p.events.GameEvent
 import com.example.blokus2p.game.Player
 import com.example.blokus2p.model.PlayerType

@@ -5,6 +5,7 @@ data class BlokusBoard(
     override val boardGrid : LongArray = LongArray(4),
     override val placedPolyominos: List<PlacedPolyomino> = listOf(),
 ):GameBoard {
+
     override fun copyWith(boardGrid: LongArray, placedPolyominos: List<PlacedPolyomino>): BlokusBoard =
         this.copy(
             boardGrid = boardGrid,

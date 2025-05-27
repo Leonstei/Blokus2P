@@ -19,14 +19,14 @@ data class Polyomino(
 
     val distinctVariants: List<List<Int>> = polyominoVariantsDistinct[name] ?: emptyList()
 
-    private val oldVariants: List<PolyominoVariant> by lazy {
-            generateAllTransformations(cells)
-    }
-    private val cachedTransformations: List<List<Int>> by lazy {
-        oldVariants.map { it.cells }.distinct()
-    }
-
-    fun getAllTransformations():List<List<Int>> = cachedTransformations
+//    private val oldVariants: List<PolyominoVariant> by lazy {
+//            generateAllTransformations(cells)
+//    }
+//    private val cachedTransformations: List<List<Int>> by lazy {
+//        oldVariants.map { it.cells }.distinct()
+//    }
+//
+//    fun getAllTransformations():List<List<Int>> = cachedTransformations
 
     val currentVariant: List<Int>
         get() = allVariants[variantIndex % allVariants.size].cells
@@ -66,37 +66,37 @@ data class Polyomino(
         return copy(variantIndex = allVariants.indexOf(next), selectedCell = pairToIndex(selectedCellNormalized))
     }
 
-    fun generateAllTransformations(
-        cellIndices: List<Int>,
-    ): List<PolyominoVariant> {
-        val seen = mutableSetOf<PolyominoVariant>()
-        var rotation = 0
-        var currentCells = toPairs(cellIndices)
-
-        repeat(4) {
-            // normalize() und flipHorizontal(), rotate90() arbeiten auf Pair-Listen
-            val norm       = normalize(currentCells)
-            val normFlip   = normalize(flipHorizontal(currentCells))
-
-            seen += PolyominoVariant(
-                cells      = toIndices(norm),
-                isFlipped  = false,
-                rotation   = rotation
-            )
-            seen += PolyominoVariant(
-                cells      = toIndices(normFlip),
-                isFlipped  = true,
-                rotation   = rotation
-            )
-
-            // für nächste Runde
-            currentCells = rotate90(currentCells)
-            rotation += 90
-        }
-        //Log.d("AppViewModel", "generateAllTransformations: $seen")
-
-        return seen.toList()
-    }
+//    fun generateAllTransformations(
+//        cellIndices: List<Int>,
+//    ): List<PolyominoVariant> {
+//        val seen = mutableSetOf<PolyominoVariant>()
+//        var rotation = 0
+//        var currentCells = toPairs(cellIndices)
+//
+//        repeat(4) {
+//            // normalize() und flipHorizontal(), rotate90() arbeiten auf Pair-Listen
+//            val norm       = normalize(currentCells)
+//            val normFlip   = normalize(flipHorizontal(currentCells))
+//
+//            seen += PolyominoVariant(
+//                cells      = toIndices(norm),
+//                isFlipped  = false,
+//                rotation   = rotation
+//            )
+//            seen += PolyominoVariant(
+//                cells      = toIndices(normFlip),
+//                isFlipped  = true,
+//                rotation   = rotation
+//            )
+//
+//            // für nächste Runde
+//            currentCells = rotate90(currentCells)
+//            rotation += 90
+//        }
+//        //Log.d("AppViewModel", "generateAllTransformations: $seen")
+//
+//        return seen.toList()
+//    }
 
 
     private fun rotate90(cells: List<Pair<Int, Int>>): List<Pair<Int, Int>> =
