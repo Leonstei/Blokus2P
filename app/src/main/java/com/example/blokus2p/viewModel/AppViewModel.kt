@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.blokus2p.ai.AiInterface
 import com.example.blokus2p.ai.MinmaxAi
+import com.example.blokus2p.ai.MonteCarloTreeSearchAi
 import com.example.blokus2p.ai.RandomAi
 import com.example.blokus2p.game.BlokusRules
 import com.example.blokus2p.game.GameEngine
@@ -16,6 +17,7 @@ import com.example.blokus2p.events.GameEvent
 import com.example.blokus2p.game.Polyomino
 import com.example.blokus2p.events.PolyominoEvent
 import com.example.blokus2p.game.BlokusBoard
+import com.example.blokus2p.game.GameBoard
 import com.example.blokus2p.helper.getUpdatedPlayerBitBoard
 import com.example.blokus2p.helper.mapCellsToBoardIndexes
 import com.example.blokus2p.model.PlayerType
@@ -470,7 +472,7 @@ class AppViewModel : ViewModel() {
 
     }
 
-    private fun updateBoard(newBoard: BlokusBoard?) {
+    private fun updateBoard(newBoard: GameBoard?) {
         if (newBoard != null) {
             val gameState = _gameState.value
             val updatedPlayerBitBoard = getUpdatedPlayerBitBoard(gameState.board.boardGrid, newBoard.boardGrid,gameState.activPlayer.bitBoard,)
@@ -494,7 +496,7 @@ class AppViewModel : ViewModel() {
         }
     }
 
-    private fun updateBoardUndo(newBoard: BlokusBoard?){
+    private fun updateBoardUndo(newBoard: GameBoard?){
         // Hier wird der letzte Zug rückgängig gemacht
         // es könnte sein das availableEdges und availableMoves nicht mehr stimmen
         if (newBoard != null) {
@@ -532,7 +534,7 @@ class AppViewModel : ViewModel() {
             Human -> null
             MinimaxAI -> MinmaxAi()
             RandomAI -> RandomAi()
-            MonteCarloAI -> RandomAi()
+            MonteCarloAI -> MonteCarloTreeSearchAi()
         }
     }
 }

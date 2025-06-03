@@ -90,4 +90,5 @@ dependencies {
 
     implementation(libs.zoomable)
     implementation (libs.kotlinx.coroutines.test)
+    testImplementation(kotlin("test"))
 }

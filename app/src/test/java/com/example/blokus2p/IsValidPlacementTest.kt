@@ -22,7 +22,6 @@ class IsValidPlacementTest {
             player,
             listOf(1,14,29,15,16),
             board,
-            selectedPosition
         )
 
         // Assert the result
@@ -39,7 +38,6 @@ class IsValidPlacementTest {
             player,
             listOf(-1,-14,-29,-15,196),
             board,
-            selectedPosition
         )
 
         // Assert the result
@@ -56,13 +54,11 @@ class IsValidPlacementTest {
             player,
             listOf(0,13,14,28,15),
             board,
-            selectedPositionLeft
         )
         val resultRight = rules.isValidPlacement(
             player,
             listOf(55,68,69,83,70),
             board,
-            selectedPositionRight
         )
 
         // Assert the result
@@ -80,7 +76,6 @@ class IsValidPlacementTest {
             player,
             listOf(16,30,31),
             board,
-            selectedPositionTop
         )
         // Assert the result
         assertFalse(resultTop)
@@ -97,7 +92,6 @@ class IsValidPlacementTest {
             player,
             listOf(0,14,15),
             board,
-            selectedPositionTop
         )
         // Assert the result
         assertFalse(resultTop)
@@ -118,25 +112,21 @@ class IsValidPlacementTest {
             player,
             listOf(14),
             board,
-            selectedPositionTop
         )
         val resultRight = rules.isValidPlacement(
             player,
             listOf(15),
             board,
-            selectedPositionTop
         )
         val resultDown = rules.isValidPlacement(
             player,
             listOf(17),
             board,
-            selectedPositionTop
         )
         val resultLeft = rules.isValidPlacement(
             player,
             listOf(20),
             board,
-            selectedPositionTop
         )
         print("resultTop: $resultTop, resultRight: $resultRight, resultDown: $resultDown, resultLeft: $resultLeft")
         // Assert the result

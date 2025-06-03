@@ -9,6 +9,19 @@ data class GameState(
     val activPlayer: Player = Player(),
     val playerOneColor: Color = Color.Black,
     val playerTwoColor: Color = Color.Black,
-    var board: BlokusBoard = BlokusBoard(),
+    var board: GameBoard = BlokusBoard(),
     val selectedPolyomino: Polyomino = Polyomino()
-)
+){
+    fun getResult(): Double {
+        val result =
+             when {
+                players[0].points > players[1].points -> 1.0 // Spieler 1 gewinnt
+                players[0].points < players[1].points -> -1.0 // Spieler 2 gewinnt
+                else -> 0.0 // Unentschieden
+            }
+        if(players[0].isMaximizing)
+            return result
+        else
+            return -result
+    }
+}

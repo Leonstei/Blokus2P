@@ -1,57 +1,64 @@
 package com.example.blokus2p.ai
 
-import com.example.blokus2p.game.BlokusRules
 import com.example.blokus2p.game.GameEngine
 import com.example.blokus2p.game.GameState
 import com.example.blokus2p.game.PlacedPolyomino
 import com.example.blokus2p.game.Player
+import com.example.blokus2p.helper.gameStateToSmalGameState
+import com.example.blokus2p.helper.makeMove
+import com.example.blokus2p.helper.smalMoveToMove
 import com.example.blokus2p.model.Move
+import com.example.blokus2p.model.PlacedSmalPolyomino
 import com.example.blokus2p.model.ScoredMove
+import com.example.blokus2p.model.SmalGameState
+import com.example.blokus2p.model.SmalMove
+import com.example.blokus2p.model.SmalPlayer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 
 class MinmaxAi : AiInterface {
     override fun getNextMove(gameState: GameState): Move? {
+        val smalGameState = gameStateToSmalGameState(gameState)
         var depth = 3
         if(gameState.activPlayer.availableMoves.size > 50){
             depth--
         }
-        val bestMove = findBestMove(gameState, depth)
+        val bestMove = findBestMove(smalGameState, depth)
         return bestMove
     }
 
-    private suspend fun findBestMoveParallel(
-        gameState: GameState,
-        depth: Int
-    ): Move? = coroutineScope {
-        val maximizingPlayer = getMaximizingPlayer(gameState)
-        val currentPlayer = gameState.players[gameState.activPlayer_id - 1]
-        val moves = getMoves(currentPlayer)
-
-        val filterdMoves = if (moves.size > 100){
-            moves.filterIndexed { index, move ->
-                index % 4 == 0 && move.polyomino.points == moves.first().polyomino.points
-            }
-        }else {
-            moves.filterIndexed { index, move ->
-                index % 3 == 0 && move.polyomino.points == moves.first().polyomino.points
-            }
-        }
-
-        val moveChunks = filterdMoves.chunked((filterdMoves.size / 10) + 1) // Teilt die Züge in Gruppen von 4 auf
-        val currentdepth = depth-1
-
-        val bestResult = moveChunks.flatMap { chunk ->
-            chunk.map { move ->
-                async(Dispatchers.Default) {
-                    val newState = makeMove(gameState, move, currentPlayer)
-                    minmaxAlphaBeta(currentdepth, newState, maximizingPlayer, Int.MIN_VALUE, Int.MAX_VALUE).copy(move = move)
-                }
-            }.awaitAll()
-        }.maxByOrNull { it.score }
-
-        bestResult?.move
+//    private suspend fun findBestMoveParallel(
+//        gameState: GameState,
+//        depth: Int
+//    ): Move? = coroutineScope {
+//        val maximizingPlayer = getMaximizingPlayer(gameState)
+//        val currentPlayer = gameState.players[gameState.activPlayer_id - 1]
+//        val moves = getMoves(currentPlayer)
+//
+//        val filterdMoves = if (moves.size > 100){
+//            moves.filterIndexed { index, move ->
+//                index % 4 == 0 && move.polyomino.points == moves.first().polyomino.points
+//            }
+//        }else {
+//            moves.filterIndexed { index, move ->
+//                index % 3 == 0 && move.polyomino.points == moves.first().polyomino.points
+//            }
+//        }
+//
+//        val moveChunks = filterdMoves.chunked((filterdMoves.size / 10) + 1) // Teilt die Züge in Gruppen von 4 auf
+//        val currentdepth = depth-1
+//
+//        val bestResult = moveChunks.flatMap { chunk ->
+//            chunk.map { move ->
+//                async(Dispatchers.Default) {
+//                    val newState = GameEngine().makeMove(gameState, move, currentPlayer)
+//                    minmaxAlphaBeta(currentdepth, newState, maximizingPlayer, Int.MIN_VALUE, Int.MAX_VALUE).copy(move = move)
+//                }
+//            }.awaitAll()
+//        }.maxByOrNull { it.score }
+//
+//        bestResult?.move
 
 
         //val semaphore = Semaphore(permits = 4) // max 8 gleichzeitig
@@ -73,62 +80,25 @@ class MinmaxAi : AiInterface {
 //            results.minByOrNull { it.score }
 //        }
 //        best?.move
-    }
-    private fun findBestMove(gameState: GameState, depth: Int): Move? {
+//    }
+    private fun findBestMove(gameState: SmalGameState, depth: Int): Move? {
         val maximizingPlayer = getMaximizingPlayer(gameState)
         val result= minmaxAlphaBeta(depth, gameState,maximizingPlayer,Int.MIN_VALUE, Int.MAX_VALUE)
-        //Log.d("AppViewModel", "Score: ${scoredMove.score}")
-        return result.move
+            //Log.d("AppViewModel", "Score: ${scoredMove.score}")
+        if( result.move == null) {
+            return null
+        }else
+            return smalMoveToMove(result.move)
     }
 
-    fun getMoves(player: Player): Set<Move> {
+    fun getMoves(player: SmalPlayer): Set<SmalMove> {
         return player.availableMoves
     }
 
-    fun makeMove(gameState: GameState, move: Move, player: Player): GameState  {
-        val rules = BlokusRules()
-        val newBoard = GameEngine().placeAiMove(
-            player,
-            move.polyomino,
-            move.position
-            ,gameState.board, rules, move.orientation
-        ) ?: return gameState
-
-        val updatedPlayers = gameState.players.map { p ->
-            if (p.id == player.id) {
-                val newPolyominos = p.polyominos.toMutableList().apply { remove(move.polyomino) }
-
-                val newAvailableEdges = GameEngine().calculateNewAvailableEdges(p, newBoard)
-                val notAvailableEdges = GameEngine().notCheckForNotAvailableEdges(p.availableEdges, newBoard)
-                val finalEdges = p.availableEdges + newAvailableEdges - notAvailableEdges
-
-                val newAvailableMoves = GameEngine().calculateNewMoves(
-                    p.copy(availableEdges = finalEdges, polyominos = newPolyominos), newBoard, rules)
-                val notAvailableMoves = GameEngine().calculateNotAvailableMoves(p, newBoard)
-                val finalMoves = p.availableMoves + newAvailableMoves - notAvailableMoves.toSet()
-                p.copy(
-                    points = p.points + move.polyomino.points,
-                    polyominos = newPolyominos,
-                    isActiv = false,
-                    availableEdges = finalEdges,
-                    availableMoves = finalMoves
-                )
-            } else {
-                val opponentNotAvailableMoves = GameEngine().calculateNotAvailableMoves(p, newBoard)
-                p.copy(isActiv = true, availableMoves = p.availableMoves.minus(opponentNotAvailableMoves.toSet())) // Unverändert übernehmen
-            }
-        }
-
-        return gameState.copy(
-            activPlayer_id = if (gameState.activPlayer_id == gameState.players.size) 1 else gameState.activPlayer_id + 1,
-            board = newBoard,
-            players = updatedPlayers
-        )
-    }
 
 
     fun minmaxAlphaBeta(
-        depth: Int, gameState: GameState, maximizingPlayer: Player,alpha:Int,beta:Int
+        depth: Int, gameState: SmalGameState, maximizingPlayer: SmalPlayer,alpha:Int,beta:Int
     ): ScoredMove {
         // Basisfall: Bei Erreichung der maximalen Tiefe oder Spielende
         if (depth == 0 || gameOver(gameState)) {
@@ -141,7 +111,7 @@ class MinmaxAi : AiInterface {
 
         var currentAlpha = alpha
         var currentBeta = beta
-        var bestMove: Move? = null
+        var bestMove: SmalMove? = null
 
         val currentPlayer = gameState.players[gameState.activPlayer_id-1]
         val isMaximizingPly = (currentPlayer.id == maximizingPlayer.id)
@@ -149,11 +119,11 @@ class MinmaxAi : AiInterface {
         val possibleMoves = getMoves(currentPlayer)
         val filterdMoves = if (possibleMoves.size > 100){
             possibleMoves.filterIndexed { index, move ->
-                index % 19 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
+                index % 3 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
             }
         }else {
             possibleMoves.filterIndexed { index, move ->
-                index % 11 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
+                index % 2 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
             }
         }
 
@@ -200,19 +170,19 @@ class MinmaxAi : AiInterface {
     }
 
 
-    fun getMaximizingPlayer(gameState: GameState): Player {
+    fun getMaximizingPlayer(gameState: SmalGameState): SmalPlayer {
         gameState.players.forEach {player->
             if (player.isMaximizing)
                 return player
         }
-        return Player()
+        return SmalPlayer()
     }
 
-    fun gameOver(gameState: GameState): Boolean {
+    fun gameOver(gameState: SmalGameState): Boolean {
         return GameEngine().checkForGameEnd(gameState.players)
     }
 
-    fun evaluate(gameState: GameState): Int {
+    fun evaluate(gameState: SmalGameState): Int {
         val maximizingPlayer = getMaximizingPlayer(gameState)
         val opponent = gameState.players[maximizingPlayer.id  % gameState.players.size]
 
@@ -227,12 +197,12 @@ class MinmaxAi : AiInterface {
     }
 
     fun evaluateCenterControl(
-        maximizingPlayer: Player,
-        opponent: Player,
-        gameState: GameState
+        maximizingPlayer: SmalPlayer,
+        opponent: SmalPlayer,
+        gameState: SmalGameState
     ): Int {
-        val lastPolyominoMaximizingPlayer = gameState.board.placedPolyominos.filter { it.playerId == maximizingPlayer.id }.last()
-        val lastPolyominoOpponent = gameState.board.placedPolyominos.filter { it.playerId == opponent.id }.last()
+        val lastPolyominoMaximizingPlayer = gameState.board.placedPolyominosSmal.filter { it.playerId == maximizingPlayer.id }.last()
+        val lastPolyominoOpponent = gameState.board.placedPolyominosSmal.filter { it.playerId == opponent.id }.last()
 
         val distanceMaximizingPlayer = distancToCenterForPolyomino(lastPolyominoMaximizingPlayer)
         val distanceOpponent = distancToCenterForPolyomino(lastPolyominoOpponent)
@@ -240,7 +210,7 @@ class MinmaxAi : AiInterface {
     }
 
     fun distancToCenterForPolyomino(
-        polyomino: PlacedPolyomino
+        polyomino: PlacedSmalPolyomino
     ): Double {
         val centerX = 6.5
         val centerY = 6.5
@@ -252,6 +222,7 @@ class MinmaxAi : AiInterface {
         }
         return distance
     }
+
 
 //    fun minimax(board: Board, depth: Int, alpha: Int, beta: Int, isMaximizingPlayer: Boolean): Int {
 //        if (depth == 0 || gameOver(board)) {
