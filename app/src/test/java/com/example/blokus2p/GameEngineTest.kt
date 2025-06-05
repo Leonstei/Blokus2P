@@ -35,6 +35,149 @@ class GameEngineTest {
     val board = SmalBoard()
     val viewModel = AppViewModel()
     val gameState = viewModel.gameState.value
+    val edgesOfFirstMoves =
+        listOf(
+            2,4,4,4,4,4,4,4,4,2,
+
+            6,6,6,6,6,6,6,6,
+            6,6,6,6,6,6,6,6,
+            6,6,6,6,6,6,6,6,
+            6,6,6,6,6,6,6,6,
+            6,6,6,6,6,6,6,6,
+
+            7,7,7,7,7,7,7,7,
+            7,7,7,7,7,7,7,7,
+            7,7,7,7,7,7,7,7,
+            7,7,7,7,7,7,7,7,
+            7,7,7,7,7,7,7,7,
+
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,5,5,5,5,
+
+            6,6,6,6,6,6,6,6,
+            6,6,6,6,6,6,6,6,
+            6,6,6,6,6,6,6,6,
+            6,6,6,6,6,6,6,6,
+            6,6,6,6,6,6,6,6,
+
+            7,7,7,7,7,7,7,7,
+            7,7,7,7,7,7,7,7,
+            7,7,7,7,
+
+            6,6,6,6,6,6,6,6,
+            6,6,6,6,6,6,6,6,
+            6,6,6,6,
+
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,
+
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,
+
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,5,5,5,5,
+
+            6,6,6,6,6,6,6,6,
+            6,6,6,6,6,6,6,6,
+            6,6,6,6,
+
+            8,8,8,8,8,
+
+            4,4,4,4,4,4,4,4,
+
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,5,5,5,5,
+
+            6,6,6,6,6,6,6,6,
+            6,6,6,6,6,6,6,6,
+
+            6,6,6,6,6,6,6,6,
+            6,6,6,6,6,6,6,6,
+
+            4,4,4,4,
+
+            4,4,4,4,4,4,
+
+            5,5,5,5,5,5,5,5,
+            5,5,5,5,
+
+            4,4,4,4,
+
+            4)
+    //[130, 131, 144, 145, 158]
+    //[37, 51, 65]
+    //[91, 104, 105, 106, 118]
+    //[67, 80, 81, 82]
+    //[61, 74, 75, 89]
+    //[7, 21, 22]
+    //[4, 18, 32, 33, 46]
+    //[12, 26, 27, 40, 54]
+    //[99, 100, 101, 115]
+    //[93, 107]
+    //[64, 78, 79]
+    //[109, 122, 123, 124, 136]
+    //[57, 70, 71, 84]
+    val moves = listOf(
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_BLOCK, 5,
+                cells = listOf(130, 131, 144, 145, 158) ), 130
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.DREI, 3,
+                cells = listOf(37, 51, 65) ), 130
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_7, 5,
+                cells = listOf(91, 104, 105, 106, 118) ), 130
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.VIER_T, 4,
+                cells = listOf(67, 80, 81, 82) ), 80
+        ),        SmalMove(
+            SmalPolyomino( PolyominoNames.VIER_T, 4,
+                cells = listOf(61, 74, 75, 89) ), 89
+        ),        SmalMove(
+            SmalPolyomino( PolyominoNames.DREI_L, 3,
+                cells = listOf(7, 21, 22) ), 22
+        ),        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_SMAL_T, 5,
+                cells = listOf(4, 18, 32, 33, 46) ), 46
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_SMAL_T, 5,
+                cells = listOf(12, 26, 27, 40, 54) ), 54
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.VIER_L, 4,
+                cells = listOf(99, 100, 101, 115) ), 115
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.ZWEI, 2,
+                cells = listOf(93, 107) ), 93
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.DREI_L, 3,
+                cells = listOf(64, 78, 79) ), 78
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_7, 5,
+                cells = listOf(109, 122, 123, 124, 136) ), 130
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.VIER_Z, 4,
+                cells = listOf(57, 70, 71, 84) ), 84
+        ),
+    )
 
 
 
@@ -116,5 +259,33 @@ class GameEngineTest {
     }
 
     // Weitere Tests für Spezialfälle, z.B. keine Polyominos mehr, keine Moves mehr etc.
+    @Test
+    fun `make all first moves and calculateNewAvailableMoves`() {
+        val gameState = viewModel.gameState.value
+        val smalGameState = gameStateToSmalGameState(gameState)
+        val playerOne = smalGameState.players.first { it.id == 1 }
+        val playerTwo = smalGameState.players.first { it.id == 2 }
+        val edgeCounts: MutableList<Int> = mutableListOf()
+        playerOne.availableMoves.forEachIndexed { index, move ->
+            val newGameState = makeMove(smalGameState, move, playerOne)
+            val edgeCount = newGameState.players[0].availableEdges.size
+            print(edgeCount)
+            edgeCounts.add(newGameState.players[0].availableEdges.size)
+            assertEquals(edgesOfFirstMoves[index],newGameState.players[0].availableEdges.size)
+        }
+    }
 
+    @Test
+    fun `make a sertian move and check available edges and moves`() {
+        var rolloutState = gameStateToSmalGameState(viewModel.gameState.value )
+        moves.forEach {
+            val activPlayer = getActivPlayer(rolloutState)
+            rolloutState = makeMove(rolloutState,it,activPlayer)
+        }
+    }
+
+
+
+    //[151, 152, 163, 164, 165]
+    //[171, 173, 185, 186, 187]
 }

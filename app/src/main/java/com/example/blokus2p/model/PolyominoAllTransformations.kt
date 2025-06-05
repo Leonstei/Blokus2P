@@ -15,6 +15,16 @@ val polyominoVariants: Map<PolyominoNames,List<PolyominoVariant>> =
             PolyominoVariant(cells = listOf(0, 1, 2, 3, 4), isFlipped = true, rotation = 270)
         ),
         PolyominoNames.FÜNF_ZL to listOf(
+            PolyominoVariant(cells=listOf(0, 14, 15, 29, 43), isFlipped=false, rotation=0),
+            PolyominoVariant(cells=listOf(1, 14, 15, 28, 42), isFlipped=true, rotation=0),
+            PolyominoVariant(cells=listOf(2, 3, 14, 15, 16), isFlipped=false, rotation=90),
+            PolyominoVariant(cells=listOf(0, 1, 15, 16, 17), isFlipped=true, rotation=90),
+            PolyominoVariant(cells=listOf(0, 14, 28, 29, 43), isFlipped=false, rotation=180),
+            PolyominoVariant(cells=listOf(1, 15, 28, 29, 42), isFlipped=true, rotation=180),
+            PolyominoVariant(cells=listOf(1, 2, 3, 14, 15), isFlipped=false, rotation=270),
+            PolyominoVariant(cells=listOf(0, 1, 2, 16, 17), isFlipped=true, rotation=270)
+        ),
+        PolyominoNames.FÜNF_7 to listOf(
             PolyominoVariant(cells=listOf(0, 14, 15, 16, 29), isFlipped=false, rotation=0),
             PolyominoVariant(cells=listOf(0, 14, 15, 16, 29), isFlipped=true, rotation=0),
             PolyominoVariant(cells=listOf(1, 2, 14, 15, 29), isFlipped=false, rotation=90),
@@ -23,16 +33,6 @@ val polyominoVariants: Map<PolyominoNames,List<PolyominoVariant>> =
             PolyominoVariant(cells=listOf(1, 14, 15, 16, 28), isFlipped=true, rotation=180),
             PolyominoVariant(cells=listOf(1, 15, 16, 28, 29), isFlipped=false, rotation=270),
             PolyominoVariant(cells=listOf(1, 14, 15, 29, 30), isFlipped=true, rotation=270)
-        ),
-        PolyominoNames.FÜNF_7 to listOf(
-            PolyominoVariant(cells=listOf(0, 14, 28, 42, 43), isFlipped=false, rotation=0),
-            PolyominoVariant(cells=listOf(1, 15, 29, 42, 43), isFlipped=true, rotation=0),
-            PolyominoVariant(cells=listOf(0, 1, 2, 3, 14), isFlipped=false, rotation=90),
-            PolyominoVariant(cells=listOf(0, 1, 2, 3, 17), isFlipped=true, rotation=90),
-            PolyominoVariant(cells=listOf(0, 1, 15, 29, 43), isFlipped=false, rotation=180),
-            PolyominoVariant(cells=listOf(0, 1, 14, 28, 42), isFlipped=true, rotation=180),
-            PolyominoVariant(cells=listOf(3, 14, 15, 16, 17), isFlipped=false, rotation=270),
-            PolyominoVariant(cells=listOf(0, 14, 15, 16, 17), isFlipped=true, rotation=270)
         ),
         PolyominoNames.FÜNF_L to listOf(
             PolyominoVariant(cells=listOf(0, 14, 28, 42, 43), isFlipped=false, rotation=0),
@@ -136,23 +136,23 @@ val polyominoVariants: Map<PolyominoNames,List<PolyominoVariant>> =
         ),
         PolyominoNames.VIER_L to listOf(
             PolyominoVariant(cells=listOf(0, 14, 28, 29), isFlipped=false, rotation=0),
-            PolyominoVariant(cells=listOf(0, 14, 28, 29), isFlipped=true, rotation=0),
+            PolyominoVariant(cells=listOf(1, 15, 28, 29), isFlipped=true, rotation=0),
             PolyominoVariant(cells=listOf(0, 1, 2, 14), isFlipped=false, rotation=90),
-            PolyominoVariant(cells=listOf(0, 1, 2, 14), isFlipped=true, rotation=90),
-            PolyominoVariant(cells=listOf(0, 14, 28, 29), isFlipped=false, rotation=180),
-            PolyominoVariant(cells=listOf(0, 14, 28, 29), isFlipped=true, rotation=180),
-            PolyominoVariant(cells=listOf(0, 1, 2, 14), isFlipped=false, rotation=270),
-            PolyominoVariant(cells=listOf(0, 1, 2, 14), isFlipped=true, rotation=270)
+            PolyominoVariant(cells=listOf(0, 1, 2, 16), isFlipped=true, rotation=90),
+            PolyominoVariant(cells=listOf(0, 1, 15, 29), isFlipped=false, rotation=180),
+            PolyominoVariant(cells=listOf(0, 1, 14, 28), isFlipped=true, rotation=180),
+            PolyominoVariant(cells=listOf(2, 14, 15, 16), isFlipped=false, rotation=270),
+            PolyominoVariant(cells=listOf(0, 14, 15, 16), isFlipped=true, rotation=270)
         ),
         PolyominoNames.VIER_T to listOf(
             PolyominoVariant(cells=listOf(0, 14, 28, 15), isFlipped=false, rotation=0),
-            PolyominoVariant(cells=listOf(0, 14, 28, 15), isFlipped=true, rotation=0),
-            PolyominoVariant(cells=listOf(0, 1, 2, 14), isFlipped=false, rotation=90),
-            PolyominoVariant(cells=listOf(0, 1, 2, 14), isFlipped=true, rotation=90),
-            PolyominoVariant(cells=listOf(0, 14, 28, 15), isFlipped=false, rotation=180),
+            PolyominoVariant(cells=listOf(1, 14, 15, 29), isFlipped=true, rotation=0),
+            PolyominoVariant(cells=listOf(0, 1, 2, 15), isFlipped=false, rotation=90),
+            PolyominoVariant(cells=listOf(0, 1, 2, 15), isFlipped=true, rotation=90),
+            PolyominoVariant(cells=listOf(1, 14, 15, 29), isFlipped=false, rotation=180),
             PolyominoVariant(cells=listOf(0, 14, 28, 15), isFlipped=true, rotation=180),
-            PolyominoVariant(cells=listOf(0, 1, 2, 14), isFlipped=false, rotation=270),
-            PolyominoVariant(cells=listOf(0, 1, 2, 14), isFlipped=true, rotation=270)
+            PolyominoVariant(cells=listOf(1, 14, 15, 16), isFlipped=false, rotation=270),
+            PolyominoVariant(cells=listOf(1, 14, 15, 16), isFlipped=true, rotation=270)
         ),
         PolyominoNames.VIER_Z to listOf(
             PolyominoVariant(cells=listOf(0, 14, 15, 29), isFlipped=false, rotation=0),

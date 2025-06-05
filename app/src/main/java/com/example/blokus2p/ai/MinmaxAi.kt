@@ -115,7 +115,7 @@ class MinmaxAi : AiInterface {
 
         val currentPlayer = gameState.players[gameState.activPlayer_id-1]
         val isMaximizingPly = (currentPlayer.id == maximizingPlayer.id)
-
+        //isMaximizing wird nicht richtig gesetzt manschmal sind beide Spieler Maximizer
         val possibleMoves = getMoves(currentPlayer)
         val filterdMoves = if (possibleMoves.size > 100){
             possibleMoves.filterIndexed { index, move ->
@@ -126,6 +126,7 @@ class MinmaxAi : AiInterface {
                 index % 2 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
             }
         }
+        // if züge vom gegner empty dann gegner überspringen
 
         if(isMaximizingPly){
             var maxScore = Int.MIN_VALUE // Bester Wert für diesen maximierenden Knoten
@@ -148,7 +149,7 @@ class MinmaxAi : AiInterface {
             return ScoredMove(bestMove, maxScore, depth)
         }else { // Minimierender Spieler ist am Zug
             var minScore = Int.MAX_VALUE // Bester Wert für diesen minimierenden Knoten
-            for (move in possibleMoves) {
+            for (move in filterdMoves) {
                 val newGameState = makeMove(gameState, move, currentPlayer)
                 // Rekursiver Aufruf für den nächsten Zustand, alpha und beta weitergeben
                 val scoredMoveRecursive = minmaxAlphaBeta(depth - 1, newGameState, maximizingPlayer, currentAlpha, currentBeta)
@@ -201,9 +202,14 @@ class MinmaxAi : AiInterface {
         opponent: SmalPlayer,
         gameState: SmalGameState
     ): Int {
-        val lastPolyominoMaximizingPlayer = gameState.board.placedPolyominosSmal.filter { it.playerId == maximizingPlayer.id }.last()
-        val lastPolyominoOpponent = gameState.board.placedPolyominosSmal.filter { it.playerId == opponent.id }.last()
+        val lastPolyominoMaximizingPlayer =
+            gameState.board.placedPolyominosSmal.lastOrNull { it.playerId == maximizingPlayer.id }
+        val lastPolyominoOpponent =
+            gameState.board.placedPolyominosSmal.lastOrNull { it.playerId == opponent.id }
 
+        if(lastPolyominoMaximizingPlayer == null || lastPolyominoOpponent == null) {
+            return 0 // Wenn einer der Spieler noch keinen Zug gemacht hat, gibt es keine Bewertung
+        }
         val distanceMaximizingPlayer = distancToCenterForPolyomino(lastPolyominoMaximizingPlayer)
         val distanceOpponent = distancToCenterForPolyomino(lastPolyominoOpponent)
         return (-distanceMaximizingPlayer + distanceOpponent).toInt()

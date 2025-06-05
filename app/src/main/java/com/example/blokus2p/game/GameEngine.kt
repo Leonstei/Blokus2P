@@ -90,10 +90,21 @@ class GameEngine {
         return filteredEdges.toSet()
     }
 
-    fun notCheckForNotAvailableEdges(edges: Set<Int>, board: GameBoard):Set<Int>{
+    fun checkForNotAvailableEdges(edges: Set<Int>, board: GameBoard, playerBoard: LongArray):Set<Int>{
         val notAvailableEdges : MutableSet<Int> = mutableSetOf()
         edges.forEach { index->
             if (isBitSet(board.boardGrid, index)) notAvailableEdges.add(index)
+            else{
+                val cellAbove = index - 14
+                val cellLeft = index - 1
+                val cellRight = index + 1
+                val cellBelow = index + 14
+
+                if (cellAbove in 0 until 196 && isBitSet(playerBoard, cellAbove)) notAvailableEdges.add(index)
+                if (cellLeft in 0 until 196 && isBitSet(playerBoard, cellLeft)) notAvailableEdges.add(index)
+                if (cellRight in 0 until 196 && isBitSet(playerBoard, cellRight)) notAvailableEdges.add(index)
+                if (cellBelow in 0 until 196 && isBitSet(playerBoard, cellBelow)) notAvailableEdges.add(index)
+            }
         }
         return notAvailableEdges
     }
@@ -232,7 +243,7 @@ class GameEngine {
     fun checkForNotValidMoves( moves :Set<Move>,rules: GameRules,player: Player,board: GameBoard):List<Move> {
         val notValidMoves = mutableListOf<Move>()
         for ( move in moves) {
-            if (!rules.isValidPlacement(player, move.polyomino.cells, board)) {
+            if (!rules.isValidPlacement(player, move.orientation, board  )|| move.polyomino !in player.polyominos) {
                 notValidMoves.add(move)
             }
         }

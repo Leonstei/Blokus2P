@@ -95,3 +95,20 @@ fun getUpdatedPlayerBitBoard(oldBoard: LongArray, newBoard: LongArray,playerBoar
     // Füge die neuen Bits dem alten BitBoard hinzu (OR-Operation)
     return orBitBoardReturn(playerBoard, newBits)
 }
+
+fun visualizeBitBoard(bitBoard: LongArray) {
+    val bits = bitBoard
+        .flatMap { long ->
+            (63 downTo 0).map { i ->
+                if ((long ushr i) and 1L == 1L) '█' else '.'
+            }
+        }
+
+    for (y in 0 until 14) {
+        for (x in 0 until 14) {
+            val index = y * 14 + x
+            print(bits[index])
+        }
+        println()
+    }
+}

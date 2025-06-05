@@ -36,6 +36,10 @@ data class Node(
             val activPlayer = getActivPlayer(rolloutState)
             //Log.d("AppViewModel", "Rollout state: {${rolloutState.board.placedPolyominos}")
             val moves = activPlayer.availableMoves
+            if (moves.isEmpty()) {
+                // Wenn keine Züge mehr verfügbar sind, beenden wir den Rollout
+                break
+            }
             val randomMove = moves.random()
             //Log.d("AppViewModel", "Random move: $randomMove")
             rolloutState = makeMove(rolloutState,randomMove,activPlayer)

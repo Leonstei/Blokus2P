@@ -101,6 +101,45 @@ fun place(
     )
 }
 
+fun calculateAllMovesOfAPlayer(player: SmalPlayer, board: SmalBoard, rules: GameRules):Set<SmalMove>{
+    val validMoves = mutableListOf<SmalMove>()
+//        val timeTaken = measureTime {
+    for (polyomino in player.polyominos) {
+        // Transformationen: Rotationen & Spiegelungen
+        val transformedShapes = polyomino.distinctVariants
+//            Log.d("AppViewModel", "getAllTransformations: $timeTaken2")
+        for (shape in transformedShapes) {
+            for (edge in player.availableEdges) {
+                // Probiere alle Verschiebungen des Polyominos von der Edge aus
+                for (cell in shape) {
+                    val newShape = normalizeShapeForCell(cell, shape)
+                    val boardPositions = newShape.map {
+                        it + edge
+                    }
+                    // Ist der Zug erlaubt?
+                    if (rules.isValidPlacementSmal(
+                            player,
+                            boardPositions,
+                            board
+                        )
+                    ) {
+                        validMoves.add(
+                            SmalMove(
+                                polyomino = polyomino.copy(cells = boardPositions),
+                                position = edge
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+    //}
+//            Log.d("AppViewModel", "validMoves ${validMoves.size}")
+    // Log.d("AppViewModel", "time taken $timeTaken")
+    return validMoves.toSet()
+}
+
 fun calculateNewAvailableEdges(player: SmalPlayer, board: SmalBoard): Set<Int> {
     val newAvailableEdges: MutableSet<Int> = mutableSetOf()
     val lastPlacedPolyominoFromPlayer = board.placedPolyominosSmal.lastOrNull { it.playerId == player.id }
@@ -137,13 +176,26 @@ fun calculateNewAvailableEdges(player: SmalPlayer, board: SmalBoard): Set<Int> {
     }
     return filteredEdges.toSet()
 }
-fun notCheckForNotAvailableEdges(edges: Set<Int>, board: SmalBoard):Set<Int>{
+fun notCheckForNotAvailableEdges(edges: Set<Int>, board: SmalBoard,playerBoard: LongArray):Set<Int>{
     val notAvailableEdges : MutableSet<Int> = mutableSetOf()
     edges.forEach { index->
         if (isBitSet(board.boardGrid, index)) notAvailableEdges.add(index)
+        else{
+            val cellAbove = index - 14
+            val cellLeft = index - 1
+            val cellRight = index + 1
+            val cellBelow = index + 14
+
+            if (cellAbove in 0 until 196 && isBitSet(playerBoard, cellAbove)) notAvailableEdges.add(index)
+            if (cellLeft in 0 until 196 && isBitSet(playerBoard, cellLeft)) notAvailableEdges.add(index)
+            if (cellRight in 0 until 196 && isBitSet(playerBoard, cellRight)) notAvailableEdges.add(index)
+            if (cellBelow in 0 until 196 && isBitSet(playerBoard, cellBelow)) notAvailableEdges.add(index)
+        }
     }
     return notAvailableEdges
 }
+
+
 
 fun calculateNewMoves(player: SmalPlayer, board: SmalBoard, rules: GameRules): List<SmalMove> {
     val validMoves = mutableListOf<SmalMove>()
@@ -209,7 +261,7 @@ fun calculateNotAvailableMoves(player: SmalPlayer, board: SmalBoard):List<SmalMo
             notAvailableEdges.add(it)
         }
     }
-    lastPlacedPolyominoFromPlayer.cells.forEach {
+    lastPlacedPolyominoFromPlayer.cells.forEach { // hier muss ich auf die Zellen achten die über den Rand gehen
         notAvailableEdges.add(it + 1)
         notAvailableEdges.add(it - 1)
         notAvailableEdges.add(it + 14)
@@ -222,6 +274,50 @@ fun calculateNotAvailableMoves(player: SmalPlayer, board: SmalBoard):List<SmalMo
                     notAvailableEdges.contains(cell)
                 } ||
                 move.polyomino.name == lastPlacedPolyominoFromPlayer.polyomino.name
+        // letzte abfrage kann ich mir vielleicht sparen
+    }
+    //}
+    //Log.d("AppViewModel", "not validMoves  $timeTaken")
+    //Log.d("AppViewModel", "not validMoves fun1 ${notValidMoves.size}")
+    return notValidMoves
+}
+fun calculateNotAvailableMoves2(player: SmalPlayer, board: SmalBoard):List<SmalMove>{
+
+    var notValidMoves: List<SmalMove>
+    //val timeTaken = measureTime {
+    val lastPlacedPolyominoFromPlayer =
+        board.placedPolyominosSmal.lastOrNull { it.playerId == player.id }
+    //val lastPlacedPolyominoFromPlayer = lastPlacedPolyominosFromPlayer.lastOrNull()
+    if (lastPlacedPolyominoFromPlayer == null) return emptyList()
+
+    //funktioniert nicht bei mehr als 2 Spielern
+    val lastPlacedPolyominoFromOtherPlayer =
+        board.placedPolyominosSmal.lastOrNull { it.playerId != player.id }
+    //val lastPlacedPolyominoFromOtherPlayer =
+    //    lastPlacedPolyominosFromOtherPlayer.lastOrNull()
+
+    val notAvailableEdges: MutableList<Int> =
+        mutableListOf(lastPlacedPolyominoFromPlayer.placePosition)
+
+    if (lastPlacedPolyominoFromOtherPlayer != null) {
+        lastPlacedPolyominoFromOtherPlayer.cells.forEach {
+            notAvailableEdges.add(it)
+        }
+    }
+    lastPlacedPolyominoFromPlayer.cells.forEach { // hier muss ich auf die Zellen achten die über den Rand gehen
+        notAvailableEdges.add(it + 1)
+        notAvailableEdges.add(it - 1)
+        notAvailableEdges.add(it + 14)
+        notAvailableEdges.add(it - 14)
+    }
+
+    notValidMoves = player.availableMoves.filter { move ->
+        notAvailableEdges.contains(move.position) ||
+                move.polyomino.cells.any { cell ->
+                    notAvailableEdges.contains(cell)
+                } ||
+                move.polyomino.name == lastPlacedPolyominoFromPlayer.polyomino.name
+        // letzte abfrage kann ich mir vielleicht sparen
     }
     //}
     //Log.d("AppViewModel", "not validMoves  $timeTaken")
@@ -231,6 +327,7 @@ fun calculateNotAvailableMoves(player: SmalPlayer, board: SmalBoard):List<SmalMo
 
 fun makeMove(gameState: SmalGameState, move: SmalMove, player: SmalPlayer): SmalGameState  {
     val rules = BlokusRules()
+    println(move.polyomino.cells)
     val newBoard = place(
         player,
         move.polyomino,
@@ -239,21 +336,33 @@ fun makeMove(gameState: SmalGameState, move: SmalMove, player: SmalPlayer): Smal
     )
         ?: return gameState
 
+
     val updatedPlayers = gameState.players.map { p ->
         if (p.id == player.id) {
-            val newPolyominos = p.polyominos.toMutableList().apply { remove(move.polyomino) }
+            val newPolyominos = p.polyominos.toMutableList().apply { removeIf { move.polyomino.name == it.name } }
 
             val updatedPlayerBitBoard = getUpdatedPlayerBitBoard(gameState.board.boardGrid, newBoard.boardGrid,p.bitBoard)
 
             val updatedPlayer =  p.copy(polyominos = newPolyominos, bitBoard = updatedPlayerBitBoard)
             val newAvailableEdges = calculateNewAvailableEdges(updatedPlayer, newBoard)
-            val notAvailableEdges = notCheckForNotAvailableEdges(updatedPlayer.availableEdges, newBoard)
+            val notAvailableEdges = notCheckForNotAvailableEdges(updatedPlayer.availableEdges, newBoard,updatedPlayerBitBoard)
             val finalEdges = p.availableEdges + newAvailableEdges - notAvailableEdges
 
+            val allAvailableMoves = calculateAllMovesOfAPlayer(
+                updatedPlayer.copy(availableEdges = finalEdges), newBoard, rules)
             val newAvailableMoves = calculateNewMoves(
                 updatedPlayer.copy(availableEdges = finalEdges), newBoard, rules)
             val notAvailableMoves = calculateNotAvailableMoves(updatedPlayer, newBoard)
             val finalMoves = updatedPlayer.availableMoves + newAvailableMoves - notAvailableMoves.toSet()
+            //println("all available : ${allAvailableMoves.size}, final: ${finalMoves.size} new available: ${newAvailableMoves.size}, not available: ${notAvailableMoves.size},")
+            val movesNotinAllMoves: MutableList<SmalMove> = mutableListOf()
+            if (finalMoves.size != allAvailableMoves.size) {
+                allAvailableMoves.forEach { move ->
+                    if (!finalMoves.contains(move))
+                        movesNotinAllMoves.add(move)
+                        //println(move)
+                }
+            }
             updatedPlayer.copy(
                 points = p.points + move.polyomino.points,
                 isActiv = false,
