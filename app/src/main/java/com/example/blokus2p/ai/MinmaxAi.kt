@@ -115,7 +115,6 @@ class MinmaxAi : AiInterface {
 
         val currentPlayer = gameState.players[gameState.activPlayer_id-1]
         val isMaximizingPly = (currentPlayer.id == maximizingPlayer.id)
-        //isMaximizing wird nicht richtig gesetzt manschmal sind beide Spieler Maximizer
         val possibleMoves = getMoves(currentPlayer)
         val filterdMoves = if (possibleMoves.size > 100){
             possibleMoves.filterIndexed { index, move ->
@@ -126,8 +125,18 @@ class MinmaxAi : AiInterface {
                 index % 2 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
             }
         }
-        // if züge vom gegner empty dann gegner überspringen
 
+        if (filterdMoves.isEmpty()) {
+            // Nächsten Spieler aktivieren (ohne die Tiefe zu verringern, da „kein Zug“)
+            val nextPlayerIndex = (gameState.activPlayer_id % gameState.players.size) + 1
+            val skippedState = gameState.copy(
+                activPlayer_id = nextPlayerIndex
+                // Alle anderen Felder bleiben unverändert
+            )
+            // Rekursiver Aufruf mit gleicher Tiefe (Variante A). Wenn du möchtest,
+            // kann hier auch „depth - 1“ stehen, um Skips ebenfalls als „Tiefe“ abzurechnen.
+            return minmaxAlphaBeta(depth, skippedState, maximizingPlayer, currentAlpha, currentBeta)
+        }
         if(isMaximizingPly){
             var maxScore = Int.MIN_VALUE // Bester Wert für diesen maximierenden Knoten
             for (move in filterdMoves) {
@@ -207,12 +216,17 @@ class MinmaxAi : AiInterface {
         val lastPolyominoOpponent =
             gameState.board.placedPolyominosSmal.lastOrNull { it.playerId == opponent.id }
 
-        if(lastPolyominoMaximizingPlayer == null || lastPolyominoOpponent == null) {
-            return 0 // Wenn einer der Spieler noch keinen Zug gemacht hat, gibt es keine Bewertung
+        if(lastPolyominoMaximizingPlayer != null && lastPolyominoOpponent != null) {
+            val distanceMaximizingPlayer = distancToCenterForPolyomino(lastPolyominoMaximizingPlayer)
+            val distanceOpponent = distancToCenterForPolyomino(lastPolyominoOpponent)
+            return (-distanceMaximizingPlayer + distanceOpponent).toInt()
+        }else if (lastPolyominoMaximizingPlayer == null && lastPolyominoOpponent != null) {
+            return distancToCenterForPolyomino(lastPolyominoOpponent).toInt()  // Wenn einer der Spieler noch keinen Zug gemacht hat, gibt es keine Bewertung
+        }else if (lastPolyominoMaximizingPlayer != null) {
+            return -distancToCenterForPolyomino(lastPolyominoMaximizingPlayer).toInt()  // Wenn einer der Spieler noch keinen Zug gemacht hat, gibt es keine Bewertung
+        }else {
+            throw IllegalStateException("Both players must have made a move to evaluate center control")
         }
-        val distanceMaximizingPlayer = distancToCenterForPolyomino(lastPolyominoMaximizingPlayer)
-        val distanceOpponent = distancToCenterForPolyomino(lastPolyominoOpponent)
-        return (-distanceMaximizingPlayer + distanceOpponent).toInt()
     }
 
     fun distancToCenterForPolyomino(

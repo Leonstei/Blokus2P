@@ -7,7 +7,7 @@ class RandomAi:AiInterface {
     override fun getNextMove(gameState: GameState): Move? {
         //val moves = GameEngine().calculateAllMovesOfAPlayer(gameState.activPlayer,gameState.board,BlokusRules())
         val moves = gameState.activPlayer.availableMoves
-        if(gameState.activPlayer.id == 2){
+        if(gameState.activPlayer.id == 1){
             if (moves.isNotEmpty()){
                 val sortedMoves = moves.sortedBy { move ->
                     move.polyomino.points

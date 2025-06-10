@@ -525,6 +525,7 @@ class AppViewModel : ViewModel() {
                 )
             }
         } else {
+            println("Polyomino konnte nicht platziert werden")
 //            Log.d("AppViewModel", "Polyomino konnte nicht platziert werden")
         }
     }

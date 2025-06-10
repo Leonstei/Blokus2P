@@ -11,7 +11,7 @@ import com.example.blokus2p.model.SmalGameState
 class MonteCarloTreeSearchAi : AiInterface {
     override fun getNextMove(gameState: GameState): Move? {
         val smalGameState = gameStateToSmalGameState(gameState)
-        return mctsSearch(smalGameState, 10000)
+        return mctsSearch(smalGameState, 15000)
     }
 
     fun mctsSearch(rootState: SmalGameState, timeLimitMs: Long): Move {

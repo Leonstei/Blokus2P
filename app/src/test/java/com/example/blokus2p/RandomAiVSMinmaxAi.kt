@@ -18,7 +18,7 @@ class RandomAiVSMinmaxAi {
         var playerOneWins = 0
         var playerTwoWins = 0
         val takenTime = measureTime {
-            repeat(1) {
+            repeat(20) {
                 val viewModel: AppViewModel = AppViewModel()
                 var count = 0
                 val gameState = viewModel.gameState.value
@@ -26,7 +26,7 @@ class RandomAiVSMinmaxAi {
                     GameEvent.ChangePlayerSettings(
                         gameState.players[0].name, gameState.players[1].name,
                         gameState.players[0].color, gameState.players[1].color,
-                        PlayerType.MinimaxAI, PlayerType.RandomAI
+                        PlayerType.RandomAI, PlayerType.MinimaxAI
                     )
                 )
 
