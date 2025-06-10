@@ -283,9 +283,4 @@ class GameEngineTest {
             rolloutState = makeMove(rolloutState,it,activPlayer)
         }
     }
-
-
-
-    //[151, 152, 163, 164, 165]
-    //[171, 173, 185, 186, 187]
 }

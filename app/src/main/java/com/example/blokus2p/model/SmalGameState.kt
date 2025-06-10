@@ -128,7 +128,7 @@ data class SmalPlayer(
         SmalPolyomino(PolyominoNames.ZWEI, 2,  cells=listOf(0, 14)),
         SmalPolyomino(PolyominoNames.EINS, 1,  cells=listOf(0)),
     ),
-    val placedSmalPolyomino: SmalPolyomino = SmalPolyomino(),
+    //val placedSmalPolyomino: SmalPolyomino = SmalPolyomino(),
     val availableEdges: Set<Int> = setOf(),
     val availableMoves: Set<SmalMove> = setOf(),
     val isAi: Boolean = false,

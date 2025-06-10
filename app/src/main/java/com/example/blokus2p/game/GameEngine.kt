@@ -240,10 +240,10 @@ class GameEngine {
 //        Log.d("AppViewModel", "new validMoves ${validMoves.size}")
         return validMoves
     }
-    fun checkForNotValidMoves( moves :Set<Move>,rules: GameRules,player: Player,board: GameBoard):List<Move> {
+    fun checkForNotValidMoves( moves :Set<Move>, placedPolyomino:Polyomino,rules: GameRules,player: Player,board: GameBoard):List<Move> {
         val notValidMoves = mutableListOf<Move>()
         for ( move in moves) {
-            if (!rules.isValidPlacement(player, move.orientation, board  )|| move.polyomino !in player.polyominos) {
+            if (!rules.isValidPlacement(player, move.orientation, board  )|| move.polyomino.name == placedPolyomino.name) {
                 notValidMoves.add(move)
             }
         }

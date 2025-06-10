@@ -165,7 +165,7 @@ class AppViewModel : ViewModel() {
                 val aiMove = _gameState.value.activPlayer.ai?.getNextMove(_gameState.value)
 //                Log.d("AppViewModel", "aiMove $aiMove")
             if(aiMove == null && activePlayer.availableMoves.isNotEmpty()) {
-                val notValidMoves =  GameEngine().checkForNotValidMoves(activePlayer.availableMoves,rules,activePlayer, _gameState.value.board)
+                val notValidMoves =  GameEngine().checkForNotValidMoves(activePlayer.availableMoves, activePlayer.placedPolyomino,rules,activePlayer, _gameState.value.board)
 //                visualizeBitBoard(_gameState.value.board.boardGrid)
                 _gameState.update { state ->
                     state.copy(
@@ -452,15 +452,15 @@ class AppViewModel : ViewModel() {
         val board = _gameState.value.board
         val availableMoves = activePlayer.availableMoves
 
-        val allAvailableMoves = GameEngine().calculateAllMovesOfAPlayer(activePlayer, board, rules)
-        val notAvailableMoves = GameEngine().calculateNotAvailableMoves(activePlayer, board )
+//        val allAvailableMoves = GameEngine().calculateAllMovesOfAPlayer(activePlayer, board, rules)
+//        val notAvailableMoves = GameEngine().calculateNotAvailableMoves(activePlayer, board )
         val opponentNotAvailableMoves = GameEngine().calculateNotAvailableMoves(opponentPlayer, board)
-        val notValidMoves = GameEngine().checkForNotValidMoves(availableMoves, rules, activePlayer, board)
+        val notValidMoves = GameEngine().checkForNotValidMoves(availableMoves, activePlayer.placedPolyomino, rules, activePlayer, board)
 
         val newAvailableMoves = GameEngine().calculateNewMoves(activePlayer, board, rules)
         //println("all: ${allAvailableMoves.size} new: ${newAvailableMoves.size} not: ${notAvailableMoves.size}")
-        val finalMoves = (availableMoves.plus(newAvailableMoves).minus(notAvailableMoves.toSet()))//.sortedByDescending { move ->
-        val finalMoves2 = (availableMoves.plus(newAvailableMoves).minus(notValidMoves.toSet()))
+        val finalMoves = (availableMoves.plus(newAvailableMoves).minus(notValidMoves.toSet()))//.sortedByDescending { move ->
+ //       val finalMoves2 = (availableMoves.plus(newAvailableMoves).minus(notValidMoves.toSet()))
 //        if(finalMoves2.size != allAvailableMoves.size){
 //            finalMoves2.forEach { move ->
 //                if (!allAvailableMoves.contains(move))

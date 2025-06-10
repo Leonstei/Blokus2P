@@ -14,6 +14,7 @@ import com.example.blokus2p.model.SmalGameState
 import com.example.blokus2p.model.SmalMove
 import com.example.blokus2p.model.SmalPlayer
 import com.example.blokus2p.model.SmalPolyomino
+import kotlin.time.measureTime
 
 fun gameStateToSmalGameState(gameState: GameState): SmalGameState {
     return SmalGameState(
@@ -201,7 +202,7 @@ fun calculateNewMoves(player: SmalPlayer, board: SmalBoard, rules: GameRules): L
     val validMoves = mutableListOf<SmalMove>()
     //val timeTaken = measureTime {
 
-    val newEdges = calculateNewAvailableEdges(player, board)
+    val newEdges = player.availableEdges
 
     val lastPlacedPolyominosFromPlayer = board.placedPolyominosSmal.filter { it.playerId == player.id }
     val lastPlacedPolyominoFromPlayer = lastPlacedPolyominosFromPlayer.lastOrNull()
@@ -240,7 +241,6 @@ fun calculateNewMoves(player: SmalPlayer, board: SmalBoard, rules: GameRules): L
 }
 fun calculateNotAvailableMoves(player: SmalPlayer, board: SmalBoard):List<SmalMove>{
 
-    var notValidMoves: List<SmalMove>
     //val timeTaken = measureTime {
     val lastPlacedPolyominoFromPlayer =
         board.placedPolyominosSmal.lastOrNull { it.playerId == player.id }
@@ -262,13 +262,13 @@ fun calculateNotAvailableMoves(player: SmalPlayer, board: SmalBoard):List<SmalMo
         }
     }
     lastPlacedPolyominoFromPlayer.cells.forEach { // hier muss ich auf die Zellen achten die über den Rand gehen
-        notAvailableEdges.add(it + 1)
-        notAvailableEdges.add(it - 1)
-        notAvailableEdges.add(it + 14)
-        notAvailableEdges.add(it - 14)
+        if (it % 14 != 13) notAvailableEdges.add(it + 1)
+        if (it % 14 != 0) notAvailableEdges.add(it - 1)
+        if (it % 14 != 13) notAvailableEdges.add(it + 14)
+        if (it % 14 != 0) notAvailableEdges.add(it - 14)
     }
 
-    notValidMoves = player.availableMoves.filter { move ->
+    val notValidMoves = player.availableMoves.filter { move ->
         notAvailableEdges.contains(move.position) ||
                 move.polyomino.cells.any { cell ->
                     notAvailableEdges.contains(cell)
@@ -281,53 +281,20 @@ fun calculateNotAvailableMoves(player: SmalPlayer, board: SmalBoard):List<SmalMo
     //Log.d("AppViewModel", "not validMoves fun1 ${notValidMoves.size}")
     return notValidMoves
 }
-fun calculateNotAvailableMoves2(player: SmalPlayer, board: SmalBoard):List<SmalMove>{
 
-    var notValidMoves: List<SmalMove>
-    //val timeTaken = measureTime {
-    val lastPlacedPolyominoFromPlayer =
-        board.placedPolyominosSmal.lastOrNull { it.playerId == player.id }
-    //val lastPlacedPolyominoFromPlayer = lastPlacedPolyominosFromPlayer.lastOrNull()
-    if (lastPlacedPolyominoFromPlayer == null) return emptyList()
-
-    //funktioniert nicht bei mehr als 2 Spielern
-    val lastPlacedPolyominoFromOtherPlayer =
-        board.placedPolyominosSmal.lastOrNull { it.playerId != player.id }
-    //val lastPlacedPolyominoFromOtherPlayer =
-    //    lastPlacedPolyominosFromOtherPlayer.lastOrNull()
-
-    val notAvailableEdges: MutableList<Int> =
-        mutableListOf(lastPlacedPolyominoFromPlayer.placePosition)
-
-    if (lastPlacedPolyominoFromOtherPlayer != null) {
-        lastPlacedPolyominoFromOtherPlayer.cells.forEach {
-            notAvailableEdges.add(it)
+fun checkForNotValidMoves( moves :Set<SmalMove>, currentMove: SmalMove,rules: GameRules,player: SmalPlayer,board: SmalBoard):List<SmalMove> {
+    val notValidMoves = mutableListOf<SmalMove>()
+    for ( move in moves) {
+        if (!rules.isValidPlacementSmal(player, move.polyomino.cells, board ) || move.polyomino.name == currentMove.polyomino.name ) {
+            notValidMoves.add(move)
         }
     }
-    lastPlacedPolyominoFromPlayer.cells.forEach { // hier muss ich auf die Zellen achten die über den Rand gehen
-        notAvailableEdges.add(it + 1)
-        notAvailableEdges.add(it - 1)
-        notAvailableEdges.add(it + 14)
-        notAvailableEdges.add(it - 14)
-    }
-
-    notValidMoves = player.availableMoves.filter { move ->
-        notAvailableEdges.contains(move.position) ||
-                move.polyomino.cells.any { cell ->
-                    notAvailableEdges.contains(cell)
-                } ||
-                move.polyomino.name == lastPlacedPolyominoFromPlayer.polyomino.name
-        // letzte abfrage kann ich mir vielleicht sparen
-    }
-    //}
-    //Log.d("AppViewModel", "not validMoves  $timeTaken")
-    //Log.d("AppViewModel", "not validMoves fun1 ${notValidMoves.size}")
     return notValidMoves
 }
 
 fun makeMove(gameState: SmalGameState, move: SmalMove, player: SmalPlayer): SmalGameState  {
     val rules = BlokusRules()
-    println(move.polyomino.cells)
+    //println(move.polyomino.cells)
     val newBoard = place(
         player,
         move.polyomino,
@@ -352,8 +319,10 @@ fun makeMove(gameState: SmalGameState, move: SmalMove, player: SmalPlayer): Smal
                 updatedPlayer.copy(availableEdges = finalEdges), newBoard, rules)
             val newAvailableMoves = calculateNewMoves(
                 updatedPlayer.copy(availableEdges = finalEdges), newBoard, rules)
-            val notAvailableMoves = calculateNotAvailableMoves(updatedPlayer, newBoard)
-            val finalMoves = updatedPlayer.availableMoves + newAvailableMoves - notAvailableMoves.toSet()
+            val notValidMoves = checkForNotValidMoves(p.availableMoves, move, rules, updatedPlayer, newBoard)
+
+            // println("not valid moves: ${notValidMoves.size}, not available moves: ${notAvailableMoves.size}, not available moves2: ${notAvailbaleMoves2.size}")
+            val finalMoves = updatedPlayer.availableMoves + newAvailableMoves - notValidMoves.toSet()
             //println("all available : ${allAvailableMoves.size}, final: ${finalMoves.size} new available: ${newAvailableMoves.size}, not available: ${notAvailableMoves.size},")
             val movesNotinAllMoves: MutableList<SmalMove> = mutableListOf()
             if (finalMoves.size != allAvailableMoves.size) {
