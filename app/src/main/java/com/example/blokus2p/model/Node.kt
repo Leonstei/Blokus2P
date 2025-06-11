@@ -15,6 +15,9 @@ data class Node(
     val children: MutableList<Node> = mutableListOf(),
     val untriedMoves: MutableList<SmalMove> =  getActivPlayer(state).availableMoves.toMutableList()
 ){
+    override fun toString(): String {
+        return "Node(state is finished=${state.isFinished}, move=$move, visits=$visits, wins=$wins, children=${children.size})"
+    }
     fun uctSelectChild(): Node {
         val c = 1.41  // Exploration-Konstante
         return children.maxByOrNull {
@@ -30,7 +33,7 @@ data class Node(
         children.add(child)
         return child
     }
-    fun rollout(): Double {
+    fun rollout(rootPlayerId:Int): Double {
         var rolloutState = state.copy()  // Deep copy, um originalen Baum nicht zu verändern
         while (!rolloutState.isFinished) {
             val activPlayer = getActivPlayer(rolloutState)
@@ -46,7 +49,7 @@ data class Node(
             if(GameEngine().checkForGameEnd(rolloutState.players))
                 rolloutState = rolloutState.copy(isFinished = true)
         }
-        return rolloutState.getResult()  // z. B. 1.0 für Sieg, 0.0 für Niederlage
+        return rolloutState.getResult(rootPlayerId)  // z. B. 1.0 für Sieg, 0.0 für Niederlage
     }
     fun backpropagate(result: Double) {
         var current: Node? = this

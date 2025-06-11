@@ -83,7 +83,7 @@ class MinmaxAi : AiInterface {
 //    }
     private fun findBestMove(gameState: SmalGameState, depth: Int): Move? {
         val maximizingPlayer = getMaximizingPlayer(gameState)
-        val result= minmaxAlphaBeta(depth, gameState,maximizingPlayer,Int.MIN_VALUE, Int.MAX_VALUE)
+        val result= minmaxAlphaBeta(depth, gameState,maximizingPlayer.id,Int.MIN_VALUE, Int.MAX_VALUE)
             //Log.d("AppViewModel", "Score: ${scoredMove.score}")
         if( result.move == null) {
             return null
@@ -98,13 +98,13 @@ class MinmaxAi : AiInterface {
 
 
     fun minmaxAlphaBeta(
-        depth: Int, gameState: SmalGameState, maximizingPlayer: SmalPlayer,alpha:Int,beta:Int
+        depth: Int, gameState: SmalGameState, maximizingPlayerId: Int,alpha:Int,beta:Int
     ): ScoredMove {
         // Basisfall: Bei Erreichung der maximalen Tiefe oder Spielende
         if (depth == 0 || gameOver(gameState)) {
             return ScoredMove(
                 move = null,
-                score = evaluate(gameState),
+                score = evaluate(gameState, maximizingPlayerId),
                 depth = depth
             )
         }
@@ -114,7 +114,7 @@ class MinmaxAi : AiInterface {
         var bestMove: SmalMove? = null
 
         val currentPlayer = gameState.players[gameState.activPlayer_id-1]
-        val isMaximizingPly = (currentPlayer.id == maximizingPlayer.id)
+        val isMaximizingPly = (currentPlayer.id == maximizingPlayerId)
         val possibleMoves = getMoves(currentPlayer)
         val filterdMoves = if (possibleMoves.size > 100){
             possibleMoves.filterIndexed { index, move ->
@@ -135,13 +135,13 @@ class MinmaxAi : AiInterface {
             )
             // Rekursiver Aufruf mit gleicher Tiefe (Variante A). Wenn du möchtest,
             // kann hier auch „depth - 1“ stehen, um Skips ebenfalls als „Tiefe“ abzurechnen.
-            return minmaxAlphaBeta(depth, skippedState, maximizingPlayer, currentAlpha, currentBeta)
+            return minmaxAlphaBeta(depth, skippedState, maximizingPlayerId, currentAlpha, currentBeta)
         }
         if(isMaximizingPly){
             var maxScore = Int.MIN_VALUE // Bester Wert für diesen maximierenden Knoten
             for (move in filterdMoves) {
                 val newGameState = makeMove(gameState, move, currentPlayer)
-                val scoredMoveRecursive = minmaxAlphaBeta(depth - 1, newGameState, maximizingPlayer, currentAlpha, currentBeta)
+                val scoredMoveRecursive = minmaxAlphaBeta(depth - 1, newGameState, maximizingPlayerId, currentAlpha, currentBeta)
                 val score = scoredMoveRecursive.score // Erhaltener Score vom Kindknoten
 
                 if (score > maxScore) {
@@ -161,7 +161,7 @@ class MinmaxAi : AiInterface {
             for (move in filterdMoves) {
                 val newGameState = makeMove(gameState, move, currentPlayer)
                 // Rekursiver Aufruf für den nächsten Zustand, alpha und beta weitergeben
-                val scoredMoveRecursive = minmaxAlphaBeta(depth - 1, newGameState, maximizingPlayer, currentAlpha, currentBeta)
+                val scoredMoveRecursive = minmaxAlphaBeta(depth - 1, newGameState, maximizingPlayerId, currentAlpha, currentBeta)
                 val score = scoredMoveRecursive.score // Erhaltener Score vom Kindknoten
 
                 if (score < minScore) {
@@ -182,19 +182,23 @@ class MinmaxAi : AiInterface {
 
     fun getMaximizingPlayer(gameState: SmalGameState): SmalPlayer {
         gameState.players.forEach {player->
-            if (player.isMaximizing)
+            if (player.isActiv)
                 return player
         }
         return SmalPlayer()
+    }
+    fun getPlayerById(gameState: SmalGameState, playerId: Int): SmalPlayer {
+        return gameState.players.firstOrNull { it.id == playerId }
+            ?: throw IllegalArgumentException("Player with id $playerId not found")
     }
 
     fun gameOver(gameState: SmalGameState): Boolean {
         return GameEngine().checkForGameEnd(gameState.players)
     }
 
-    fun evaluate(gameState: SmalGameState): Int {
-        val maximizingPlayer = getMaximizingPlayer(gameState)
-        val opponent = gameState.players[maximizingPlayer.id  % gameState.players.size]
+    fun evaluate(gameState: SmalGameState,maximizingPlayerId:Int): Int {
+        val maximizingPlayer = getPlayerById(gameState,maximizingPlayerId)
+        val opponent = gameState.players[maximizingPlayerId  % gameState.players.size]
 
         // Grundwertung: Punktedifferenz
         var score = (maximizingPlayer.points - opponent.points) * 3

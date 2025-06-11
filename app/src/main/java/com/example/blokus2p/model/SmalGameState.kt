@@ -13,14 +13,14 @@ data class SmalGameState(
     val isFinished: Boolean = false,
     var board : SmalBoard,
 ){
-    fun getResult(): Double {
+    fun getResult(perspectivePlayerId: Int): Double {
         val result =
             when {
                 players[0].points > players[1].points -> 1.0 // Spieler 1 gewinnt
                 players[0].points < players[1].points -> -1.0 // Spieler 2 gewinnt
                 else -> 0.0 // Unentschieden
             }
-        if(players[0].isMaximizing)
+        if(players[0].id == perspectivePlayerId)
             return result
         else
             return -result

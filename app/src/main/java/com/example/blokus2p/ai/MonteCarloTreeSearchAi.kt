@@ -11,7 +11,7 @@ import com.example.blokus2p.model.SmalGameState
 class MonteCarloTreeSearchAi : AiInterface {
     override fun getNextMove(gameState: GameState): Move? {
         val smalGameState = gameStateToSmalGameState(gameState)
-        return mctsSearch(smalGameState, 15000)
+        return mctsSearch(smalGameState, 1000)
     }
 
     fun mctsSearch(rootState: SmalGameState, timeLimitMs: Long): Move {
@@ -32,13 +32,16 @@ class MonteCarloTreeSearchAi : AiInterface {
             }
 
             // 3. Simulation
-            val result = node.rollout()
-            Log.d("AppViewModel", "Backpropagating result: $result for move: ${node.move}")
+            val result = node.rollout(node.state.activPlayer_id)
+//            Log.d("AppViewModel", "Backpropagating result: $result for move: ${node.move}")
+            //println("Simulated result: $result for move: ${node.move}")
 
             // 4. Backpropagation
             node.backpropagate(result)
-            Log.d("AppViewModel", "Backpropagating result: $result for move: ${node.move}")
+ //           Log.d("AppViewModel", "Backpropagating result: $result for move: ${node.move}")
+            println("Backpropagating result: $result for move: ${node.move}")
         }
+        println("MCTS completed with ${root.visits} visits")
 
         return smalMoveToMove(
             root.children.maxByOrNull { it.visits }?.move
