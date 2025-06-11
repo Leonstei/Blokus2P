@@ -9,7 +9,6 @@ data class Player(
     val id: Int = 0,
     val name: String = "",
     val isActiv: Boolean = false,
-    val isMaximizing: Boolean = false,
     val color: Color = Color.Black,
     val points: Int = 0,
     val bitBoard: LongArray = LongArray(4),

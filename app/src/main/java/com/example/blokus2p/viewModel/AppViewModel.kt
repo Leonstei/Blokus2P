@@ -103,12 +103,12 @@ class AppViewModel : ViewModel() {
         _gameState.update {
             it.copy(
                 players = listOf(
-                    Player(1, "Player 1",true, false, Color.Blue, 0,
+                    Player(1, "Player 1",true,  Color.Blue, 0,
                         availableEdges =  setOf(130)),
-                    Player(2, "Player 2",false, true,Color.Magenta, 0,
+                    Player(2, "Player 2",false, Color.Magenta, 0,
                         availableEdges =  setOf(65),isAi = true, ai = MinmaxAi())),
                 activPlayer_id = 1,
-                activPlayer = Player(1, "Player 1",true, false,Color.Blue, 0, availableEdges =  setOf(143)),
+                activPlayer = Player(1, "Player 1",true, Color.Blue, 0, availableEdges =  setOf(143)),
                 playerOneColor = Color.Blue,
                 playerTwoColor = Color.Magenta,
                 board = BlokusBoard()
@@ -239,10 +239,9 @@ class AppViewModel : ViewModel() {
                     player.copy(
                         polyominoIsPlaced = false,
                         isActiv = false,
-                        isMaximizing = false
                     )
                 } else {
-                    player.copy(isMaximizing = player.isAi && player.ai is MinmaxAi || player.isAi && player.ai is MonteCarloTreeSearchAi)
+                    player.copy()
                 }
             }
             // Neuen aktiven Spieler bestimmen
@@ -301,18 +300,12 @@ class AppViewModel : ViewModel() {
                     player.copy(name = namePlayerOne, color = colorPlayerOne,
                         isAi = playerOneType != Human,
                         ai = getAiByTyp(playerOneType),
-                        isMaximizing =
-                            player.isActiv &&
-                                playerOneType == MinimaxAI || playerOneType == MonteCarloAI
                     ))
             if(player.id == _gameState.value.players[1].id)
                 updatedPlayers.add(
                     player.copy(name = namePlayerTwo, color = colorPlayerTwo,
                         isAi = playerTwoType != Human,
                         ai = getAiByTyp(playerTwoType),
-                        isMaximizing =
-                            player.isActiv &&
-                                playerTwoType == MinimaxAI || playerTwoType == MonteCarloAI
                     ))
         }
         _gameState.update { state ->
@@ -322,7 +315,6 @@ class AppViewModel : ViewModel() {
                     color = colorPlayerOne,
                     isAi = playerOneType != Human,
                     ai = getAiByTyp(playerOneType),
-                    isMaximizing = playerOneType == MinimaxAI || playerOneType == MonteCarloAI
                 ),
                 players = updatedPlayers,
                 playerOneColor = colorPlayerOne,
