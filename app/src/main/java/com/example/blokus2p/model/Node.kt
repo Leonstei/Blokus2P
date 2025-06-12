@@ -13,7 +13,12 @@ data class Node(
     var visits: Int = 0,
     var wins: Double = 0.0,
     val children: MutableList<Node> = mutableListOf(),
-    val untriedMoves: MutableList<SmalMove> =  getActivPlayer(state).availableMoves.toMutableList()
+    val untriedMoves: MutableList<SmalMove> = if(getActivPlayer(state).availableMoves.size > 200)
+        getActivPlayer(state).availableMoves.filterIndexed { index, smalMove ->
+            index % 3 == 0 && smalMove.polyomino.points == getActivPlayer(state).availableMoves.first().polyomino.points
+        }.toMutableList()
+    else
+        getActivPlayer(state).availableMoves.toMutableList()
 ){
     override fun toString(): String {
         return "Node(state is finished=${state.isFinished}, move=$move, visits=$visits, wins=$wins, children=${children.size})"
@@ -37,14 +42,12 @@ data class Node(
         var rolloutState = state.copy()  // Deep copy, um originalen Baum nicht zu verändern
         while (!rolloutState.isFinished) {
             val activPlayer = getActivPlayer(rolloutState)
-            //Log.d("AppViewModel", "Rollout state: {${rolloutState.board.placedPolyominos}")
             val moves = activPlayer.availableMoves
             if (moves.isEmpty()) {
                 // Wenn keine Züge mehr verfügbar sind, beenden wir den Rollout
                 break
             }
             val randomMove = moves.random()
-            //Log.d("AppViewModel", "Random move: $randomMove")
             rolloutState = makeMove(rolloutState,randomMove,activPlayer)
             if(GameEngine().checkForGameEnd(rolloutState.players))
                 rolloutState = rolloutState.copy(isFinished = true)
@@ -59,5 +62,4 @@ data class Node(
             current = current.parent
         }
     }
-
 }

@@ -14,7 +14,7 @@ class MinmaxAIVSMCT_AiTest {
         var playerOneWins = 0
         var playerTwoWins = 0
         val takenTime = measureTime {
-            repeat(1) {
+            repeat(10) {
                 val viewModel: AppViewModel = AppViewModel()
                 var count = 0
                 val gameState = viewModel.gameState.value

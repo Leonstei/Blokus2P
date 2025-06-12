@@ -4,6 +4,7 @@ import com.example.blokus2p.game.GameEngine
 import com.example.blokus2p.game.GameState
 import com.example.blokus2p.game.PlacedPolyomino
 import com.example.blokus2p.game.Player
+import com.example.blokus2p.helper.evaluate
 import com.example.blokus2p.helper.gameStateToSmalGameState
 import com.example.blokus2p.helper.makeMove
 import com.example.blokus2p.helper.smalMoveToMove
@@ -118,11 +119,11 @@ class MinmaxAi : AiInterface {
         val possibleMoves = getMoves(currentPlayer)
         val filterdMoves = if (possibleMoves.size > 100){
             possibleMoves.filterIndexed { index, move ->
-                index % 3 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
+                index % 9 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
             }
         }else {
             possibleMoves.filterIndexed { index, move ->
-                index % 2 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
+                index % 7 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
             }
         }
 
@@ -187,65 +188,11 @@ class MinmaxAi : AiInterface {
         }
         return SmalPlayer()
     }
-    fun getPlayerById(gameState: SmalGameState, playerId: Int): SmalPlayer {
-        return gameState.players.firstOrNull { it.id == playerId }
-            ?: throw IllegalArgumentException("Player with id $playerId not found")
-    }
 
     fun gameOver(gameState: SmalGameState): Boolean {
         return GameEngine().checkForGameEnd(gameState.players)
     }
 
-    fun evaluate(gameState: SmalGameState,maximizingPlayerId:Int): Int {
-        val maximizingPlayer = getPlayerById(gameState,maximizingPlayerId)
-        val opponent = gameState.players[maximizingPlayerId  % gameState.players.size]
-
-        // Grundwertung: Punktedifferenz
-        var score = (maximizingPlayer.points - opponent.points) * 3
-        score += (maximizingPlayer.availableMoves.size - opponent.availableMoves.size)
-
-        //Kontrolle über das Zentrum bewerten
-        val centerControl = evaluateCenterControl(maximizingPlayer, opponent, gameState)
-        score += centerControl
-        return score
-    }
-
-    fun evaluateCenterControl(
-        maximizingPlayer: SmalPlayer,
-        opponent: SmalPlayer,
-        gameState: SmalGameState
-    ): Int {
-        val lastPolyominoMaximizingPlayer =
-            gameState.board.placedPolyominosSmal.lastOrNull { it.playerId == maximizingPlayer.id }
-        val lastPolyominoOpponent =
-            gameState.board.placedPolyominosSmal.lastOrNull { it.playerId == opponent.id }
-
-        if(lastPolyominoMaximizingPlayer != null && lastPolyominoOpponent != null) {
-            val distanceMaximizingPlayer = distancToCenterForPolyomino(lastPolyominoMaximizingPlayer)
-            val distanceOpponent = distancToCenterForPolyomino(lastPolyominoOpponent)
-            return (-distanceMaximizingPlayer + distanceOpponent).toInt()
-        }else if (lastPolyominoMaximizingPlayer == null && lastPolyominoOpponent != null) {
-            return distancToCenterForPolyomino(lastPolyominoOpponent).toInt()  // Wenn einer der Spieler noch keinen Zug gemacht hat, gibt es keine Bewertung
-        }else if (lastPolyominoMaximizingPlayer != null) {
-            return -distancToCenterForPolyomino(lastPolyominoMaximizingPlayer).toInt()  // Wenn einer der Spieler noch keinen Zug gemacht hat, gibt es keine Bewertung
-        }else {
-            throw IllegalStateException("Both players must have made a move to evaluate center control")
-        }
-    }
-
-    fun distancToCenterForPolyomino(
-        polyomino: PlacedSmalPolyomino
-    ): Double {
-        val centerX = 6.5
-        val centerY = 6.5
-        var distance = 0.0
-        polyomino.cells.forEach { cell ->
-            val x = cell % 14
-            val y = cell / 14
-            distance += Math.abs(x - centerX) + Math.abs(y- centerY)
-        }
-        return distance
-    }
 
 
 //    fun minimax(board: Board, depth: Int, alpha: Int, beta: Int, isMaximizingPlayer: Boolean): Int {

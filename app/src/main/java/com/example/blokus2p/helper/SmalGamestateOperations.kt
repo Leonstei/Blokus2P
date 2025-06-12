@@ -22,7 +22,6 @@ fun gameStateToSmalGameState(gameState: GameState): SmalGameState {
             SmalPlayer(
                 id = player.id,
                 isActiv = player.isActiv,
-                isMaximizing = player.isMaximizing,
                 points = player.points,
                 bitBoard = player.bitBoard,
                 polyominos = player.polyominos.map { polyomino ->
@@ -187,9 +186,11 @@ fun notCheckForNotAvailableEdges(edges: Set<Int>, board: SmalBoard,playerBoard: 
             val cellRight = index + 1
             val cellBelow = index + 14
 
+            // problem bei randzellen
+
             if (cellAbove in 0 until 196 && isBitSet(playerBoard, cellAbove)) notAvailableEdges.add(index)
-            if (cellLeft in 0 until 196 && isBitSet(playerBoard, cellLeft)) notAvailableEdges.add(index)
-            if (cellRight in 0 until 196 && isBitSet(playerBoard, cellRight)) notAvailableEdges.add(index)
+            if (cellLeft in 0 until 196 && isBitSet(playerBoard, cellLeft) && index % 14 != 0) notAvailableEdges.add(index)
+            if (cellRight in 0 until 196 && isBitSet(playerBoard, cellRight) && index % 14 != 13) notAvailableEdges.add(index)
             if (cellBelow in 0 until 196 && isBitSet(playerBoard, cellBelow)) notAvailableEdges.add(index)
         }
     }
@@ -315,8 +316,8 @@ fun makeMove(gameState: SmalGameState, move: SmalMove, player: SmalPlayer): Smal
             val notAvailableEdges = notCheckForNotAvailableEdges(updatedPlayer.availableEdges, newBoard,updatedPlayerBitBoard)
             val finalEdges = p.availableEdges + newAvailableEdges - notAvailableEdges
 
-            val allAvailableMoves = calculateAllMovesOfAPlayer(
-                updatedPlayer.copy(availableEdges = finalEdges), newBoard, rules)
+//            val allAvailableMoves = calculateAllMovesOfAPlayer(
+//                updatedPlayer.copy(availableEdges = finalEdges), newBoard, rules)
             val newAvailableMoves = calculateNewMoves(
                 updatedPlayer.copy(availableEdges = finalEdges), newBoard, rules)
             val notValidMoves = checkForNotValidMoves(p.availableMoves, move, rules, updatedPlayer, newBoard)
@@ -324,14 +325,14 @@ fun makeMove(gameState: SmalGameState, move: SmalMove, player: SmalPlayer): Smal
             // println("not valid moves: ${notValidMoves.size}, not available moves: ${notAvailableMoves.size}, not available moves2: ${notAvailbaleMoves2.size}")
             val finalMoves = updatedPlayer.availableMoves + newAvailableMoves - notValidMoves.toSet()
             //println("all available : ${allAvailableMoves.size}, final: ${finalMoves.size} new available: ${newAvailableMoves.size}, not available: ${notAvailableMoves.size},")
-            val movesNotinAllMoves: MutableList<SmalMove> = mutableListOf()
-            if (finalMoves.size != allAvailableMoves.size) {
-                allAvailableMoves.forEach { move ->
-                    if (!finalMoves.contains(move))
-                        movesNotinAllMoves.add(move)
-                        //println(move)
-                }
-            }
+//            val movesNotinAllMoves: MutableList<SmalMove> = mutableListOf()
+//            if (finalMoves.size != allAvailableMoves.size) {
+//                allAvailableMoves.forEach { move ->
+//                    if (!finalMoves.contains(move))
+//                        movesNotinAllMoves.add(move)
+//                        //println(move)
+//                }
+//            }
             updatedPlayer.copy(
                 points = p.points + move.polyomino.points,
                 isActiv = false,
@@ -350,6 +351,64 @@ fun makeMove(gameState: SmalGameState, move: SmalMove, player: SmalPlayer): Smal
         players = updatedPlayers
     )
 }
+
+fun evaluate(gameState: SmalGameState,maximizingPlayerId:Int): Int {
+    val maximizingPlayer = getPlayerById(gameState,maximizingPlayerId)
+    val opponent = gameState.players[maximizingPlayerId  % gameState.players.size]
+
+    // Grundwertung: Punktedifferenz
+    var score = (maximizingPlayer.points - opponent.points) * 3
+    score += (maximizingPlayer.availableMoves.size - opponent.availableMoves.size)
+
+    //Kontrolle über das Zentrum bewerten
+    val centerControl = evaluateCenterControl(maximizingPlayer, opponent, gameState)
+    score += centerControl
+    return score
+}
+
+fun evaluateCenterControl(
+    maximizingPlayer: SmalPlayer,
+    opponent: SmalPlayer,
+    gameState: SmalGameState
+): Int {
+    val lastPolyominoMaximizingPlayer =
+        gameState.board.placedPolyominosSmal.lastOrNull { it.playerId == maximizingPlayer.id }
+    val lastPolyominoOpponent =
+        gameState.board.placedPolyominosSmal.lastOrNull { it.playerId == opponent.id }
+
+    if(lastPolyominoMaximizingPlayer != null && lastPolyominoOpponent != null) {
+        val distanceMaximizingPlayer = distancToCenterForPolyomino(lastPolyominoMaximizingPlayer)
+        val distanceOpponent = distancToCenterForPolyomino(lastPolyominoOpponent)
+        return (-distanceMaximizingPlayer + distanceOpponent).toInt()
+    }else if (lastPolyominoMaximizingPlayer == null && lastPolyominoOpponent != null) {
+        return distancToCenterForPolyomino(lastPolyominoOpponent).toInt()  // Wenn einer der Spieler noch keinen Zug gemacht hat, gibt es keine Bewertung
+    }else if (lastPolyominoMaximizingPlayer != null) {
+        return -distancToCenterForPolyomino(lastPolyominoMaximizingPlayer).toInt()  // Wenn einer der Spieler noch keinen Zug gemacht hat, gibt es keine Bewertung
+    }else {
+        throw IllegalStateException("Both players must have made a move to evaluate center control")
+    }
+}
+
+fun distancToCenterForPolyomino(
+    polyomino: PlacedSmalPolyomino
+): Double {
+    val centerX = 6.5
+    val centerY = 6.5
+    var distance = 0.0
+    polyomino.cells.forEach { cell ->
+        val x = cell % 14
+        val y = cell / 14
+        distance += Math.abs(x - centerX) + Math.abs(y- centerY)
+    }
+    return distance
+}
+
+fun getPlayerById(gameState: SmalGameState, playerId: Int): SmalPlayer {
+    return gameState.players.firstOrNull { it.id == playerId }
+        ?: throw IllegalArgumentException("Player with id $playerId not found")
+}
+
+
 fun getActivPlayer(gameState: SmalGameState): SmalPlayer {
     return gameState.players.firstOrNull { it.isActiv }
         ?: throw IllegalStateException("No active player found in the game state")

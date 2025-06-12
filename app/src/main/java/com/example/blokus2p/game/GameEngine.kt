@@ -67,11 +67,11 @@ class GameEngine {
             if (leftTopEdge in 0 until 196 && !isBitSet(board.boardGrid,leftTopEdge)
                 && index % 14 != 0) newAvailableEdges.add(leftTopEdge)
             if (rightTopEdge in 0 until 196 && !isBitSet(board.boardGrid,rightTopEdge)
-                && (index-13) % 14 != 0) newAvailableEdges.add(rightTopEdge)
+                && index % 14 != 13) newAvailableEdges.add(rightTopEdge)
             if (leftBottomEdge in 0 until 196 && !isBitSet(board.boardGrid,leftBottomEdge)
                 && index % 14 != 0 ) newAvailableEdges.add(leftBottomEdge)
             if (rightBottomEdge in 0 until 196 && !isBitSet(board.boardGrid,rightBottomEdge)
-                && (index-13) % 14 != 0) newAvailableEdges.add(rightBottomEdge)
+                && index % 14 != 13) newAvailableEdges.add(rightBottomEdge)
         }
         val filteredEdges = newAvailableEdges.filter { edge ->
             val cellAbove = edge - 14
@@ -101,8 +101,8 @@ class GameEngine {
                 val cellBelow = index + 14
 
                 if (cellAbove in 0 until 196 && isBitSet(playerBoard, cellAbove)) notAvailableEdges.add(index)
-                if (cellLeft in 0 until 196 && isBitSet(playerBoard, cellLeft)) notAvailableEdges.add(index)
-                if (cellRight in 0 until 196 && isBitSet(playerBoard, cellRight)) notAvailableEdges.add(index)
+                if (cellLeft in 0 until 196 && isBitSet(playerBoard, cellLeft) && index % 14 != 0) notAvailableEdges.add(index)
+                if (cellRight in 0 until 196 && isBitSet(playerBoard, cellRight) && index % 14 != 13) notAvailableEdges.add(index)
                 if (cellBelow in 0 until 196 && isBitSet(playerBoard, cellBelow)) notAvailableEdges.add(index)
             }
         }

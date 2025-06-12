@@ -25,6 +25,7 @@ import org.junit.Before
 import org.junit.Test
 import kotlin.test.DefaultAsserter.assertEquals
 import kotlin.test.assertEquals
+import kotlin.time.measureTime
 
 
 class GameEngineTest {
@@ -178,6 +179,125 @@ class GameEngineTest {
                 cells = listOf(57, 70, 71, 84) ), 84
         ),
     )
+    val moves2 = listOf(
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_PLUS, 5,
+                cells = listOf(116, 129, 130, 131, 144) ), 130
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF, 5,
+                cells = listOf(65, 79, 93, 107, 121) ), 65
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_ZL, 5,
+                cells = listOf(134, 135, 146, 147, 148) ), 146
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_ZL, 5,
+                cells = listOf(7, 21, 35, 36, 50) ), 50
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_SMAL_T, 5,
+                cells = listOf(80, 94, 108, 109, 122) ), 122
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_7, 5,
+                cells = listOf(38, 52, 53, 54, 67) ), 52 //2
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_W, 5,
+                cells = listOf(71, 85, 86, 100, 101) ), 101
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_L, 5,
+                cells = listOf(136, 150, 164, 178, 179) ), 136
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF, 5,
+                cells = listOf(47, 61, 75, 89, 103) ), 103
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_SMAL_T, 5,
+                cells = listOf(48, 62, 63, 76, 90) ), 48
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_T, 5,
+                cells = listOf(3, 4, 5, 18, 32) ), 32
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_C, 5,
+                cells = listOf(9, 10, 11, 23, 25) ), 23
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_L, 5,
+                cells = listOf(77, 91, 105, 118, 119) ), 119
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_W, 5,
+                cells = listOf(69, 82, 83, 95, 96) ), 69
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_Z, 5,
+                cells = listOf(163, 175, 176, 177, 189) ), 163
+        ),
+
+        SmalMove(
+            SmalPolyomino( PolyominoNames.VIER_T, 4,
+                cells = listOf(153, 166, 167, 181) ), 166
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_7, 5,
+                cells = listOf(126, 140, 141, 142, 155) ), 142 //1
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.EINS, 1,
+                cells = listOf(194) ), 194
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_BLOCK, 5,
+                cells = listOf(43, 44, 45, 58, 59) ), 58
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.ZWEI, 2,
+                cells = listOf(19, 33) ), 33
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.VIER_T, 4,
+                cells = listOf(137, 138, 139, 152) ), 137
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.VIER_L, 4,
+                cells = listOf(111, 123, 124, 125) ), 111
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.DREI, 3,
+                cells = listOf(159, 173, 187) ), 159
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_LANG_L, 5,
+                cells = listOf(46, 60, 72, 73, 74) ), 46
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.VIER_L, 4,
+                cells = listOf(170, 182, 183, 184) ), 170
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.FÜNF_Z, 5,
+                cells = listOf(1, 15, 16, 17, 31) ), 31
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.ZWEI, 2,
+                cells = listOf(14, 28) ), 28
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.DREI_L, 5,
+                cells = listOf(42, 56, 57) ), 57
+        ),
+        SmalMove(
+            SmalPolyomino( PolyominoNames.EINS, 1,
+                cells = listOf(98) ), 98
+        ),
+    )
 
 
 
@@ -282,5 +402,73 @@ class GameEngineTest {
             val activPlayer = getActivPlayer(rolloutState)
             rolloutState = makeMove(rolloutState,it,activPlayer)
         }
+    }
+
+    @Test
+    fun `make a sertian move and check available edges and moves 2`() {
+        var rolloutState = gameStateToSmalGameState(viewModel.gameState.value )
+        moves2.forEach {
+            val activPlayer = getActivPlayer(rolloutState)
+            rolloutState = makeMove(rolloutState,it,activPlayer)
+            if(rolloutState.players[rolloutState.activPlayer_id-1].availableEdges == setOf<Int>(41, 123, 191, 111, 138, 46)){
+                println("Found the edge: ${rolloutState.players[rolloutState.activPlayer_id-1].availableEdges}")
+            }
+            println("Available Edges: ${rolloutState.players[rolloutState.activPlayer_id-1].availableEdges}")
+            println("Available Moves: ${rolloutState.players[rolloutState.activPlayer_id-1].availableMoves}")
+        }
+        println("Available Edges: ${rolloutState.players[1].availableEdges}")
+        println("Available Moves: ${rolloutState.players[1].availableMoves}")
+    }
+
+    @Test
+    fun modOperations(){
+        val timeTaken3 = measureTime {
+            var index = 13
+            repeat(1000000) {
+                val bool =  index % 14 != 13
+                index++
+            }
+        }
+        println("Time taken for 1000000 iterations: $timeTaken3")
+        val timeTaken2 = measureTime {
+            var index = 13
+            repeat(1000000) {
+                val bool =  index.mod(14) != 13
+                index++
+            }
+        }
+        println("Time taken for 1000000 iterations2: $timeTaken2")
+        val timeTaken = measureTime {
+            var index = 13
+            repeat(1000000) {
+                val bool =  index % 14 != 13
+                index++
+            }
+        }
+        println("Time taken for 1000000 iterations: $timeTaken")
+        val timeTaken4 = measureTime {
+            var index = 13
+            repeat(1000000) {
+                val bool =  index.mod(14) != 13
+                index++
+            }
+        }
+        println("Time taken for 1000000 iterations2: $timeTaken4")
+        val timeTaken5 = measureTime {
+            var index = 13
+            repeat(1000000) {
+                val bool =  index % 14 != 13
+                index++
+            }
+        }
+        println("Time taken for 1000000 iterations: $timeTaken5")
+        val timeTaken6 = measureTime {
+            var index = 13
+            repeat(1000000) {
+                val bool =  index.mod(14) != 13
+                index++
+            }
+        }
+        println("Time taken for 1000000 iterations2: $timeTaken6")
     }
 }

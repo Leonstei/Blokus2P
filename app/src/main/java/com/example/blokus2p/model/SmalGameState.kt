@@ -30,7 +30,6 @@ data class SmalGameState(
 data class SmalPlayer(
     val id: Int = 0,
     val isActiv: Boolean = false,
-    val isMaximizing: Boolean = false,
     val points: Int = 0,
     val bitBoard: LongArray = LongArray(4),
     val polyominos: List<SmalPolyomino> = listOf(

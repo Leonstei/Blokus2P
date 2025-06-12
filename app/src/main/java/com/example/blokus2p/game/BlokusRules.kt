@@ -129,9 +129,9 @@ class BlokusRules: GameRules {
         polyominoCells.forEach {
             if (it >= 14  && isBitSet(player.bitBoard, it - 14))
                 return false
-            if (it.mod(14) != 0 && it - 1 >= 0 && isBitSet(player.bitBoard, it - 1))
+            if (it % 14 != 0 && it - 1 >= 0 && isBitSet(player.bitBoard, it - 1))
                 return false
-            if ((it - 13).mod(14) != 0 && it + 1 < 196 && isBitSet(player.bitBoard, it + 1))
+            if (it % 14 != 13 && it + 1 < 196 && isBitSet(player.bitBoard, it + 1))
                 return false
             if (it < 182 && isBitSet(player.bitBoard, it + 14))
                 return false

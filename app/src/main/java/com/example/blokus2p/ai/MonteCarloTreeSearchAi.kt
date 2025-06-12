@@ -2,6 +2,7 @@ package com.example.blokus2p.ai
 
 import android.util.Log
 import com.example.blokus2p.game.GameState
+import com.example.blokus2p.helper.evaluate
 import com.example.blokus2p.helper.gameStateToSmalGameState
 import com.example.blokus2p.helper.smalMoveToMove
 import com.example.blokus2p.model.Move
@@ -11,7 +12,7 @@ import com.example.blokus2p.model.SmalGameState
 class MonteCarloTreeSearchAi : AiInterface {
     override fun getNextMove(gameState: GameState): Move? {
         val smalGameState = gameStateToSmalGameState(gameState)
-        return mctsSearch(smalGameState, 1000)
+        return mctsSearch(smalGameState, 3000)
     }
 
     fun mctsSearch(rootState: SmalGameState, timeLimitMs: Long): Move {
@@ -39,14 +40,28 @@ class MonteCarloTreeSearchAi : AiInterface {
             // 4. Backpropagation
             node.backpropagate(result)
  //           Log.d("AppViewModel", "Backpropagating result: $result for move: ${node.move}")
-            println("Backpropagating result: $result for move: ${node.move}")
+            //println("Backpropagating result: $result for move: ${node.move}")
         }
-        println("MCTS completed with ${root.visits} visits")
+        //println("MCTS completed with ${root.visits} visits")
 
-        return smalMoveToMove(
-            root.children.maxByOrNull { it.visits }?.move
-                ?: throw IllegalStateException("No moves available")
-        )
+//        for (child in root.children) {
+//            println("Move=${child.move}, visits=${child.visits}, winRate=${child.wins / child.visits}")
+//        }
+
+
+        val bestMoves = root.children.filter { (it.wins / it.visits) == root.children.maxOfOrNull { child -> (child.wins / child.visits) }}
+        val bestMove = bestMoves.maxByOrNull { evaluate(it.state, root.state.activPlayer_id) }
+//        println("Best move found with ${root.visits} visits, win rate: ${bestMove?.wins?.div(bestMove.visits)} move: ${bestMove?.move}")
+//
+//        for (move in bestMoves) {
+//            println("Move=$move")
+//        }
+//        println()
+        return smalMoveToMove(bestMove?.move ?: throw IllegalStateException("No best move found"))
+//        return smalMoveToMove(
+//            root.children.maxByOrNull { it.wins / it.visits }?.move
+//                ?: throw IllegalStateException("No moves available")
+//        )
 
     }
 
