@@ -3,7 +3,7 @@ package com.example.blokus2p.game
 import androidx.compose.ui.graphics.Color
 import com.example.blokus2p.ai.AiInterface
 import com.example.blokus2p.model.Move
-import com.example.blokus2p.model.PolyominoNames
+import com.example.blokus2p.helper.PolyominoNames
 
 data class Player(
     val id: Int = 0,

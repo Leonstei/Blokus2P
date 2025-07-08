@@ -8,7 +8,7 @@ import com.example.blokus2p.game.Polyomino
 import com.example.blokus2p.helper.isBitSet
 import com.example.blokus2p.helper.mapCellsToBoardIndexes
 import com.example.blokus2p.helper.setBit
-import com.example.blokus2p.model.PolyominoNames
+import com.example.blokus2p.helper.PolyominoNames
 import junit.framework.TestCase.assertTrue
 import org.junit.Test
 import kotlin.time.measureTime

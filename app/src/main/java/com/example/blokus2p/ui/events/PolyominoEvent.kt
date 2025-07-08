@@ -1,4 +1,4 @@
-package com.example.blokus2p.events
+package com.example.blokus2p.ui.events
 
 import com.example.blokus2p.game.Polyomino
 

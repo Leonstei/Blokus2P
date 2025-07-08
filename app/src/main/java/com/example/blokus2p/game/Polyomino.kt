@@ -1,9 +1,8 @@
 package com.example.blokus2p.game
 
-import android.util.Log
-import com.example.blokus2p.model.PolyominoNames
-import com.example.blokus2p.model.polyominoVariants
-import com.example.blokus2p.model.polyominoVariantsDistinct
+import com.example.blokus2p.helper.PolyominoNames
+import com.example.blokus2p.helper.polyominoVariants
+import com.example.blokus2p.helper.polyominoVariantsDistinct
 
 
 data class Polyomino(
@@ -34,7 +33,10 @@ data class Polyomino(
     fun rotatedRight(): Polyomino {
         val current = allVariants[variantIndex]
         val next = allVariants.firstOrNull {
-            it.rotation == (current.rotation + 90) % 360 && it.isFlipped == current.isFlipped
+            if(current.isFlipped){
+                it.rotation == (current.rotation - 90 + 360) % 360 && it.isFlipped == true
+            } else
+            it.rotation == (current.rotation + 90) % 360 && it.isFlipped == false
         } ?: current
         val selectedCellIndex = currentVariant.indexOf( selectedCell)
         val currentRotated = rotate90(toPairs(currentVariant))
@@ -45,7 +47,10 @@ data class Polyomino(
     fun rotatedLeft(): Polyomino {
         val current = allVariants[variantIndex]
         val next = allVariants.firstOrNull {
-            it.rotation == (current.rotation - 90 + 360) % 360 && it.isFlipped == current.isFlipped
+            if(current.isFlipped){
+                it.rotation == (current.rotation + 90) % 360 && it.isFlipped == true
+            } else
+            it.rotation == (current.rotation - 90 + 360) % 360 && it.isFlipped == false
         } ?: current
         val selectedCellIndex = currentVariant.indexOf(selectedCell)
         val currentRotated = rotate90Left(toPairs(currentVariant))
@@ -107,25 +112,25 @@ data class Polyomino(
     private fun flipHorizontal(cells: List<Pair<Int, Int>>): List<Pair<Int, Int>> =
         cells.map { Pair(-it.first, it.second) }
 
-    private fun normalize(cells: List<Pair<Int, Int>>): List<Pair<Int, Int>> {
-        val minX = cells.minOf { it.first }
-        val minY = cells.minOf { it.second }
-        return cells.map { Pair(it.first - minX, it.second - minY) }.sortedWith(compareBy({ it.second }, { it.first }))
-    }
+//    private fun normalize(cells: List<Pair<Int, Int>>): List<Pair<Int, Int>> {
+//        val minX = cells.minOf { it.first }
+//        val minY = cells.minOf { it.second }
+//        return cells.map { Pair(it.first - minX, it.second - minY) }.sortedWith(compareBy({ it.second }, { it.first }))
+//    }
     private fun normalizeOneCell(cells: List<Pair<Int, Int>>,selectedCell: Pair<Int, Int>): Pair<Int, Int> {
         val minX = cells.minOf { it.first }
         val minY = cells.minOf { it.second }
         return  Pair(selectedCell.first - minX, selectedCell.second - minY)
     }
-    fun toPairs(indices: List<Int>) = indices.map {
+    private fun toPairs(indices: List<Int>) = indices.map {
         val x = it % boardSize
         val y = it / boardSize
         x to y
     }
-    fun toIndices(pairs: List<Pair<Int,Int>>) = pairs.map { (x, y) ->
-        y * boardSize + x
-    }
-    fun pairToIndex(pair: Pair<Int,Int>): Int = pair.second * boardSize + pair.first
+//    fun toIndices(pairs: List<Pair<Int,Int>>) = pairs.map { (x, y) ->
+//        y * boardSize + x
+//    }
+ fun pairToIndex(pair: Pair<Int,Int>): Int = pair.second * boardSize + pair.first
 
 }
 data class PolyominoVariant(

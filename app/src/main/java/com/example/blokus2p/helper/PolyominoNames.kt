@@ -1,4 +1,4 @@
-package com.example.blokus2p.model
+package com.example.blokus2p.helper
 
 enum class PolyominoNames(val id: Int) {
     NULL(0),

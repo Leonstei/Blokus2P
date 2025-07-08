@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -37,10 +36,10 @@ import androidx.compose.ui.window.Dialog
 import com.example.blokus2p.ai.MinmaxAi
 import com.example.blokus2p.ai.MonteCarloTreeSearchAi
 import com.example.blokus2p.ai.RandomAi
-import com.example.blokus2p.events.GameEvent
+import com.example.blokus2p.ui.events.GameEvent
 import com.example.blokus2p.game.GameState
 import com.example.blokus2p.game.Player
-import com.example.blokus2p.model.PlayerType
+import com.example.blokus2p.helper.PlayerType
 
 
 @OptIn(ExperimentalMaterial3Api::class)

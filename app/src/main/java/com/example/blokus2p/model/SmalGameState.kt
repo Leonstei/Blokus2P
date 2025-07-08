@@ -1,10 +1,8 @@
 package com.example.blokus2p.model
 
 import com.example.blokus2p.ai.AiInterface
-import com.example.blokus2p.game.BlokusBoard
-import com.example.blokus2p.game.GameBoard
-import com.example.blokus2p.game.PlacedPolyomino
-import com.example.blokus2p.game.Polyomino
+import com.example.blokus2p.helper.PolyominoNames
+import com.example.blokus2p.helper.polyominoVariantsDistinct
 
 
 data class SmalGameState(
@@ -135,7 +133,7 @@ data class SmalPlayer(
 )
 
 data class SmalPolyomino(
-    val name: PolyominoNames =PolyominoNames.NULL,
+    val name: PolyominoNames = PolyominoNames.NULL,
     val points: Int = 0,
     val cells: List<Int> = listOf(),
     ){

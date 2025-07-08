@@ -1,8 +1,7 @@
-package com.example.blokus2p.events
+package com.example.blokus2p.ui.events
 
-import android.icu.text.PluralRules.PluralType
 import androidx.compose.ui.graphics.Color
-import com.example.blokus2p.model.PlayerType
+import com.example.blokus2p.helper.PlayerType
 
 sealed interface GameEvent : AppEvent {
     data class GameStarted(val playerCount: Int) : GameEvent

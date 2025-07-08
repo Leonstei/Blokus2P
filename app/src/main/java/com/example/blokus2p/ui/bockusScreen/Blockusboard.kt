@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.times
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.blokus2p.R
-import com.example.blokus2p.events.GameEvent
+import com.example.blokus2p.ui.events.GameEvent
 import com.example.blokus2p.game.Polyomino
-import com.example.blokus2p.events.PolyominoEvent
+import com.example.blokus2p.ui.events.PolyominoEvent
 import com.example.blokus2p.ui.components.SettingsDialog
 import com.example.blokus2p.viewModel.AppViewModel
 import com.example.blokus2p.game.GameState

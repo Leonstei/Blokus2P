@@ -59,6 +59,11 @@ android {
             version = "3.22.1"
         }
     }
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
 
 }
 

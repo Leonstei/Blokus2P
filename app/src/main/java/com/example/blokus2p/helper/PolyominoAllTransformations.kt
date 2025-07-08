@@ -1,4 +1,4 @@
-package com.example.blokus2p.model
+package com.example.blokus2p.helper
 
 import com.example.blokus2p.game.PolyominoVariant
 
@@ -26,7 +26,7 @@ val polyominoVariants: Map<PolyominoNames,List<PolyominoVariant>> =
         ),
         PolyominoNames.FÜNF_7 to listOf(
             PolyominoVariant(cells=listOf(0, 14, 15, 16, 29), isFlipped=false, rotation=0),
-            PolyominoVariant(cells=listOf(0, 14, 15, 16, 29), isFlipped=true, rotation=0),
+            PolyominoVariant(cells=listOf(2, 14, 15, 16, 29), isFlipped=true, rotation=0),
             PolyominoVariant(cells=listOf(1, 2, 14, 15, 29), isFlipped=false, rotation=90),
             PolyominoVariant(cells=listOf(0, 1, 15, 16, 29), isFlipped=true, rotation=90),
             PolyominoVariant(cells=listOf(1, 14, 15, 16, 30), isFlipped=false, rotation=180),

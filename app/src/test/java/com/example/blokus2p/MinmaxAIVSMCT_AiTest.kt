@@ -1,8 +1,8 @@
 package com.example.blokus2p
 
-import com.example.blokus2p.events.GameEvent
+import com.example.blokus2p.ui.events.GameEvent
 import com.example.blokus2p.game.Player
-import com.example.blokus2p.model.PlayerType
+import com.example.blokus2p.helper.PlayerType
 import com.example.blokus2p.viewModel.AppViewModel
 import junit.framework.TestCase.assertTrue
 import org.junit.Test

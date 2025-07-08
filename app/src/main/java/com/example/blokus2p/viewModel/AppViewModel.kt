@@ -1,10 +1,8 @@
 package com.example.blokus2p.viewModel
 
 //import android.util.Log
-import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.blokus2p.ai.AiInterface
 import com.example.blokus2p.ai.MinmaxAi
 import com.example.blokus2p.ai.MonteCarloTreeSearchAi
@@ -13,33 +11,28 @@ import com.example.blokus2p.game.BlokusRules
 import com.example.blokus2p.game.GameEngine
 import com.example.blokus2p.game.GameState
 import com.example.blokus2p.game.Player
-import com.example.blokus2p.events.AppEvent
-import com.example.blokus2p.events.GameEvent
+import com.example.blokus2p.ui.events.AppEvent
+import com.example.blokus2p.ui.events.GameEvent
 import com.example.blokus2p.game.Polyomino
-import com.example.blokus2p.events.PolyominoEvent
+import com.example.blokus2p.ui.events.PolyominoEvent
 import com.example.blokus2p.game.BlokusBoard
 import com.example.blokus2p.game.GameBoard
 import com.example.blokus2p.helper.getUpdatedPlayerBitBoard
 import com.example.blokus2p.helper.mapCellsToBoardIndexes
-import com.example.blokus2p.helper.visualizeBitBoard
-import com.example.blokus2p.model.PlayerType
-import com.example.blokus2p.model.PlayerType.Human
-import com.example.blokus2p.model.PlayerType.MinimaxAI
-import com.example.blokus2p.model.PlayerType.MonteCarloAI
-import com.example.blokus2p.model.PlayerType.RandomAI
-import com.example.blokus2p.model.PolyominoNames
+import com.example.blokus2p.helper.PlayerType
+import com.example.blokus2p.helper.PlayerType.Human
+import com.example.blokus2p.helper.PlayerType.MinimaxAI
+import com.example.blokus2p.helper.PlayerType.MonteCarloAI
+import com.example.blokus2p.helper.PlayerType.RandomAI
+import com.example.blokus2p.helper.PolyominoNames
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class AppViewModel : ViewModel() {
     private val _gameState = MutableStateFlow(GameState())
     val gameState: StateFlow<GameState> = _gameState.asStateFlow()
-
-    private val _polyominoState = MutableStateFlow(PolyominoSate())
-    val polyominoState: StateFlow<PolyominoSate> = _polyominoState.asStateFlow()
 
     val rules = BlokusRules()
     val gameEngine = GameEngine()
@@ -347,7 +340,6 @@ class AppViewModel : ViewModel() {
         val selected = _gameState.value.selectedPolyomino
         if(selected.name == PolyominoNames.NULL)return
         val updatedPolyomino = selected.rotatedLeft()
-
         _gameState.update { state ->
             state.copy(
                 activPlayer = state.activPlayer.copy(

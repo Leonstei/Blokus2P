@@ -1,29 +1,19 @@
 package com.example.blokus2p
 
-import android.util.Log
-import com.example.blokus2p.ai.Move
-import com.example.blokus2p.game.BlokusBoard
-import com.example.blokus2p.game.BlokusRules
 import com.example.blokus2p.game.GameEngine
-import com.example.blokus2p.game.GameState
-import com.example.blokus2p.game.PlacedPolyomino
-import com.example.blokus2p.game.Player
-import com.example.blokus2p.game.Polyomino
 import com.example.blokus2p.helper.gameStateToSmalGameState
 import com.example.blokus2p.helper.getActivPlayer
 import com.example.blokus2p.helper.makeMove
 import com.example.blokus2p.helper.setBit
 import com.example.blokus2p.model.PlacedSmalPolyomino
-import com.example.blokus2p.model.PolyominoNames
+import com.example.blokus2p.helper.PolyominoNames
 import com.example.blokus2p.model.SmalBoard
 import com.example.blokus2p.model.SmalMove
 import com.example.blokus2p.model.SmalPlayer
 import com.example.blokus2p.model.SmalPolyomino
 import com.example.blokus2p.viewModel.AppViewModel
 import org.junit.Assert.assertNotEquals
-import org.junit.Before
 import org.junit.Test
-import kotlin.test.DefaultAsserter.assertEquals
 import kotlin.test.assertEquals
 import kotlin.time.measureTime
 
