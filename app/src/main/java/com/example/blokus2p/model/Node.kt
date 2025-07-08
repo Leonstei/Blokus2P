@@ -2,7 +2,6 @@ package com.example.blokus2p.model
 
 import android.util.Log
 import com.example.blokus2p.game.GameEngine
-import com.example.blokus2p.game.GameState
 import com.example.blokus2p.helper.getActivPlayer
 import com.example.blokus2p.helper.makeMove
 

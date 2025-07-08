@@ -12,7 +12,6 @@ class BitOoperationsTest {
     @Test
     fun setBitOnBlokusboard2(){
         val board = BlokusBoard()
-        val index = 195
         for(i in 0 until 196 step 2){
             setBit(board.boardGrid, i)
         }

@@ -292,7 +292,7 @@ class GameEngineTest {
 
 
     @Test
-    fun `makeMove gibt unveränderten GameState bei ungültigem Zug zurück`() {
+    fun `makeMove gibt unveranderten GameState bei ungultigem Zug zuruck`() {
         val einnerPolyomino = SmalPolyomino(PolyominoNames.EINS, 1,  cells=listOf(10))
         // placeAiMove gibt null zurück -> ungültiger Zug
         val move = SmalMove(
@@ -308,7 +308,7 @@ class GameEngineTest {
     }
 
     @Test
-    fun `makeMove aktualisiert Spieler und Board korrekt bei gültigem Zug`() {
+    fun `makeMove aktualisiert Spieler und Board korrekt bei gultigem Zug`() {
         val einnerPolyomino = SmalPolyomino(PolyominoNames.EINS, 1,  cells=listOf(130))
         // placeAiMove gibt ein neues Board zurück
         setBit(board.boardGrid, selectedPosition)
@@ -335,7 +335,7 @@ class GameEngineTest {
         val einnerPolyomino = SmalPolyomino(PolyominoNames.EINS, 1,  cells=listOf(130))
         // placeAiMove gibt ein neues Board zurück
         setBit(board.boardGrid, selectedPosition)
-        val oldBoard =  board.copy(placedPolyominosSmal = listOf(PlacedSmalPolyomino(1, einnerPolyomino, einnerPolyomino.cells,selectedPosition)))
+        board.copy(placedPolyominosSmal = listOf(PlacedSmalPolyomino(1, einnerPolyomino, einnerPolyomino.cells,selectedPosition)))
         // Simuliere weitere Methoden, falls nötig
         val move = SmalMove(
             einnerPolyomino,
@@ -374,7 +374,7 @@ class GameEngineTest {
         val gameState = viewModel.gameState.value
         val smalGameState = gameStateToSmalGameState(gameState)
         val playerOne = smalGameState.players.first { it.id == 1 }
-        val playerTwo = smalGameState.players.first { it.id == 2 }
+        smalGameState.players.first { it.id == 2 }
         val edgeCounts: MutableList<Int> = mutableListOf()
         playerOne.availableMoves.forEachIndexed { index, move ->
             val newGameState = makeMove(smalGameState, move, playerOne)
@@ -415,7 +415,7 @@ class GameEngineTest {
         val timeTaken3 = measureTime {
             var index = 13
             repeat(1000000) {
-                val bool =  index % 14 != 13
+                index % 14 != 13
                 index++
             }
         }
@@ -423,7 +423,7 @@ class GameEngineTest {
         val timeTaken2 = measureTime {
             var index = 13
             repeat(1000000) {
-                val bool =  index.mod(14) != 13
+                index.mod(14) != 13
                 index++
             }
         }
@@ -431,7 +431,7 @@ class GameEngineTest {
         val timeTaken = measureTime {
             var index = 13
             repeat(1000000) {
-                val bool =  index % 14 != 13
+                index % 14 != 13
                 index++
             }
         }
@@ -439,7 +439,7 @@ class GameEngineTest {
         val timeTaken4 = measureTime {
             var index = 13
             repeat(1000000) {
-                val bool =  index.mod(14) != 13
+                index.mod(14) != 13
                 index++
             }
         }
@@ -447,7 +447,7 @@ class GameEngineTest {
         val timeTaken5 = measureTime {
             var index = 13
             repeat(1000000) {
-                val bool =  index % 14 != 13
+                index % 14 != 13
                 index++
             }
         }
@@ -455,7 +455,7 @@ class GameEngineTest {
         val timeTaken6 = measureTime {
             var index = 13
             repeat(1000000) {
-                val bool =  index.mod(14) != 13
+                index.mod(14) != 13
                 index++
             }
         }

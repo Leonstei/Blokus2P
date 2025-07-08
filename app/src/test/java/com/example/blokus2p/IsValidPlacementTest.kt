@@ -14,7 +14,6 @@ class IsValidPlacementTest {
     fun allCellsOnBoard() {
         val player = Player(1, "Player 1", availableEdges = setOf(15))
         val board = BlokusBoard()
-        val selectedPosition = 15
         val rules = BlokusRules()
 
 
@@ -32,7 +31,6 @@ class IsValidPlacementTest {
     fun allCellsOffBoard() {
         val player = Player(1, "Player 1", availableEdges = setOf(15))
         val board = BlokusBoard()
-        val selectedPosition = -15
         val rules = BlokusRules()
         val result = rules.isValidPlacement(
             player,
@@ -47,8 +45,6 @@ class IsValidPlacementTest {
     fun cellsGoOverLeftAndRightEdges() {
         val player = Player(1, "Player 1", availableEdges = setOf(14,55))
         val board = BlokusBoard()
-        val selectedPositionLeft = 14
-        val selectedPositionRight = 55
         val rules = BlokusRules()
         val resultLeft = rules.isValidPlacement(
             player,
@@ -70,7 +66,6 @@ class IsValidPlacementTest {
     fun noCellOnAvailableEdges() {
         val player = Player(1, "Player 1", availableEdges = setOf(14,55))
         val board = BlokusBoard()
-        val selectedPositionTop = 0
         val rules = BlokusRules()
         val resultTop = rules.isValidPlacement(
             player,
@@ -85,7 +80,6 @@ class IsValidPlacementTest {
     fun cellsOnoccupiedPlaces(){
         val player = Player(1, "Player 1", availableEdges = setOf(14,55))
         val board = BlokusBoard()
-        val selectedPositionTop = 0
         val rules = BlokusRules()
         setBit(board.boardGrid, 14)
         val resultTop = rules.isValidPlacement(
@@ -102,7 +96,6 @@ class IsValidPlacementTest {
     fun cellsAroundOccupiedPlaces(){
         val player = Player(1, "Player 1", availableEdges = setOf(14,15,17,20))
         val board = BlokusBoard()
-        val selectedPositionTop = 0
         val rules = BlokusRules()
         setBit(player.bitBoard, 0)
         setBit(player.bitBoard, 16)
