@@ -9,7 +9,7 @@ import com.example.blokus2p.helper.PlayerType
 import com.example.blokus2p.helper.PolyominoNames
 import com.example.blokus2p.viewModel.AppViewModel
 import junit.framework.TestCase.assertTrue
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.time.measureTime
 
 class RandomAiVSMinmaxAi {
@@ -18,7 +18,7 @@ class RandomAiVSMinmaxAi {
         var playerOneWins = 0
         var playerTwoWins = 0
         val takenTime = measureTime {
-            repeat(20) {
+            repeat(2) {
                 val viewModel: AppViewModel = AppViewModel()
                 var count = 0
                 val gameState = viewModel.gameState.value

@@ -5,7 +5,8 @@ import com.example.blokus2p.helper.clearBit
 import com.example.blokus2p.helper.isBitSet
 import com.example.blokus2p.helper.setBit
 import org.junit.Assert.assertThrows
-import org.junit.Test
+import kotlin.test.Test
+
 
 class BitOoperationsTest {
 

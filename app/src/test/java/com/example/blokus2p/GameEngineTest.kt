@@ -13,7 +13,7 @@ import com.example.blokus2p.model.SmalPlayer
 import com.example.blokus2p.model.SmalPolyomino
 import com.example.blokus2p.viewModel.AppViewModel
 import org.junit.Assert.assertNotEquals
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.measureTime
 

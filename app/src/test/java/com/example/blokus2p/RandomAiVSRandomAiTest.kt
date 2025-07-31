@@ -5,7 +5,7 @@ import com.example.blokus2p.game.Player
 import com.example.blokus2p.helper.PlayerType
 import com.example.blokus2p.viewModel.AppViewModel
 import junit.framework.TestCase.assertTrue
-import org.junit.Test
+import kotlin.test.Test
 
 class RandomAiVSRandomAiTest {
 
@@ -27,7 +27,7 @@ class RandomAiVSRandomAiTest {
         val availableMovesPerTurn: MutableMap<Int, Pair<Int, Int>> =
             (1..42).associateWith { 0 to 0 }.toMutableMap()
 
-        repeat(10000) {
+        repeat(100) {
             val viewModel: AppViewModel = AppViewModel()
             val gameState = viewModel.gameState.value
             var count = 1

@@ -1,8 +1,7 @@
 package com.example.blokus2p
 
-import org.junit.Test
-
-import org.junit.Assert.*
+import junit.framework.TestCase.assertEquals
+import kotlin.test.Test
 
 /**
  * Example local unit test, which will execute on the development machine (host).

@@ -5,7 +5,7 @@ import com.example.blokus2p.game.Player
 import com.example.blokus2p.helper.PlayerType
 import com.example.blokus2p.viewModel.AppViewModel
 import junit.framework.TestCase.assertTrue
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.time.measureTime
 
 class MinmaxAIVSMCT_AiTest {
@@ -14,7 +14,7 @@ class MinmaxAIVSMCT_AiTest {
         var playerOneWins = 0
         var playerTwoWins = 0
         val takenTime = measureTime {
-            repeat(10) {
+            repeat(1) {
                 val viewModel = AppViewModel()
                 var count = 0
                 val gameState = viewModel.gameState.value

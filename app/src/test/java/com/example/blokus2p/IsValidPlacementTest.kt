@@ -5,7 +5,8 @@ import com.example.blokus2p.game.BlokusRules
 import com.example.blokus2p.game.Player
 import com.example.blokus2p.helper.setBit
 import junit.framework.TestCase.assertFalse
-import org.junit.Test
+import kotlin.test.Test
+
 
 class IsValidPlacementTest {
 
