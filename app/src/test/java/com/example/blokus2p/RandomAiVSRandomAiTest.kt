@@ -27,7 +27,7 @@ class RandomAiVSRandomAiTest {
         val availableMovesPerTurn: MutableMap<Int, Pair<Int, Int>> =
             (1..42).associateWith { 0 to 0 }.toMutableMap()
 
-        repeat(100) {
+        repeat(1000) {
             val viewModel: AppViewModel = AppViewModel()
             val gameState = viewModel.gameState.value
             var count = 1
