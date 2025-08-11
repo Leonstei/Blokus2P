@@ -1,6 +1,8 @@
-package com.example.blokus2p.game
+package com.example.blokus2p.model
 
 import androidx.compose.ui.graphics.Color
+import com.example.blokus2p.game.BlokusBoard
+import com.example.blokus2p.game.GameBoard
 
 data class GameState(
     val players: List<Player> = listOf(),

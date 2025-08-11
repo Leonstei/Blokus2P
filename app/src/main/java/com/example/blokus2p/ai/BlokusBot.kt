@@ -1,6 +1,6 @@
 package com.example.blokus2p.ai
 
-import com.example.blokus2p.game.GameState
+import com.example.blokus2p.model.GameState
 
 data class Move(val pieceId: Int, val position : Int, val rotation: Int, val flip: Boolean)
 // Du wirst wahrscheinlich schon eine Move-Klasse in deinem Projekt haben

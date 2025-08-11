@@ -1,7 +1,7 @@
 package com.example.blokus2p.helper
 
 
-import com.example.blokus2p.game.Polyomino
+import com.example.blokus2p.model.Polyomino
 
 /**
  * mapt die Zellen eines Polyominos auf die Indizes des Boards

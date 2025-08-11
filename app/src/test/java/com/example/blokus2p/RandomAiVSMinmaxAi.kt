@@ -2,8 +2,8 @@ package com.example.blokus2p
 
 import com.example.blokus2p.ui.events.GameEvent
 import com.example.blokus2p.game.GameEngine
-import com.example.blokus2p.game.Player
-import com.example.blokus2p.game.Polyomino
+import com.example.blokus2p.model.Player
+import com.example.blokus2p.model.Polyomino
 import com.example.blokus2p.model.Move
 import com.example.blokus2p.helper.PlayerType
 import com.example.blokus2p.helper.PolyominoNames
@@ -18,7 +18,7 @@ class RandomAiVSMinmaxAi {
         var playerOneWins = 0
         var playerTwoWins = 0
         val takenTime = measureTime {
-            repeat(2) {
+            repeat(30) {
                 val viewModel: AppViewModel = AppViewModel()
                 var count = 0
                 val gameState = viewModel.gameState.value
@@ -76,13 +76,15 @@ class RandomAiVSMinmaxAi {
                 PlayerType.Human, PlayerType.Human))
         val moves = listOf(
             Move(Polyomino(PolyominoNames.FÜNF_L, 5, false, cells=listOf(0, 14, 28, 42, 43)),listOf(88, 102, 116, 130, 131),130),
-            Move(Polyomino(
+            Move(
+                Polyomino(
                 PolyominoNames.FÜNF_L,
                 5,
                 false,
                 cells=listOf(0, 14, 28, 42, 43)
             ),listOf(65, 79, 93, 107, 106),65),
-            Move(Polyomino(
+            Move(
+                Polyomino(
                 PolyominoNames.FÜNF,
                 5,
                 false,

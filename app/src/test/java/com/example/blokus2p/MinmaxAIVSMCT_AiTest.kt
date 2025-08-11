@@ -1,7 +1,7 @@
 package com.example.blokus2p
 
 import com.example.blokus2p.ui.events.GameEvent
-import com.example.blokus2p.game.Player
+import com.example.blokus2p.model.Player
 import com.example.blokus2p.helper.PlayerType
 import com.example.blokus2p.viewModel.AppViewModel
 import junit.framework.TestCase.assertTrue
@@ -14,7 +14,7 @@ class MinmaxAIVSMCT_AiTest {
         var playerOneWins = 0
         var playerTwoWins = 0
         val takenTime = measureTime {
-            repeat(1) {
+            repeat(10) {
                 val viewModel = AppViewModel()
                 var count = 0
                 val gameState = viewModel.gameState.value
@@ -26,12 +26,12 @@ class MinmaxAIVSMCT_AiTest {
                     )
                 )
 
-                while (viewModel.gameState.value.isFinished == false && count < 21) {
+                while (viewModel.gameState.value.isFinished == false && count < 40) {
                     // Simulate player 1's turn
                     viewModel.checkForAiTurn()
 //                println("Player 1 points: ${viewModel.gameState.value.players[0].points}")
                     // Simulate player 2's turn
-                    viewModel.checkForAiTurn()
+//                    viewModel.checkForAiTurn()
 //                println("Player 2 points: ${viewModel.gameState.value.players[1].points}")
                     count++
                 }

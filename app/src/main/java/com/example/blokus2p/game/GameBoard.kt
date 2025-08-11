@@ -1,5 +1,7 @@
 package com.example.blokus2p.game
 
+import com.example.blokus2p.model.PlacedPolyomino
+
 interface GameBoard {
     val boardSize: Int
     val boardGrid: LongArray

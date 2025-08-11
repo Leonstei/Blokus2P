@@ -1,5 +1,6 @@
 package com.example.blokus2p.game
 
+import com.example.blokus2p.model.Player
 import com.example.blokus2p.model.SmalBoard
 import com.example.blokus2p.model.SmalPlayer
 

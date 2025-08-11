@@ -1,22 +1,16 @@
 package com.example.blokus2p.ai
 
 import com.example.blokus2p.game.GameEngine
-import com.example.blokus2p.game.GameState
-import com.example.blokus2p.game.PlacedPolyomino
-import com.example.blokus2p.game.Player
+import com.example.blokus2p.model.GameState
 import com.example.blokus2p.helper.evaluate
 import com.example.blokus2p.helper.gameStateToSmalGameState
 import com.example.blokus2p.helper.makeMove
 import com.example.blokus2p.helper.smalMoveToMove
 import com.example.blokus2p.model.Move
-import com.example.blokus2p.model.PlacedSmalPolyomino
 import com.example.blokus2p.model.ScoredMove
 import com.example.blokus2p.model.SmalGameState
 import com.example.blokus2p.model.SmalMove
 import com.example.blokus2p.model.SmalPlayer
-import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
 
 class MinmaxAi : AiInterface {
     override fun getNextMove(gameState: GameState): Move? {

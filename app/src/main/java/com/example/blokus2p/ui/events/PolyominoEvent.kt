@@ -1,9 +1,9 @@
 package com.example.blokus2p.ui.events
 
-import com.example.blokus2p.game.Polyomino
+import com.example.blokus2p.model.Polyomino
 
 interface PolyominoEvent : AppEvent {
-    data class PolyominoSelected(val polyomino: Polyomino, val selectedCell2: Int) :
+    data class PolyominoSelected(val polyomino: Polyomino, val selectedCell: Int) :
         PolyominoEvent
     object PolyominoRotate: PolyominoEvent
     object PolyominoRotateClockwise: PolyominoEvent

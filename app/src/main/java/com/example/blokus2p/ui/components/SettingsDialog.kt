@@ -37,8 +37,8 @@ import com.example.blokus2p.ai.MinmaxAi
 import com.example.blokus2p.ai.MonteCarloTreeSearchAi
 import com.example.blokus2p.ai.RandomAi
 import com.example.blokus2p.ui.events.GameEvent
-import com.example.blokus2p.game.GameState
-import com.example.blokus2p.game.Player
+import com.example.blokus2p.model.GameState
+import com.example.blokus2p.model.Player
 import com.example.blokus2p.helper.PlayerType
 
 

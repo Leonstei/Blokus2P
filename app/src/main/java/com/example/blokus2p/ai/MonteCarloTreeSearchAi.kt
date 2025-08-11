@@ -1,7 +1,6 @@
 package com.example.blokus2p.ai
 
-import android.util.Log
-import com.example.blokus2p.game.GameState
+import com.example.blokus2p.model.GameState
 import com.example.blokus2p.helper.evaluate
 import com.example.blokus2p.helper.gameStateToSmalGameState
 import com.example.blokus2p.helper.smalMoveToMove
@@ -56,7 +55,7 @@ class MonteCarloTreeSearchAi : AiInterface {
 //        for (move in bestMoves) {
 //            println("Move=$move")
 //        }
-//        println()
+        println(root.children)
         return smalMoveToMove(bestMove?.move ?: throw IllegalStateException("No best move found"))
 //        return smalMoveToMove(
 //            root.children.maxByOrNull { it.wins / it.visits }?.move

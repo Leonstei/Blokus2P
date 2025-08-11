@@ -1,5 +1,6 @@
 package com.example.blokus2p.ui.bockusScreen
 
+import android.provider.DocumentsContract.Document.COLUMN_SIZE
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,13 +28,19 @@ import androidx.compose.ui.unit.times
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.blokus2p.R
+import com.example.blokus2p.helper.COLUM_SIZE
+import com.example.blokus2p.helper.ROW_SIZE
+import com.example.blokus2p.helper.START_INDEX_PLAYER1
+import com.example.blokus2p.helper.START_INDEX_PLAYER2
+import com.example.blokus2p.helper.VISIBIL_COLUMN_SIZE
+import com.example.blokus2p.helper.VISIBIL_ROW_SIZE
 import com.example.blokus2p.ui.events.GameEvent
-import com.example.blokus2p.game.Polyomino
+import com.example.blokus2p.model.Polyomino
 import com.example.blokus2p.ui.events.PolyominoEvent
 import com.example.blokus2p.ui.components.SettingsDialog
 import com.example.blokus2p.viewModel.AppViewModel
-import com.example.blokus2p.game.GameState
-import com.example.blokus2p.game.Player
+import com.example.blokus2p.model.GameState
+import com.example.blokus2p.model.Player
 import com.example.blokus2p.helper.isBitSet
 
 @Composable
@@ -218,9 +225,9 @@ fun BlockusBoard(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            for (row in 0 until gridSize) {
+            for (row in 1 until VISIBIL_ROW_SIZE+1) {
                 Row {
-                    for (col in 0 until gridSize) {
+                    for (col in 1 until VISIBIL_COLUMN_SIZE+1) {
                         val index = row * gridSize + col
                         Box(
                             modifier = Modifier
@@ -251,8 +258,8 @@ fun BlockusBoard(
                                 .padding(1.dp)
                         ) {
                             Text("$index")
-                            if (index == 65 || index == 130) {
-                                Text("X")
+                            if (index == START_INDEX_PLAYER2 || index == START_INDEX_PLAYER1) {
+                                Text("O")
                             }
                         }
                     }
@@ -300,11 +307,10 @@ fun Polyomino(
     player: Int
 ){
     // Berechne alle (x,y)-Paare aus den linearen Indices
-    val boardWidth = 14
     val coords: List<Pair<Int,Int>> = polyomino.currentVariant.map { index ->
-        val x = index % boardWidth
-        val y = index / boardWidth
-        x to y
+        val x = index % ROW_SIZE
+        val y = index / COLUM_SIZE
+        x-1 to y-1 // Subtrahiere 1, um die Koordinaten an den sichtbaren Bereich anzupassen
     }
     // Randfarbe bestimmen
     var borderColor = if (gameState.selectedPolyomino.name == polyomino.name
@@ -335,22 +341,23 @@ fun Polyomino(
                         y = (y - minY) * cellSize
                     )
                     .clickable {
-                        if (player == gameState.activPlayer.id) onEvent(
+                        val selectedCell = (y + 1) * ROW_SIZE + (x + 1)
+                        if (player == gameState.activPlayer.id)
+                            onEvent(
                             PolyominoEvent.PolyominoSelected(
                                 polyomino,
-                                y*boardWidth+x
+                                selectedCell
                             )
                         )
                     }
                     .border(
-                        1.dp, if (polyomino.selectedCell == y*boardWidth+x &&
+                        1.dp, if (polyomino.selectedCell == (y+1)*ROW_SIZE+(x+1) &&
                             polyomino.name == gameState.selectedPolyomino.name &&
                             player == gameState.activPlayer_id
                         ) borderColor else Color.Transparent
                     )
                     .size(cellSize)
                     .background(if (player == 1) gameState.playerOneColor else gameState.playerTwoColor)
-
             )
         }
     }

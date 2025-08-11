@@ -9,11 +9,11 @@ import com.example.blokus2p.ai.MonteCarloTreeSearchAi
 import com.example.blokus2p.ai.RandomAi
 import com.example.blokus2p.game.BlokusRules
 import com.example.blokus2p.game.GameEngine
-import com.example.blokus2p.game.GameState
-import com.example.blokus2p.game.Player
+import com.example.blokus2p.model.GameState
+import com.example.blokus2p.model.Player
 import com.example.blokus2p.ui.events.AppEvent
 import com.example.blokus2p.ui.events.GameEvent
-import com.example.blokus2p.game.Polyomino
+import com.example.blokus2p.model.Polyomino
 import com.example.blokus2p.ui.events.PolyominoEvent
 import com.example.blokus2p.game.BlokusBoard
 import com.example.blokus2p.game.GameBoard
@@ -25,6 +25,8 @@ import com.example.blokus2p.helper.PlayerType.MinimaxAI
 import com.example.blokus2p.helper.PlayerType.MonteCarloAI
 import com.example.blokus2p.helper.PlayerType.RandomAI
 import com.example.blokus2p.helper.PolyominoNames
+import com.example.blokus2p.helper.START_INDEX_PLAYER1
+import com.example.blokus2p.helper.START_INDEX_PLAYER2
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -51,7 +53,7 @@ class AppViewModel : ViewModel() {
     private fun handlePolyominoEvent(event: PolyominoEvent) {
         when (event) {
             is PolyominoEvent.PolyominoSelected -> {
-                selectPolyomino(event.polyomino,event.selectedCell2)
+                selectPolyomino(event.polyomino,event.selectedCell)
             }
 
             is PolyominoEvent.PolyominoRotate -> {
@@ -97,11 +99,12 @@ class AppViewModel : ViewModel() {
             it.copy(
                 players = listOf(
                     Player(1, "Player 1",true,  Color.Blue, 0,
-                        availableEdges =  setOf(130)),
+                        availableEdges =  setOf(START_INDEX_PLAYER1)),
                     Player(2, "Player 2",false, Color.Magenta, 0,
-                        availableEdges =  setOf(65),isAi = true, ai = MinmaxAi())),
+                        availableEdges =  setOf(START_INDEX_PLAYER2),isAi = true, ai = MinmaxAi())
+                ),
                 activPlayer_id = 1,
-                activPlayer = Player(1, "Player 1",true, Color.Blue, 0, availableEdges =  setOf(143)),
+                activPlayer = Player(1, "Player 1",true, Color.Blue, 0, availableEdges =  setOf(START_INDEX_PLAYER1)),
                 playerOneColor = Color.Blue,
                 playerTwoColor = Color.Magenta,
                 board = BlokusBoard()
@@ -377,7 +380,7 @@ class AppViewModel : ViewModel() {
         }
     }
 
-    fun selectPolyomino(polyomino: Polyomino,selectedCell : Int){
+    fun selectPolyomino(polyomino: Polyomino, selectedCell : Int){
         _gameState.update { state ->
             state.copy(
                 selectedPolyomino = polyomino.copy(

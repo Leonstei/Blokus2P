@@ -1,4 +1,4 @@
-package com.example.blokus2p.game
+package com.example.blokus2p.model
 
 import com.example.blokus2p.helper.PolyominoNames
 import com.example.blokus2p.helper.polyominoVariants
@@ -12,7 +12,7 @@ data class Polyomino(
     val cells: List<Int> = listOf(),
     val selectedCell: Int = 0,
     val variantIndex: Int = 0,
-    val boardSize: Int = 14
+    val boardSize: Int = 16
 ) {
     private val allVariants: List<PolyominoVariant> = polyominoVariants[name] ?: emptyList()
 
@@ -29,6 +29,30 @@ data class Polyomino(
 
     val currentVariant: List<Int>
         get() = allVariants[variantIndex % allVariants.size].cells
+
+    fun List<Int>.toMailboxIndices(): List<Int> =
+        this.map { old ->
+            val r = old / 14
+            val c = old % 14
+            (r + 1) * 16 + (c + 1)
+        }
+
+//    fun logAllVariants() {
+//        polyominoVariants.forEach { entrys ->
+//            println("Polyomino: ${entrys.key}")
+//            entrys.value.forEach { variant ->
+//                println("PolyominoVariant(cells = listOf(${variant.cells.toMailboxIndices()}), " +
+//                        "isFlipped = ${variant.isFlipped}, rotation = ${variant.rotation}),")
+//            }
+//        }
+//        polyominoVariantsDistinct.forEach { entry ->
+//            println("Polyomino: ${entry.key}")
+//            entry.value.forEach { variant ->
+//                println("listOf(${variant.toMailboxIndices()}),")
+//            }
+//        }
+//    }
+
 
     fun rotatedRight(): Polyomino {
         val current = allVariants[variantIndex]
@@ -130,7 +154,7 @@ data class Polyomino(
 //    fun toIndices(pairs: List<Pair<Int,Int>>) = pairs.map { (x, y) ->
 //        y * boardSize + x
 //    }
- fun pairToIndex(pair: Pair<Int,Int>): Int = pair.second * boardSize + pair.first
+ fun pairToIndex(pair: Pair<Int,Int>): Int = (pair.second +1) * boardSize + pair.first +1
 
 }
 data class PolyominoVariant(

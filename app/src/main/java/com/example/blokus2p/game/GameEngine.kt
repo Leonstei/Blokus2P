@@ -1,13 +1,14 @@
 package com.example.blokus2p.game
 
-import android.util.Log
+import com.example.blokus2p.helper.*
 import com.example.blokus2p.helper.clearBit
 import com.example.blokus2p.helper.isBitSet
 import com.example.blokus2p.helper.setBit
 import com.example.blokus2p.model.Move
-import com.example.blokus2p.model.SmalGameState
+import com.example.blokus2p.model.PlacedPolyomino
+import com.example.blokus2p.model.Player
+import com.example.blokus2p.model.Polyomino
 import com.example.blokus2p.model.SmalPlayer
-import kotlin.time.measureTime
 
 class GameEngine {
     fun place(
@@ -57,32 +58,32 @@ class GameEngine {
         val lastPlacedPolyominoFromPlayer = board.placedPolyominos.lastOrNull { it.playerId == player.id }
         //val lastPlacedPolyominoFromPlayer = lastPlacedPolyominosFromPlayer.lastOrNull()
 
-        if (lastPlacedPolyominoFromPlayer == null) return setOf(65,130)
+        if (lastPlacedPolyominoFromPlayer == null) return setOf(START_INDEX_PLAYER1,START_INDEX_PLAYER2)
 
         lastPlacedPolyominoFromPlayer.cells.forEach { index ->
-            val leftTopEdge = index - 15
-            val rightTopEdge = index - 13
-            val leftBottomEdge = index + 13
-            val rightBottomEdge = index + 15
-            if (leftTopEdge in 0 until 196 && !isBitSet(board.boardGrid,leftTopEdge)
-                && index % 14 != 0) newAvailableEdges.add(leftTopEdge)
-            if (rightTopEdge in 0 until 196 && !isBitSet(board.boardGrid,rightTopEdge)
-                && index % 14 != 13) newAvailableEdges.add(rightTopEdge)
-            if (leftBottomEdge in 0 until 196 && !isBitSet(board.boardGrid,leftBottomEdge)
-                && index % 14 != 0 ) newAvailableEdges.add(leftBottomEdge)
-            if (rightBottomEdge in 0 until 196 && !isBitSet(board.boardGrid,rightBottomEdge)
-                && index % 14 != 13) newAvailableEdges.add(rightBottomEdge)
+            val leftTopEdge = index - INDEX_TOP_LEFT
+            val rightTopEdge = index - INDEX_TOP_RIGHT
+            val leftBottomEdge = index + INDEX_BOTTOM_LEFT
+            val rightBottomEdge = index + INDEX_BOTTOM_RIGHT
+            if (leftTopEdge in FIRST_INDEX_ONBOARD until FIRST_INDEX_OFBOARD && !isBitSet(board.boardGrid,leftTopEdge)
+                && index % ROW_SIZE != 1) newAvailableEdges.add(leftTopEdge)
+            if (rightTopEdge in FIRST_INDEX_ONBOARD until FIRST_INDEX_OFBOARD && !isBitSet(board.boardGrid,rightTopEdge)
+                && index % ROW_SIZE != 14) newAvailableEdges.add(rightTopEdge)
+            if (leftBottomEdge in FIRST_INDEX_ONBOARD until FIRST_INDEX_OFBOARD && !isBitSet(board.boardGrid,leftBottomEdge)
+                && index % ROW_SIZE != 1 ) newAvailableEdges.add(leftBottomEdge)
+            if (rightBottomEdge in FIRST_INDEX_ONBOARD until FIRST_INDEX_OFBOARD && !isBitSet(board.boardGrid,rightBottomEdge)
+                && index % ROW_SIZE != 14) newAvailableEdges.add(rightBottomEdge)
         }
         val filteredEdges = newAvailableEdges.filter { edge ->
-            val cellAbove = edge - 14
-            val cellLeft = edge - 1
-            val cellRight = edge + 1
-            val cellBelow = edge + 14
+            val cellAbove = edge - INDEX_TOP
+            val cellLeft = edge - INDEX_LEFT
+            val cellRight = edge + INDEX_RIGHT
+            val cellBelow = edge + INDEX_BOTTOM
 
-            val aboveOk = cellAbove !in 0 until 196 || !isBitSet(player.bitBoard,cellAbove)
-            val leftOk = cellLeft !in 0 until 196 || !isBitSet(player.bitBoard,cellLeft)
-            val rightOk = cellRight !in 0 until 196 || !isBitSet(player.bitBoard,cellRight)
-            val belowOk = cellBelow !in 0 until 196 || !isBitSet(player.bitBoard,cellBelow)
+            val aboveOk = cellAbove !in FIRST_INDEX_ONBOARD until FIRST_INDEX_OFBOARD || !isBitSet(player.bitBoard,cellAbove)
+            val leftOk = cellLeft !in FIRST_INDEX_ONBOARD until FIRST_INDEX_OFBOARD || !isBitSet(player.bitBoard,cellLeft)
+            val rightOk = cellRight !in FIRST_INDEX_ONBOARD until FIRST_INDEX_OFBOARD || !isBitSet(player.bitBoard,cellRight)
+            val belowOk = cellBelow !in FIRST_INDEX_ONBOARD until FIRST_INDEX_OFBOARD || !isBitSet(player.bitBoard,cellBelow)
 
             aboveOk && leftOk && rightOk && belowOk
         }
@@ -95,15 +96,15 @@ class GameEngine {
         edges.forEach { index->
             if (isBitSet(board.boardGrid, index)) notAvailableEdges.add(index)
             else{
-                val cellAbove = index - 14
-                val cellLeft = index - 1
-                val cellRight = index + 1
-                val cellBelow = index + 14
+                val cellAbove = index - INDEX_TOP
+                val cellLeft = index - INDEX_LEFT
+                val cellRight = index + INDEX_RIGHT
+                val cellBelow = index + INDEX_BOTTOM
 
-                if (cellAbove in 0 until 196 && isBitSet(playerBoard, cellAbove)) notAvailableEdges.add(index)
-                if (cellLeft in 0 until 196 && isBitSet(playerBoard, cellLeft) && index % 14 != 0) notAvailableEdges.add(index)
-                if (cellRight in 0 until 196 && isBitSet(playerBoard, cellRight) && index % 14 != 13) notAvailableEdges.add(index)
-                if (cellBelow in 0 until 196 && isBitSet(playerBoard, cellBelow)) notAvailableEdges.add(index)
+                if (cellAbove in FIRST_INDEX_ONBOARD until FIRST_INDEX_OFBOARD && isBitSet(playerBoard, cellAbove)) notAvailableEdges.add(index)
+                if (cellLeft in FIRST_INDEX_ONBOARD until FIRST_INDEX_OFBOARD && isBitSet(playerBoard, cellLeft) && index % ROW_SIZE != 1) notAvailableEdges.add(index)
+                if (cellRight in FIRST_INDEX_ONBOARD until FIRST_INDEX_OFBOARD && isBitSet(playerBoard, cellRight) && index % 14 != 13) notAvailableEdges.add(index)
+                if (cellBelow in FIRST_INDEX_ONBOARD until FIRST_INDEX_OFBOARD && isBitSet(playerBoard, cellBelow)) notAvailableEdges.add(index)
             }
         }
         return notAvailableEdges
@@ -180,10 +181,10 @@ class GameEngine {
                 }
             }
             lastPlacedPolyominoFromPlayer.cells.forEach {
-                notAvailableEdges.add(it + 1)
-                notAvailableEdges.add(it - 1)
-                notAvailableEdges.add(it + 14)
-                notAvailableEdges.add(it - 14)
+                if (it % ROW_SIZE != 14) notAvailableEdges.add(it + INDEX_RIGHT)
+                if (it % ROW_SIZE != 1) notAvailableEdges.add(it - INDEX_LEFT)
+                if (it % ROW_SIZE != 14) notAvailableEdges.add(it + INDEX_BOTTOM)
+                if (it % ROW_SIZE != 1) notAvailableEdges.add(it - INDEX_TOP)
             }
 
             notValidMoves = player.availableMoves.filter { move ->
@@ -240,7 +241,7 @@ class GameEngine {
 //        Log.d("AppViewModel", "new validMoves ${validMoves.size}")
         return validMoves
     }
-    fun checkForNotValidMoves( moves :Set<Move>, placedPolyomino:Polyomino,rules: GameRules,player: Player,board: GameBoard):List<Move> {
+    fun checkForNotValidMoves(moves :Set<Move>, placedPolyomino: Polyomino, rules: GameRules, player: Player, board: GameBoard):List<Move> {
         val notValidMoves = mutableListOf<Move>()
         for ( move in moves) {
             if (!rules.isValidPlacement(player, move.orientation, board  )|| move.polyomino.name == placedPolyomino.name) {
