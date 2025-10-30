@@ -13,6 +13,8 @@ lifecycleViewmodelCompose = "2.9.0"
 materialIconsExtended = "1.7.5"
 zoomable = "1.6.2"
 foundationAndroid = "1.6.6"
+transportRuntime = "4.0.0"
+litertApi = "1.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -35,6 +37,8 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 zoomable = { module = "net.engawapg.lib:zoomable", version.ref = "zoomable" }
 androidx-foundation-android = { group = "androidx.compose.foundation", name = "foundation-android", version.ref = "foundationAndroid" }
+transport-runtime = { group = "com.google.android.datatransport", name = "transport-runtime", version.ref = "transportRuntime" }
+litert-api = { group = "com.google.ai.edge.litert", name = "litert-api", version.ref = "litertApi" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

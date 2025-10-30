@@ -4,7 +4,7 @@ import com.example.blokus2p.model.GameState
 import com.example.blokus2p.model.Move
 
 interface AiInterface {
-    fun getNextMove(gameState: GameState): Move?
+    suspend fun getNextMove(gameState: GameState): Move?
 
 //    fun boardUpdate()
 }

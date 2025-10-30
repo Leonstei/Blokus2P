@@ -3,6 +3,7 @@ package com.example.blokus2p.viewModel
 //import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.blokus2p.ai.AiInterface
 import com.example.blokus2p.ai.MinmaxAi
 import com.example.blokus2p.ai.MonteCarloTreeSearchAi
@@ -31,6 +32,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlin.time.measureTime
 
 class AppViewModel : ViewModel() {
     private val _gameState = MutableStateFlow(GameState())
@@ -101,7 +104,7 @@ class AppViewModel : ViewModel() {
                     Player(1, "Player 1",true,  Color.Blue, 0,
                         availableEdges =  setOf(START_INDEX_PLAYER1)),
                     Player(2, "Player 2",false, Color.Magenta, 0,
-                        availableEdges =  setOf(START_INDEX_PLAYER2),isAi = true, ai = MinmaxAi())
+                        availableEdges =  setOf(START_INDEX_PLAYER2),isAi = true)
                 ),
                 activPlayer_id = 1,
                 activPlayer = Player(1, "Player 1",true, Color.Blue, 0, availableEdges =  setOf(START_INDEX_PLAYER1)),
@@ -153,11 +156,15 @@ class AppViewModel : ViewModel() {
         val activePlayer = _gameState.value.activPlayer
 //        println("checkForAiTurn ${activePlayer.name} isAi ${activePlayer.isAi}")
         if (activePlayer.isAi && activePlayer.ai != null) {
-//            viewModelScope.launch {
+            viewModelScope.launch {
 //                val timeTaken = measureTime {
 //                    val aiMove = _gameState.value.activPlayer.ai?.getNextMove(_gameState.value)
 //                }
 //                Log.d("AppViewModel", "AI took $timeTaken")
+//            val takenTime = measureTime {
+//                val aiMove = _gameState.value.activPlayer.ai?.getNextMove(_gameState.value)
+//            }
+//            println( "AI took $takenTime")
                 val aiMove = _gameState.value.activPlayer.ai?.getNextMove(_gameState.value)
 //                Log.d("AppViewModel", "aiMove $aiMove")
             if(aiMove == null && activePlayer.availableMoves.isNotEmpty()) {
@@ -183,10 +190,6 @@ class AppViewModel : ViewModel() {
                 println("player ${_gameState.value.activPlayer.name} has no available moves")
                 println("notValidMoves ${notValidMoves}")
             }
-            //4m 31s
-            //5m 1.645235900s
-            //5m 54.732790800s
-            //4m 46s
                 aiMove?.let {
                     selectPolyomino(
                         it.polyomino,
@@ -204,7 +207,7 @@ class AppViewModel : ViewModel() {
                     updateAvailableMoves()
                     nextPlayer(_gameState.value.activPlayer_id)
                 }
-//            }
+            }
         }
     }
 

@@ -257,7 +257,7 @@ fun BlockusBoard(
                                 }
                                 .padding(1.dp)
                         ) {
-                            Text("$index")
+                            //Text("$index")
                             if (index == START_INDEX_PLAYER2 || index == START_INDEX_PLAYER1) {
                                 Text("O")
                             }

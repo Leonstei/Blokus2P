@@ -11,17 +11,32 @@ import com.example.blokus2p.model.ScoredMove
 import com.example.blokus2p.model.SmalGameState
 import com.example.blokus2p.model.SmalMove
 import com.example.blokus2p.model.SmalPlayer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class MinmaxAi : AiInterface {
-    override fun getNextMove(gameState: GameState): Move? {
-        val smalGameState = gameStateToSmalGameState(gameState)
-        var depth = 3
-        if(gameState.activPlayer.availableMoves.size > 50){
-            depth--
+//    override suspend fun getNextMove(gameState: GameState): Move? {
+//
+//        val smalGameState = gameStateToSmalGameState(gameState)
+//        var depth = 3
+//        if(gameState.activPlayer.availableMoves.size > 50){
+//            depth--
+//        }
+//        val bestMove = findBestMove(smalGameState, depth)
+//        return bestMove
+//    }
+
+    override suspend fun getNextMove(gameState: GameState): Move? {
+        return withContext(Dispatchers.Default) {
+            val smalGameState = gameStateToSmalGameState(gameState)
+            var depth = 3
+            if (gameState.activPlayer.availableMoves.size > 50) {
+                depth--
+            }
+            findBestMove(smalGameState, depth)
         }
-        val bestMove = findBestMove(smalGameState, depth)
-        return bestMove
     }
+
 
 //    private suspend fun findBestMoveParallel(
 //        gameState: GameState,
@@ -113,11 +128,11 @@ class MinmaxAi : AiInterface {
         val possibleMoves = getMoves(currentPlayer)
         val filterdMoves = if (possibleMoves.size > 100){
             possibleMoves.filterIndexed { index, move ->
-                index % 9 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
+                index % 7 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
             }
         }else {
             possibleMoves.filterIndexed { index, move ->
-                index % 7 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
+                index % 3 == 0 && move.polyomino.points == possibleMoves.first().polyomino.points
             }
         }
 
