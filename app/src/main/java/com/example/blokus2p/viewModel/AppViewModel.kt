@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.yield
 
 class AppViewModel : ViewModel() {
     private val _gameState = MutableStateFlow(GameState())
@@ -93,15 +94,17 @@ class AppViewModel : ViewModel() {
         }
     }
     private fun setInitialGameState() {
+//        val polyomino = Polyomino()
+//        polyomino.printdistinctVariants()
         _gameState.update {
             it.copy(
                 players = listOf(
                     Player(1, "Player 1",true,  Color.Blue, 0,
-                        availableEdges =  setOf(130)),
+                        availableEdges =  (0..195).toSet()),
                     Player(2, "Player 2",false, Color.Magenta, 0,
-                        availableEdges =  setOf(65),isAi = true, ai = MinmaxAi())),
+                        availableEdges =  (0..195).toSet(),isAi = true, ai = MinmaxAi())),
                 activPlayer_id = 1,
-                activPlayer = Player(1, "Player 1",true, Color.Blue, 0, availableEdges =  setOf(143)),
+                activPlayer = Player(1, "Player 1",true, Color.Blue, 0, availableEdges =  (0..195).toSet()),
                 playerOneColor = Color.Blue,
                 playerTwoColor = Color.Magenta,
                 board = BlokusBoard()

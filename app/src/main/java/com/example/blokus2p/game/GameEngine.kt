@@ -146,6 +146,8 @@ class GameEngine {
         //}
 //            Log.d("AppViewModel", "validMoves ${validMoves.size}")
            // Log.d("AppViewModel", "time taken $timeTaken")
+        val validSet = validMoves.toSet()
+        val validSet2 = validSet.distinctBy { it.position to it.orientation }.toSet()
         return validMoves.toSet()
     }
 

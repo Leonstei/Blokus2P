@@ -3,6 +3,8 @@ package com.example.blokus2p.game
 import com.example.blokus2p.helper.PolyominoNames
 import com.example.blokus2p.helper.polyominoVariants
 import com.example.blokus2p.helper.polyominoVariantsDistinct
+import java.lang.Math.pow
+import kotlin.math.pow
 
 
 data class Polyomino(
@@ -17,6 +19,24 @@ data class Polyomino(
     private val allVariants: List<PolyominoVariant> = polyominoVariants[name] ?: emptyList()
 
     val distinctVariants: List<List<Int>> = polyominoVariantsDistinct[name] ?: emptyList()
+    fun printdistinctVariants(){
+        polyominoVariantsDistinct.forEach { (name, transformations) ->
+            println("Polyomino: $name")
+            transformations.forEach { transformation ->
+                println("  Transformation: $transformation")
+                var result =0
+                transformation.forEach{ cell->
+                    val x:Int = cell % boardSize
+                    val y:Int = cell / boardSize
+                    result = y * 16 + x //  2.0.pow((y * 16 + x)).toULong()
+                    print( result)
+                    print(", " )
+                }
+                println("")
+                //println(" | Encoded: $result")
+            }
+        }
+    }
 
 //    private val oldVariants: List<PolyominoVariant> by lazy {
 //            generateAllTransformations(cells)
