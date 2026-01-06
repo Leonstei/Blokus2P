@@ -156,7 +156,7 @@ class AppViewModel : ViewModel() {
         val activePlayer = _gameState.value.activPlayer
 //        println("checkForAiTurn ${activePlayer.name} isAi ${activePlayer.isAi}")
         if (activePlayer.isAi && activePlayer.ai != null) {
-            viewModelScope.launch {
+//            viewModelScope.launch {
 //                val timeTaken = measureTime {
 //                    val aiMove = _gameState.value.activPlayer.ai?.getNextMove(_gameState.value)
 //                }
@@ -207,7 +207,7 @@ class AppViewModel : ViewModel() {
                     updateAvailableMoves()
                     nextPlayer(_gameState.value.activPlayer_id)
                 }
-            }
+//            }
         }
     }
 

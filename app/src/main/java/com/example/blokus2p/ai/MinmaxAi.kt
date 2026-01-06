@@ -26,15 +26,15 @@ class MinmaxAi : AiInterface {
 //        return bestMove
 //    }
 
-    override suspend fun getNextMove(gameState: GameState): Move? {
-        return withContext(Dispatchers.Default) {
-            val smalGameState = gameStateToSmalGameState(gameState)
-            var depth = 3
-            if (gameState.activPlayer.availableMoves.size > 50) {
-                depth--
-            }
-            findBestMove(smalGameState, depth)
+    override fun getNextMove(gameState: GameState): Move? {
+//        return withContext(Dispatchers.Default) {
+        val smalGameState = gameStateToSmalGameState(gameState)
+        var depth = 3
+        if (gameState.activPlayer.availableMoves.size > 50) {
+            depth--
         }
+        return findBestMove(smalGameState, depth)
+//        }
     }
 
 
