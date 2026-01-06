@@ -50,9 +50,6 @@ class AppViewModel : ViewModel() {
         when (event) {
             is GameEvent -> handleGameEvent(event)
             is PolyominoEvent -> handlePolyominoEvent(event)
-            else -> {
-                Log.d("AppViewModel", "Unknown event: $event")
-            }
         }
     }
 
