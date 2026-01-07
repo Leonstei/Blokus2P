@@ -33,6 +33,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import kotlin.time.measureTime
 
 class AppViewModel : ViewModel() {
@@ -210,6 +212,29 @@ class AppViewModel : ViewModel() {
 //            }
         }
     }
+//    @OptIn(ExperimentalStdlibApi::class)
+//    fun ByteArray.toBlokusState(): BlokusState {
+//        val buffer = ByteBuffer.wrap(this).order(ByteOrder.LITTLE_ENDIAN)
+//
+//        val currentPlayer = buffer.get().toInt()
+//        val outcome = buffer.get().toInt()
+//        val numMoves = buffer.short.toInt()
+//        val p0Pass = buffer.get() != 0.toByte()
+//        val p1Pass = buffer.get() != 0.toByte()
+//        buffer.position(buffer.position() + 2) // padding
+//
+//        val mask0 = buffer.int.toUInt()
+//        val mask1 = buffer.int.toUInt()
+//
+//        val combined = LongArray(4) { buffer.long }
+//        val p0Board = LongArray(4) { buffer.long }
+//        val p1Board = LongArray(4) { buffer.long }
+//        val border = LongArray(4) { buffer.long }
+//        val p0Edges = LongArray(4) { buffer.long }
+//        val p1Edges = LongArray(4) { buffer.long }
+//
+//        return BlokusState(/* alle Werte übergeben */)
+//    }
 
     fun updatePolyominosOfActivPlayer(currentPlayerId: Int){
         _gameState.update { gameSate->

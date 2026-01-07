@@ -16,11 +16,11 @@ object BlokusNative {
     external fun doubleNumber(number: Int): Int
 
     // Neue Funktionen für Blokus
-    external fun initGame(): String  // Gibt initialen State als JSON-String zurück
-    external fun getLegalActions(stateJson: String, player: Int): String  // Gibt Liste von Actions als JSON
-    external fun applyAction(stateJson: String, actionId: Long, player: Int): String  // Wendet Zug an, gibt neuen State
-    external fun isTerminal(stateJson: String): Boolean  // Prüft Endzustand
-    external fun getBestMoveMinimax(stateJson: String, player: Int, depth: Int): Long  // Minimax-Bot-Zug
-    external fun getBestMoveMcts(stateJson: String, player: Int, iterations: Int): Long  // MCTS-Bot-Zug
+    external fun initGame(): ByteArray // Gibt initialen State als JSON-String zurück
+    external fun getLegalActions(stateBytes : ByteArray, player: Int): IntArray  // Gibt Liste von Actions als JSON
+    external fun applyAction(stateBytes : ByteArray, actionId: Int): ByteArray  // Wendet Zug an, gibt neuen State
+    external fun isTerminal(stateBytes : ByteArray): Boolean  // Prüft Endzustand
+    external fun getBestMoveMinimax(stateBytes : ByteArray, player: Int, depth: Int): Long  // Minimax-Bot-Zug
+    external fun getBestMoveMcts(stateBytes : ByteArray, player: Int, iterations: Int): Long  // MCTS-Bot-Zug
     // Füge mehr hinzu, z. B. für AlphaZero
 }
