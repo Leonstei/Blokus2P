@@ -23,16 +23,16 @@
 #include <string>
 #include <vector>
 
-#include "open_spiel/abseil-cpp/absl/strings/str_cat.h"
-#include "open_spiel/abseil-cpp/absl/types/span.h"
-#include "open_spiel/game_parameters.h"
-#include "open_spiel/observer.h"
-#include "open_spiel/spiel.h"
-#include "open_spiel/spiel_globals.h"
-#include "open_spiel/spiel_utils.h"
-#include "open_spiel/utils/tensor_view.h"
-#include "absl/strings/str_join.h"
-#include "absl/strings/str_cat.h"
+//#include "open_spiel/abseil-cpp/absl/strings/str_cat.h"
+//#include "open_spiel/abseil-cpp/absl/types/span.h"
+//#include "open_spiel/game_parameters.h"
+//#include "open_spiel/observer.h"
+//#include "open_spiel/spiel.h"
+//#include "open_spiel/spiel_globals.h"
+//#include "open_spiel/spiel_utils.h"
+//#include "open_spiel/utils/tensor_view.h"
+//#include "absl/strings/str_join.h"
+//#include "absl/strings/str_cat.h"
 
 #include "blokus_duo.h"
 #include "blokus_duo_logic.h"
@@ -73,8 +73,8 @@ namespace open_spiel {
 
 
 
-        void BlokusDuoState::DoApplyAction(open_spiel::Action move) {
-            Player player = CurrentPlayer();
+        void BlokusDuoState::DoApplyAction(int move) {
+            int player = CurrentPlayer();
             if (move == kPassAction) {
                 // Aktion war PASSEN:
                 player == 0 ? player0_pass = true : player1_pass = true;
@@ -115,7 +115,7 @@ namespace open_spiel {
             num_moves_++;
         }
 
-        std::vector<open_spiel::Action> BlokusDuoState::LegalActions() const {
+        std::vector<int> BlokusDuoState::LegalActions() const {
             if (IsTerminal()) return {};
 
             const auto& current_player_board =
@@ -127,7 +127,7 @@ namespace open_spiel {
             const uint32_t& current_polyomino_mask =
                     CurrentPlayer() == 0 ? polyomino_mask_player_0 : polyomino_mask_player_1;
 
-            std::vector<open_spiel::Action> moves_indices;
+            std::vector<int> moves_indices;
 
             // Annahme: ALL_DISTINCT_ACTIONS ist global verfügbar.
             for (int i = 0; i < ALL_DISTINCT_ACTIONS.size(); ++i) {
@@ -158,12 +158,12 @@ namespace open_spiel {
 
 
         std::string BlokusDuoState::ActionToString(
-                Player player, open_spiel::Action action_id) const {
+                int player, int action_id) const {
             return game_->ActionToString(player, action_id);
         }
 
 
-        BlokusDuoState::BlokusDuoState(std::shared_ptr<const Game> game) : State(game) {
+        BlokusDuoState::BlokusDuoState() {
             combined_board_.fill(0ULL);
             player_0_board_.fill(0ULL);
             player_1_board_.fill(0ULL);
@@ -244,21 +244,10 @@ namespace open_spiel {
             );
         }
 
-        std::unique_ptr<StateStruct> BlokusDuoState::ToStruct() const {
-            BlokusDuoStateStruct rv;
-            std::vector<std::string> board;
-            // board.reserve(board_.size());
-            // for (const CellState& cell : board_) {
-            //   board.push_back(StateToString(cell));
-            // }
-            // rv.current_player = PlayerToString(CurrentPlayer());
-            // rv.board = board;
-            return std::make_unique<BlokusDuoStateStruct>(rv);
-        }
 
 
         bool BlokusDuoState::IsTerminal() const {
-            return (player0_pass + player1_pass) == NumPlayers();
+            return (player0_pass + player1_pass) == kNumPlayers;
         }
 
         std::vector<double> BlokusDuoState::Returns() const {
@@ -280,7 +269,7 @@ namespace open_spiel {
             }
         }
 
-        double BlokusDuoState::PlayerReturn(Player player) const
+        double BlokusDuoState::PlayerReturn(int player) const
         {
             // return EvaluationFunktion(player);
             if (!IsTerminal())
@@ -290,10 +279,10 @@ namespace open_spiel {
             return Returns()[player];
         }
 
-        double BlokusDuoState::EvaluationFunktion(Player player) const
+        double BlokusDuoState::EvaluationFunktion(int player) const
         {
             double score_player = CalculateFinalScore(player == 0 ? player_0_board_ : player_1_board_);
-            Player opponent = 1-player;
+            int opponent = 1-player;
             double score_opponent =CalculateFinalScore(opponent == 0 ? player_0_board_ : player_1_board_);
             auto& current_player_edges =
                     player == 0 ? player_0_edges : player_1_edges;
@@ -329,19 +318,19 @@ namespace open_spiel {
             return value;
         }
 
-        std::string BlokusDuoState::InformationStateString(Player player) const {
-            SPIEL_CHECK_GE(player, 0);
-            SPIEL_CHECK_LT(player, num_players_);
-            return HistoryString();
-        }
+//        std::string BlokusDuoState::InformationStateString(int player) const {
+//            SPIEL_CHECK_GE(player, 0);
+//            SPIEL_CHECK_LT(player, num_players_);
+//            return HistoryString();
+//        }
+//
+//        std::string BlokusDuoState::ObservationString(int player) const {
+//            SPIEL_CHECK_GE(player, 0);
+//            SPIEL_CHECK_LT(player, num_players_);
+//            return ToString();
+//        }
 
-        std::string BlokusDuoState::ObservationString(Player player) const {
-            SPIEL_CHECK_GE(player, 0);
-            SPIEL_CHECK_LT(player, num_players_);
-            return ToString();
-        }
-
-        void BlokusDuoState::ObservationTensor(Player player,
+        void BlokusDuoState::ObservationTensor(int player,
                                                absl::Span<float> values) const {
             const auto& current_player_board =
                     player == 0 ? player_0_board_ : player_1_board_;
@@ -415,7 +404,7 @@ namespace open_spiel {
 
         }
 
-        void BlokusDuoState::UndoAction(Player player, open_spiel::Action move) {
+        void BlokusDuoState::UndoAction(int player, int move) {
             history_.pop_back();
             --move_number_;     // Reduziert die Zugnummer
             if ( move == kPassAction)
@@ -452,11 +441,11 @@ namespace open_spiel {
             current_player_ =  player;
         }
 
-        std::unique_ptr<State> BlokusDuoState::Clone() const {
-            return std::unique_ptr<State>(new BlokusDuoState(*this));
-        }
+//        std::unique_ptr<State> BlokusDuoState::Clone() const {
+//            return std::unique_ptr<State>(new BlokusDuoState(*this));
+//        }
 
-        std::string BlokusDuoGame::ActionToString(Player player, open_spiel::Action action_id) const {
+        std::string BlokusDuoGame::ActionToString(int player, int action_id) const {
             int index = static_cast<int>(action_id);
 
             // Prüft, ob es sich um eine der 13.729 regulären Aktionen handelt
@@ -483,8 +472,8 @@ namespace open_spiel {
             return absl::StrCat("P", player, " Invalid Action ID: ", action_id);
         }
 
-        BlokusDuoGame::BlokusDuoGame(const GameParameters& params)
-                : Game(kGameType, params) {}
+//        BlokusDuoGame::BlokusDuoGame(const GameParameters& params)
+//                : Game(kGameType, params) {}
 
     }  // namespace blokus_duo
 }  // namespace open_spiel

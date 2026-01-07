@@ -11,11 +11,6 @@
 #include <string>
 #include <vector>
 
-
-#include "open_spiel/abseil-cpp/absl/types/span.h"
-#include "open_spiel/json/include/nlohmann/json.hpp"
-#include "open_spiel/spiel_utils.h"
-#include "open_spiel/spiel.h"
 #include "blokus_duo_logic.h"
 
 
@@ -23,35 +18,33 @@ namespace open_spiel {
     namespace blokus_duo {
 
 // State of an in-play game.
-        class BlokusDuoState : public State {
+        class BlokusDuoState {
         public:
-            BlokusDuoState(std::shared_ptr<const Game> game);
+            explicit BlokusDuoState();  // statt shared_ptr<const Game>
+            BlokusDuoState(const BlokusDuoState& other);
+            BlokusDuoState& operator=(const BlokusDuoState& other);
 
-            BlokusDuoState(const BlokusDuoState&) = default;
-            BlokusDuoState& operator=(const BlokusDuoState&) = default;
 
-            Player CurrentPlayer() const override {
-                return IsTerminal() ? kTerminalPlayerId : current_player_;
-            }
-            std::string ActionToString(Player player, open_spiel::Action action_id) const override;
-            std::string ToString() const override;
-            bool IsTerminal() const override;
-            std::vector<double> Returns() const override;
-            double PlayerReturn(Player player) const override;
-            double EvaluationFunktion(Player player) const;
-            std::string InformationStateString(Player player) const override;
-            std::string ObservationString(Player player) const override;
-            void ObservationTensor(Player player,
-                                   absl::Span<float> values) const override;
-            std::unique_ptr<State> Clone() const override;
-            void UndoAction(Player player, open_spiel::Action move) override;
-            std::vector<open_spiel::Action> LegalActions() const override;
-            Player outcome() const { return outcome_; }
+            int CurrentPlayer() const { return current_player_; }
+            bool IsTerminal() const;
+            std::string ActionToString(int player,  Action action_id) const;
+            void ApplyAction(int move);  // statt DoApplyAction(Action)
+            void UndoAction(int player,int move);   // falls du es brauchst
+            int outcome() const { return outcome_; }
+
+            std::vector<double> Returns() const;
+            double PlayerReturn(int player) const;
+            double EvaluationFunktion(int player) const;
+            std::string InformationStateString(int player) const;
+            std::string ObservationString(int player) const;
+            void ObservationTensor(int player,
+                                   absl::Span<float> values) const;
+            std::vector<int> LegalActions() const;
+
             //void ChangePlayer() {current_player_ = current_player_ == 0 ? 1 : 0;}
 
-            void SetCurrentPlayer(Player player) { current_player_ = player; }
+            void SetCurrentPlayer(int player) { current_player_ = player; }
 
-            std::unique_ptr<StateStruct> ToStruct() const override;
 
         protected:
             std::array<uint64_t, kNumBitboardParts> combined_board_;
@@ -64,35 +57,37 @@ namespace open_spiel {
             uint32_t polyomino_mask_player_1;
 
 
-            void DoApplyAction(open_spiel::Action move) override;
 
         private:
-            // bool IsFull() const;                // Is the board full?
-            Player current_player_ = 0;         // Player zero goes first
-            Player outcome_ = kInvalidPlayer;
+            int current_player_ = 0;
+            int outcome_ = -1;
             int num_moves_ = 0;
             bool player0_pass = false;
             bool player1_pass = false;
         };
 
 // Game object.
-        class BlokusDuoGame : public Game {
+        class BlokusDuoGame {
         public:
-            explicit BlokusDuoGame(const GameParameters& params);
-            int NumDistinctActions() const override { return kNumDistinctActions; }
-            std::unique_ptr<State> NewInitialState() const override {
-                return std::unique_ptr<State>(new BlokusDuoState(shared_from_this()));
+            BlokusDuoGame() = default;
+            //explicit BlokusDuoGame(const GameParameters& params);
+            int NumDistinctActions() const { return kNumDistinctActions; }
+            BlokusDuoState NewInitialState() const {
+                BlokusDuoState state;
+                // Initialisiere hier alles (z. B. bit_border_, starting corners usw.)
+                // Genau wie in deinem Originalkonstruktor
+                return state;
             }
-            int NumPlayers() const override { return kNumPlayers; }
-            double MinUtility() const override { return -1; }
-            absl::optional<double> UtilitySum() const override { return 0; }
-            double MaxUtility() const override { return 1; }
-            std::vector<int> ObservationTensorShape() const override {
+            int NumPlayers() const { return kNumPlayers; }
+            double MinUtility() const { return -1; }
+            //absl::optional<double> UtilitySum() const override { return 0; }
+            double MaxUtility() const { return 1; }
+            std::vector<int> ObservationTensorShape() const {
                 return {kTotalChannels, kBoardSizeWithoutBorder, kBoardSizeWithoutBorder};
                 // Ergebnis: {46, 14, 14}
             }
-            int MaxGameLength() const override { return max_game_length; }
-            std::string ActionToString(Player player, open_spiel::Action action_id) const override;
+            int MaxGameLength() const { return max_game_length; }
+            std::string ActionToString(int player, int action_id) const;
         };
 
     }  // namespace blokus_duo
