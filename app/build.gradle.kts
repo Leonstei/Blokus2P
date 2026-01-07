@@ -52,7 +52,7 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    ndkVersion = "29.0.13113456 rc1"
+    ndkVersion = "29.0.14206865"
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
