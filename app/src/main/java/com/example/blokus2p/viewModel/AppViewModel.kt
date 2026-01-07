@@ -1,6 +1,6 @@
 package com.example.blokus2p.viewModel
 
-//import android.util.Log
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,6 +28,9 @@ import com.example.blokus2p.helper.PlayerType.RandomAI
 import com.example.blokus2p.helper.PolyominoNames
 import com.example.blokus2p.helper.START_INDEX_PLAYER1
 import com.example.blokus2p.helper.START_INDEX_PLAYER2
+import com.example.blokus2p.model.BlokusNative
+import com.example.blokus2p.model.NativeBlokusState
+import com.example.blokus2p.model.toNativeBlokusState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -143,6 +146,11 @@ class AppViewModel : ViewModel() {
             position,
             gameState.board, rules
         )
+        val state = BlokusNative.initGame()
+        Log.d("BLOKUS_KOTLIN", "Empfangene Bytes: ${state.size}")
+        Log.d("AppViewModel", "state = $state")
+        val result =  state.toNativeBlokusState()
+        Log.d("AppViewModel", "result = $result")
         if (newBoard != null){
             updateBoard(newBoard)
             updatePolyominosOfActivPlayer(gameState.activPlayer_id)

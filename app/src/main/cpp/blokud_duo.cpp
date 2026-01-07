@@ -156,41 +156,41 @@ std::vector<int> BlokusDuoState::LegalActions() const {
 //            return game_->ActionToString(player, action_id);
 //        }
 
-
-BlokusDuoState::BlokusDuoState() {
-    combined_board_.fill(0ULL);
-    player_0_board_.fill(0ULL);
-    player_1_board_.fill(0ULL);
-    bit_border_.fill(0ULL);
-    player_0_edges = {0ULL, 67108864, 0ULL, 0ULL};
-    player_1_edges = {0ULL, 0ULL, 137438953472ULL, 0ULL};
-    polyomino_mask_player_0 = 0x1FFFFF; // maske für ob alle 21 Steine da sind
-    polyomino_mask_player_1 = 0x1FFFFF; // maske für ob alle 21 Steine da sind
-
-
-    // 2. Rand auf dem combined_board_ setzen.
-    //    Der Rand repräsentiert die ungültigen Positionen.
-    for (int r = 0; r < kBoardSize; ++r) {
-        for (int c = 0; c < kBoardSize; ++c) {
-            // Prüfen, ob die Koordinate am Rand (Zeile 0, Zeile 15, Spalte 0, Spalte 15) liegt.
-            if (r == 0 || r == kBoardSize - 1 || c == 0 || c == kBoardSize - 1) {
-                int index = r * kBoardSize + c;
-
-                int part = index / 64;
-                int bit = index % 64;
-
-                if (index == 165) {
-                    player_0_edges[part] |= (1ULL << bit);
-                }
-                if (index == 90) {
-                    player_1_edges[part] |= (1ULL << bit);
-                }
-
-                bit_border_[part] |= (1ULL << bit);
-            }
-        }
-    }
-}
+//
+//BlokusDuoState::BlokusDuoState() {
+//    combined_board_.fill(0ULL);
+//    player_0_board_.fill(0ULL);
+//    player_1_board_.fill(0ULL);
+//    bit_border_.fill(0ULL);
+//    player_0_edges = {0ULL, 67108864, 0ULL, 0ULL};
+//    player_1_edges = {0ULL, 0ULL, 137438953472ULL, 0ULL};
+//    polyomino_mask_player_0 = 0x1FFFFF; // maske für ob alle 21 Steine da sind
+//    polyomino_mask_player_1 = 0x1FFFFF; // maske für ob alle 21 Steine da sind
+//
+//
+//    // 2. Rand auf dem combined_board_ setzen.
+//    //    Der Rand repräsentiert die ungültigen Positionen.
+//    for (int r = 0; r < kBoardSize; ++r) {
+//        for (int c = 0; c < kBoardSize; ++c) {
+//            // Prüfen, ob die Koordinate am Rand (Zeile 0, Zeile 15, Spalte 0, Spalte 15) liegt.
+//            if (r == 0 || r == kBoardSize - 1 || c == 0 || c == kBoardSize - 1) {
+//                int index = r * kBoardSize + c;
+//
+//                int part = index / 64;
+//                int bit = index % 64;
+//
+//                if (index == 165) {
+//                    player_0_edges[part] |= (1ULL << bit);
+//                }
+//                if (index == 90) {
+//                    player_1_edges[part] |= (1ULL << bit);
+//                }
+//
+//                bit_border_[part] |= (1ULL << bit);
+//            }
+//        }
+//    }
+//}
 
 
 //        std::string BlokusDuoState::ToString() const {

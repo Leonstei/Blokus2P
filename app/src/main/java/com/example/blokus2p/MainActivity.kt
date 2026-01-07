@@ -54,9 +54,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             Blokus2PTheme {
                 // Hier rufen wir den NDK-Test genau EINMAL beim ersten Compose auf
-                LaunchedEffect(Unit) {
-                    testNativeFunction()
-                }
+//                LaunchedEffect(Unit) {
+//                    testNativeFunction()
+//                }
 
                 // Dein originaler Screen – bleibt unverändert!
                 BlockusScreen()
@@ -65,23 +65,23 @@ class MainActivity : ComponentActivity() {
     }
 
     // Separate Funktion für den Test – leicht zu finden und später zu entfernen
-    private fun testNativeFunction() {
-        try {
-            val input = 21
-            val result = doubleNumber(input)
-            Log.d("NDK_TEST", "🎉 NDK-Test erfolgreich! doubleNumber($input) = $result")
-            Log.d("NDK_TEST", "Erwartet: ${input * 2} | Erhalten: $result")
-            if (result == input * 2) {
-                Log.d("NDK_TEST", "✅ Native Integration funktioniert perfekt!")
-            } else {
-                Log.w("NDK_TEST", "⚠️ Ergebnis unerwartet")
-            }
-        } catch (e: UnsatisfiedLinkError) {
-            Log.e("NDK_TEST", "❌ Native Funktion nicht gefunden", e)
-        } catch (e: Exception) {
-            Log.e("NDK_TEST", "❌ Unerwarteter Fehler beim Aufruf", e)
-        }
-    }
+//    private fun testNativeFunction() {
+//        try {
+//            val input = 21
+//            val result = doubleNumber(input)
+//            Log.d("NDK_TEST", "🎉 NDK-Test erfolgreich! doubleNumber($input) = $result")
+//            Log.d("NDK_TEST", "Erwartet: ${input * 2} | Erhalten: $result")
+//            if (result == input * 2) {
+//                Log.d("NDK_TEST", "✅ Native Integration funktioniert perfekt!")
+//            } else {
+//                Log.w("NDK_TEST", "⚠️ Ergebnis unerwartet")
+//            }
+//        } catch (e: UnsatisfiedLinkError) {
+//            Log.e("NDK_TEST", "❌ Native Funktion nicht gefunden", e)
+//        } catch (e: Exception) {
+//            Log.e("NDK_TEST", "❌ Unerwarteter Fehler beim Aufruf", e)
+//        }
+//    }
 }
 
 @Composable

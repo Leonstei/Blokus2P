@@ -17,10 +17,41 @@
 // State of an in-play game.
 class BlokusDuoState {
 public:
-    explicit BlokusDuoState();  // statt shared_ptr<const Game>
-    BlokusDuoState(const BlokusDuoState &other);
+    BlokusDuoState(){
+        combined_board_.fill(0ULL);
+        player_0_board_.fill(0ULL);
+        player_1_board_.fill(0ULL);
+        bit_border_.fill(0ULL);
+        player_0_edges = {0ULL, 67108864, 0ULL, 0ULL};
+        player_1_edges = {0ULL, 0ULL, 137438953472ULL, 0ULL};
+        polyomino_mask_player_0 = 0x1FFFFF; // maske für ob alle 21 Steine da sind
+        polyomino_mask_player_1 = 0x1FFFFF; // maske für ob alle 21 Steine da sind
 
-    BlokusDuoState &operator=(const BlokusDuoState &other);
+
+        // 2. Rand auf dem combined_board_ setzen.
+        //    Der Rand repräsentiert die ungültigen Positionen.
+        for (int r = 0; r < kBoardSize; ++r) {
+            for (int c = 0; c < kBoardSize; ++c) {
+                // Prüfen, ob die Koordinate am Rand (Zeile 0, Zeile 15, Spalte 0, Spalte 15) liegt.
+                if (r == 0 || r == kBoardSize - 1 || c == 0 || c == kBoardSize - 1) {
+                    int index = r * kBoardSize + c;
+
+                    int part = index / 64;
+                    int bit = index % 64;
+
+                    if (index == 165) {
+                        player_0_edges[part] |= (1ULL << bit);
+                    }
+                    if (index == 90) {
+                        player_1_edges[part] |= (1ULL << bit);
+                    }
+
+                    bit_border_[part] |= (1ULL << bit);
+                }
+            }
+        }
+    }
+
 
 
     int CurrentPlayer() const { return current_player_; }
@@ -51,19 +82,16 @@ public:
 
     void SetCurrentPlayer(int player) { current_player_ = player; }
 
-
-protected:
-    std::array<uint64_t, kNumBitboardParts> combined_board_;
-    std::array<uint64_t, kNumBitboardParts> player_0_board_;
-    std::array<uint64_t, kNumBitboardParts> player_1_board_;
-    std::array<uint64_t, kNumBitboardParts> bit_border_;
-    std::array<uint64_t, kNumBitboardParts> player_0_edges;
-    std::array<uint64_t, kNumBitboardParts> player_1_edges;
+    std::array<uint64_t, kNumBitboardParts> combined_board_{};
+    std::array<uint64_t, kNumBitboardParts> player_0_board_{};
+    std::array<uint64_t, kNumBitboardParts> player_1_board_{};
+    std::array<uint64_t, kNumBitboardParts> bit_border_{};
+    std::array<uint64_t, kNumBitboardParts> player_0_edges{};
+    std::array<uint64_t, kNumBitboardParts> player_1_edges{};
     uint32_t polyomino_mask_player_0;
     uint32_t polyomino_mask_player_1;
 
 
-private:
     int current_player_ = 0;
     int outcome_ = -1;
     int num_moves_ = 0;
@@ -81,8 +109,6 @@ public:
 
     BlokusDuoState NewInitialState() const {
         BlokusDuoState state;
-        // Initialisiere hier alles (z. B. bit_border_, starting corners usw.)
-        // Genau wie in deinem Originalkonstruktor
         return state;
     }
 
