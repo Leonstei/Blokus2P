@@ -47,3 +47,8 @@ Java_com_example_blokus2p_model_BlokusNative_getBestMoveMcts(JNIEnv *env, jobjec
                                                              jint iterations) {
     // TODO: implement getBestMoveMcts()
 }
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_blokus2p_MainActivity_doubleNumber(JNIEnv *env, jobject thiz, jint number) {
+    // TODO: implement doubleNumber()
+}
