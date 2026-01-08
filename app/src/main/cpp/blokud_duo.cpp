@@ -88,9 +88,9 @@ void BlokusDuoState::ApplyAction(int move) {
                 player == 0 ? polyomino_mask_player_0 : polyomino_mask_player_1;
 
         // **Dekodierung:** Direkter Lookup in der globalen Liste
-        if (move < 0 || move >= ALL_DISTINCT_ACTIONS.size()) {
-//                    SpielFatalError(absl::StrCat("Ungültige Aktion: ", move));
-        }
+//        if (move < 0 || move >= ALL_DISTINCT_ACTIONS.size()) {
+////                    SpielFatalError(absl::StrCat("Ungültige Aktion: ", move));
+//        }
 
         // Abrufen der vollständigen Metadaten und der ShiftedMask
         const Action &blokus_action = ALL_DISTINCT_ACTIONS[move];

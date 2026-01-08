@@ -33,7 +33,10 @@ project("Blokus2P")
 add_library(  # Name der Library
         native-lib
         SHARED  # Shared Library für JNI
-        native-lib.cpp)  # Deine C++-Datei
+        native-lib.cpp
+        blokud_duo.cpp
+        blokus_duo_logic.cpp
+)  # Deine C++-Datei
 
 #find_library(  # Log-Library für Debugging (optional)
 #        log-lib

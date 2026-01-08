@@ -103,12 +103,16 @@ class AppViewModel : ViewModel() {
         }
     }
     private fun setInitialGameState() {
+        val state = BlokusNative.initGame()
+        Log.d("BLOKUS_KOTLIN", "Empfangene Bytes: ${state.size}")
+        Log.d("AppViewModel", "state = $state")
+        val result =  state.toNativeBlokusState()
         _gameState.update {
             it.copy(
                 players = listOf(
-                    Player(1, "Player 1",true,  Color.Blue, 0,
+                    Player(1, "Player 1",true,  Color.Blue, 0, bitBoard = result.player0Board, edges = result.player0Edges,
                         availableEdges =  setOf(START_INDEX_PLAYER1)),
-                    Player(2, "Player 2",false, Color.Magenta, 0,
+                    Player(2, "Player 2",false, Color.Magenta, 0, bitBoard = result.player1Board, edges = result.player1Edges,
                         availableEdges =  setOf(START_INDEX_PLAYER2),isAi = true)
                 ),
                 activPlayer_id = 1,
@@ -151,6 +155,13 @@ class AppViewModel : ViewModel() {
         Log.d("AppViewModel", "state = $state")
         val result =  state.toNativeBlokusState()
         Log.d("AppViewModel", "result = $result")
+        val state1 = BlokusNative.applyAction(state,2976)
+        Log.d("BLOKUS_KOTLIN", "Empfangene Bytes: ${state1.size}")
+        Log.d("AppViewModel", "state1 = $state1")
+        val result1 =  state1.toNativeBlokusState()
+        Log.d("AppViewModel", "result1 = $result1")
+        val legalActions = BlokusNative.getLegalActions(state1,0)
+        Log.d("AppViewModel", "legalActions = ${legalActions.size}")
         if (newBoard != null){
             updateBoard(newBoard)
             updatePolyominosOfActivPlayer(gameState.activPlayer_id)

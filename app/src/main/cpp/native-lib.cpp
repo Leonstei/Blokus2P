@@ -28,6 +28,112 @@ struct BlokusStateSerialized {
 };
 
 constexpr size_t kBitboardSize = kNumBitboardParts * sizeof(uint64_t);
+// In deiner .cpp-Datei (z.B. native-lib.cpp oder blokus_duo.cc)
+
+constexpr size_t totalSize = 216;
+
+void serializeState(const BlokusDuoState& state, uint8_t* outData) {
+    uint8_t* ptr = outData;  // Zeiger, der durch das Array wandert
+
+    // 1. Einfache Felder (in exakt derselben Reihenfolge wie in Kotlin!)
+    std::memcpy(ptr, &state.current_player_, sizeof(state.current_player_));
+    ptr += sizeof(state.current_player_);
+
+    std::memcpy(ptr, &state.outcome_, sizeof(state.outcome_));
+    ptr += sizeof(state.outcome_);
+
+    std::memcpy(ptr, &state.num_moves_, sizeof(state.num_moves_));
+    ptr += sizeof(state.num_moves_);
+
+    // Bools als uint8_t speichern
+    uint8_t p0_pass = state.player0_pass ? 1 : 0;
+    uint8_t p1_pass = state.player1_pass ? 1 : 0;
+
+    std::memcpy(ptr, &p0_pass, 1);
+    ptr += 1;
+    std::memcpy(ptr, &p1_pass, 1);
+    ptr += 1;
+
+    std::memset(ptr, 0, 2);
+    ptr += 2;
+
+    std::memcpy(ptr, &state.polyomino_mask_player_0, sizeof(state.polyomino_mask_player_0));
+    ptr += sizeof(state.polyomino_mask_player_0);
+
+    std::memcpy(ptr, &state.polyomino_mask_player_1, sizeof(state.polyomino_mask_player_1));
+    ptr += sizeof(state.polyomino_mask_player_1);
+
+    std::memcpy(ptr, state.combined_board_.data(), kBitboardSize);
+    ptr += kBitboardSize;
+
+    std::memcpy(ptr, state.player_0_board_.data(), kBitboardSize);
+    ptr += kBitboardSize;
+
+    std::memcpy(ptr, state.player_1_board_.data(), kBitboardSize);
+    ptr += kBitboardSize;
+
+    std::memcpy(ptr, state.bit_border_.data(), kBitboardSize);
+    ptr += kBitboardSize;
+
+    std::memcpy(ptr, state.player_0_edges.data(), kBitboardSize);
+    ptr += kBitboardSize;
+
+    std::memcpy(ptr, state.player_1_edges.data(), kBitboardSize);
+    // ptr += boardSize; // nicht nötig – Ende erreicht
+}
+
+BlokusDuoState deserializeState(const uint8_t* data) {
+    BlokusDuoState state;
+    const uint8_t* ptr = data;
+
+    std::memcpy(&state.current_player_, ptr, sizeof(state.current_player_));
+    ptr += sizeof(state.current_player_);
+
+    std::memcpy(&state.outcome_, ptr, sizeof(state.outcome_));
+    ptr += sizeof(state.outcome_);
+
+    std::memcpy(&state.num_moves_, ptr, sizeof(state.num_moves_));
+    ptr += sizeof(state.num_moves_);
+
+    uint8_t p0_pass_byte, p1_pass_byte;
+    std::memcpy(&p0_pass_byte, ptr, 1);
+    ptr += 1;
+    std::memcpy(&p1_pass_byte, ptr, 1);
+    ptr += 1;
+    state.player0_pass = (p0_pass_byte != 0);
+    state.player1_pass = (p1_pass_byte != 0);
+
+    ptr += 2;  // Padding überspringen
+
+    std::memcpy(&state.polyomino_mask_player_0, ptr, sizeof(state.polyomino_mask_player_0));
+    ptr += sizeof(state.polyomino_mask_player_0);
+
+    std::memcpy(&state.polyomino_mask_player_1, ptr, sizeof(state.polyomino_mask_player_1));
+    ptr += sizeof(state.polyomino_mask_player_1);
+
+
+    std::memcpy(state.combined_board_.data(), ptr, kBitboardSize);
+    ptr += kBitboardSize;
+
+    std::memcpy(state.player_0_board_.data(), ptr, kBitboardSize);
+    ptr += kBitboardSize;
+
+    std::memcpy(state.player_1_board_.data(), ptr, kBitboardSize);
+    ptr += kBitboardSize;
+
+    std::memcpy(state.bit_border_.data(), ptr, kBitboardSize);
+    ptr += kBitboardSize;
+
+    std::memcpy(state.player_0_edges.data(), ptr, kBitboardSize);
+    ptr += kBitboardSize;
+
+    std::memcpy(state.player_1_edges.data(), ptr, kBitboardSize);
+
+    return state;
+}
+
+
+
 
 extern "C" JNIEXPORT jint JNICALL
 Java_com_example_blokus2p_model_BlokusNative_doubleNumber(JNIEnv* env, jobject /* this */, jint number) {
@@ -40,46 +146,53 @@ Java_com_example_blokus2p_model_BlokusNative_initGame(JNIEnv* env, jobject /*thi
     auto game = std::make_shared<BlokusDuoGame>();
     auto initial_state = game->NewInitialState();
 
-    BlokusStateSerialized serialized{};
-    serialized.current_player = initial_state.CurrentPlayer();
-    serialized.outcome = initial_state.outcome();
-    serialized.num_moves = initial_state.num_moves_;
-    serialized.player0_pass = initial_state.player0_pass;
-    serialized.player1_pass = initial_state.player1_pass;
-    serialized.polyomino_mask_player_0 = initial_state.polyomino_mask_player_0;
-    serialized.polyomino_mask_player_1 = initial_state.polyomino_mask_player_1;
-
-    std::memcpy(serialized.combined_board, initial_state.combined_board_.data(), kBitboardSize);
-    std::memcpy(serialized.player_0_board, initial_state.player_0_board_.data(), kBitboardSize);
-    std::memcpy(serialized.player_1_board, initial_state.player_1_board_.data(), kBitboardSize);
-    std::memcpy(serialized.bit_border, initial_state.bit_border_.data(), kBitboardSize);
-    std::memcpy(serialized.player_0_edges, initial_state.player_0_edges.data(), kBitboardSize);
-    std::memcpy(serialized.player_1_edges, initial_state.player_1_edges.data(), kBitboardSize);
-
-    // In ByteArray umwandeln
-    size_t totalSize = sizeof(BlokusStateSerialized);
+//    BlokusStateSerialized serialized{};
+//    serialized.current_player = initial_state.CurrentPlayer();
+//    serialized.outcome = initial_state.outcome();
+//    serialized.num_moves = initial_state.num_moves_;
+//    serialized.player0_pass = initial_state.player0_pass;
+//    serialized.player1_pass = initial_state.player1_pass;
+//    serialized.polyomino_mask_player_0 = initial_state.polyomino_mask_player_0;
+//    serialized.polyomino_mask_player_1 = initial_state.polyomino_mask_player_1;
+//
+//    std::memcpy(serialized.combined_board, initial_state.combined_board_.data(), kBitboardSize);
+//    std::memcpy(serialized.player_0_board, initial_state.player_0_board_.data(), kBitboardSize);
+//    std::memcpy(serialized.player_1_board, initial_state.player_1_board_.data(), kBitboardSize);
+//    std::memcpy(serialized.bit_border, initial_state.bit_border_.data(), kBitboardSize);
+//    std::memcpy(serialized.player_0_edges, initial_state.player_0_edges.data(), kBitboardSize);
+//    std::memcpy(serialized.player_1_edges, initial_state.player_1_edges.data(), kBitboardSize);
+//
+//    // In ByteArray umwandeln
+//    size_t totalSize = sizeof(BlokusStateSerialized);
+//    jbyteArray result = env->NewByteArray(totalSize);
+//    env->SetByteArrayRegion(result, 0, totalSize, reinterpret_cast<jbyte*>(&serialized));
     jbyteArray result = env->NewByteArray(totalSize);
-    env->SetByteArrayRegion(result, 0, totalSize, reinterpret_cast<jbyte*>(&serialized));
+    jbyte* buffer = env->GetByteArrayElements(result, nullptr);
 
+    serializeState(initial_state, reinterpret_cast<uint8_t*>(buffer));
+
+    env->ReleaseByteArrayElements(result, buffer, 0);
     return result;
 }
 extern "C"
 JNIEXPORT jintArray JNICALL
 Java_com_example_blokus2p_model_BlokusNative_getLegalActions(JNIEnv *env, jobject thiz,
                                                              jbyteArray stateBytes, jint player) {
-    // TODO: implement getLegalActions()
+    jbyte* input = env->GetByteArrayElements(stateBytes, nullptr);
+
+    BlokusDuoState state = deserializeState(reinterpret_cast<const uint8_t*>(input));
+
+    env->ReleaseByteArrayElements(stateBytes, input, JNI_ABORT);
+
+    std::vector<int> legal = state.LegalActions();
+
+    jintArray result = env->NewIntArray(legal.size());
+    env->SetIntArrayRegion(result, 0, legal.size(), reinterpret_cast<jint*>(legal.data()));
+
+    return result;
 }
 
 
-
-
-BlokusStateSerialized deserializeState(const uint8_t* data) {
-    // Wie zuvor: ByteBuffer → Struct füllen
-}
-
-void serializeState(const BlokusDuoState& state, uint8_t* outData) {
-    // Wie zuvor: memcpy für alle Felder
-}
 
 extern "C" JNIEXPORT jbyteArray JNICALL
 Java_com_example_blokus2p_model_BlokusNative_applyAction(
@@ -88,43 +201,36 @@ Java_com_example_blokus2p_model_BlokusNative_applyAction(
         jbyteArray stateBytes,
         jint actionId
 ) {
-    //Todo
+    jsize size = env->GetArrayLength(stateBytes);
+    jbyte* input = env->GetByteArrayElements(stateBytes, nullptr);
 
-//     //Input deserialisieren
-//    jsize size = env->GetArrayLength(stateBytes);
-//    uint8_t* input = reinterpret_cast<uint8_t*>(env->GetByteArrayElements(stateBytes, nullptr));
-//
-//    BlokusStateSerialized serializedIn;
-//    std::memcpy(&serializedIn, input, sizeof(BlokusStateSerialized));
-//
-//    // Temporären State rekonstruieren (oder direkt auf serialized arbeiten, wenn möglich)
-//    BlokusDuoState state;  // Du musst einen Weg haben, aus serializedIn einen State zu bauen
-////    state.combined_board_ = /* copy from serializedIn */;
-////    state.player_0_board_ = /* ... */;
-//    // ... alle Felder setzen
-//    state.SetCurrentPlayer(serializedIn.current_player);
-//    // ...
-//
-//    // Action anwenden – genau wie in deiner OpenSpiel-Impl!
-//    const auto& decoded = ALL_DISTINCT_ACTIONS[actionId];
-//    state.ApplyAction(actionId);  // Oder manuell mit decoded.bitmask etc.
-//
-//    // Neuen State serialisieren
-//    BlokusStateSerialized serializedOut{};
-//    // memcpy aller Felder aus state → serializedOut
-//
-//    jbyteArray result = env->NewByteArray(sizeof(BlokusStateSerialized));
-//    env->SetByteArrayRegion(result, 0, sizeof(BlokusStateSerialized),
-//                            reinterpret_cast<jbyte*>(&serializedOut));
-//
-//    env->ReleaseByteArrayElements(stateBytes, reinterpret_cast<jbyte*>(input), JNI_ABORT);
-//    return result;
+    BlokusDuoState state = deserializeState(reinterpret_cast<const uint8_t*>(input));
+
+    env->ReleaseByteArrayElements(stateBytes, input, JNI_ABORT);
+
+    // Zug anwenden
+    state.ApplyAction(actionId);
+
+    jbyteArray result = env->NewByteArray(size);
+    jbyte* output = env->GetByteArrayElements(result, nullptr);
+
+    serializeState(state, reinterpret_cast<uint8_t*>(output));
+
+    env->ReleaseByteArrayElements(result, output, 0);
+    return result;
 }
+
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_example_blokus2p_model_BlokusNative_isTerminal(JNIEnv *env, jobject thiz,
                                                         jbyteArray stateBytes) {
-    // TODO: implement isTerminal()
+    jsize size = env->GetArrayLength(stateBytes);
+    jbyte* input = env->GetByteArrayElements(stateBytes, nullptr);
+
+    BlokusDuoState state = deserializeState(reinterpret_cast<const uint8_t*>(input));
+    bool terminal = state.IsTerminal();
+
+    return terminal ? JNI_TRUE : JNI_FALSE;
 }
 extern "C"
 JNIEXPORT jlong JNICALL
