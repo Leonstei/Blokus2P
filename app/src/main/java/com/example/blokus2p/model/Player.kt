@@ -11,6 +11,9 @@ data class Player(
     val color: Color = Color.Black,
     val points: Int = 0,
     val bitBoard: LongArray = LongArray(4),
+    val passed: Boolean = false,
+    val polyomino_mask: Int = 2097151,
+    val edges: LongArray = LongArray(4),
     val polyominos: List<Polyomino> = listOf(
         Polyomino(
             PolyominoNames.FÜNF,
