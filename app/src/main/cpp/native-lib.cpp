@@ -5,6 +5,7 @@
 #include <android/log.h>
 #include "blokus_duo.h"
 #include "blokus_duo_logic.h"
+#include "mcts.h"
 
 
 struct BlokusStateSerialized {
@@ -146,26 +147,6 @@ Java_com_example_blokus2p_model_BlokusNative_initGame(JNIEnv* env, jobject /*thi
     auto game = std::make_shared<BlokusDuoGame>();
     auto initial_state = game->NewInitialState();
 
-//    BlokusStateSerialized serialized{};
-//    serialized.current_player = initial_state.CurrentPlayer();
-//    serialized.outcome = initial_state.outcome();
-//    serialized.num_moves = initial_state.num_moves_;
-//    serialized.player0_pass = initial_state.player0_pass;
-//    serialized.player1_pass = initial_state.player1_pass;
-//    serialized.polyomino_mask_player_0 = initial_state.polyomino_mask_player_0;
-//    serialized.polyomino_mask_player_1 = initial_state.polyomino_mask_player_1;
-//
-//    std::memcpy(serialized.combined_board, initial_state.combined_board_.data(), kBitboardSize);
-//    std::memcpy(serialized.player_0_board, initial_state.player_0_board_.data(), kBitboardSize);
-//    std::memcpy(serialized.player_1_board, initial_state.player_1_board_.data(), kBitboardSize);
-//    std::memcpy(serialized.bit_border, initial_state.bit_border_.data(), kBitboardSize);
-//    std::memcpy(serialized.player_0_edges, initial_state.player_0_edges.data(), kBitboardSize);
-//    std::memcpy(serialized.player_1_edges, initial_state.player_1_edges.data(), kBitboardSize);
-//
-//    // In ByteArray umwandeln
-//    size_t totalSize = sizeof(BlokusStateSerialized);
-//    jbyteArray result = env->NewByteArray(totalSize);
-//    env->SetByteArrayRegion(result, 0, totalSize, reinterpret_cast<jbyte*>(&serialized));
     jbyteArray result = env->NewByteArray(totalSize);
     jbyte* buffer = env->GetByteArrayElements(result, nullptr);
 
@@ -231,6 +212,19 @@ Java_com_example_blokus2p_model_BlokusNative_isTerminal(JNIEnv *env, jobject thi
     bool terminal = state.IsTerminal();
 
     return terminal ? JNI_TRUE : JNI_FALSE;
+}
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_blokus2p_model_BlokusNative_getMctsMove(JNIEnv *env, jobject thiz,
+                                                         jbyteArray state_bytes) {
+    jbyte* input = env->GetByteArrayElements(stateBytes, nullptr);
+    BlokusDuoState state = deserializeState(reinterpret_cast<const uint8_t*>(input));
+    env->ReleaseByteArrayElements(stateBytes, input, JNI_ABORT);
+
+    MCTSBot bot(1.414, 100, 42);  // uct_c, simulations, seed
+    int best_action = bot.Step(state);
+
+    return best_action;
 }
 extern "C"
 JNIEXPORT jlong JNICALL

@@ -36,6 +36,7 @@ add_library(  # Name der Library
         native-lib.cpp
         blokud_duo.cpp
         blokus_duo_logic.cpp
+        mcts.cpp
 )  # Deine C++-Datei
 
 #find_library(  # Log-Library für Debugging (optional)

@@ -20,6 +20,7 @@ object BlokusNative {
     external fun getLegalActions(stateBytes : ByteArray, player: Int): IntArray
     external fun applyAction(stateBytes : ByteArray, actionId: Int): ByteArray
     external fun isTerminal(stateBytes : ByteArray): Boolean
+    external fun getMctsMove(stateBytes: ByteArray): Int
     external fun getBestMoveMinimax(stateBytes : ByteArray, player: Int, depth: Int): Long
     external fun getBestMoveMcts(stateBytes : ByteArray, player: Int, iterations: Int): Long
     // Füge mehr hinzu, z. B. für AlphaZero
